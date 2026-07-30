@@ -24,6 +24,14 @@
   - [实验：张量、Module 与梯度](ch02/07-labs.md)
   - [练习、延伸阅读与来源](ch02/08-exercises-and-sources.md)
 - [第 3 章 AI 加速器与编程](ch03-accelerator.md)
+  - [工作负载与加速器设计](ch03/01-workloads-and-design.md)
+  - [GPU 并行与存储模型](ch03/02-gpu-machine-model.md)
+  - [CubeCL 编程模型](ch03/03-cubecl-programming.md)
+  - [CubeK 与 Burn 算子路径](ch03/04-cubek-and-burn.md)
+  - [GEMM 与优化阶梯](ch03/05-gemm-optimization.md)
+  - [算子编译、调优与生态](ch03/06-compilation-and-tuning.md)
+  - [实验：CPU 上运行 CubeCL Kernel](ch03/07-cpu-kernel-lab.md)
+  - [练习、延伸阅读与来源](ch03/08-exercises-and-sources.md)
 
 # 系统篇
 

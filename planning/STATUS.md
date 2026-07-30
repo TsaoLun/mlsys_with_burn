@@ -1,25 +1,25 @@
 # 实时状态
 
-更新日期：2026-07-30
+更新日期：2026-07-31
 
 ## 当前里程碑
 
-M2：基础篇。
+M3：系统篇。
 
 ## 当前目标
 
-完成第 3 章“AI 加速器与编程”，形成从 Rust API 到 CubeCL/CubeK 的
-基础篇闭环。
+建立第 4 章“AI 编译器与运行时系统”的 OpenMLSys、Burn IR/Fusion 和
+CubeCL IR/Runtime 来源映射。
 
 ## 进行中
 
-- [ ] 对第 2 章进行读者视角审校，并建立第 3 章来源与源码映射。
+- [ ] 审校基础篇的跨章术语，并建立第 4 章来源与源码映射。
 
 ## 下一步
 
-1. 映射 OpenMLSys v1 加速器章节与 CubeCL/CubeK 当前源码。
-2. 选择不依赖专有驱动的 CubeCL CPU 基础实验，再设计可选 GPU 路径。
-3. 明确 GPU 架构、Kernel 编程、CubeCL 编译和 CubeK 算子的章节边界。
+1. 映射 OpenMLSys v1 frontend/IR、backend/runtime 章节。
+2. 核验 Burn IR、Fusion、CubeCL IR/opt/runtime 的固定源码边界。
+3. 设计一个 CPU 可验证的 IR 或 Fusion 观察实验。
 
 ## 已完成
 
@@ -35,10 +35,13 @@ M2：基础篇。
 - [x] 完成第 1 章七节正文、来源映射、练习和 Flex 执行栈实验。
 - [x] 完成第 2 章八节正文、逐文件来源映射和 Burn 0.22 API 核验。
 - [x] 扩展第 2 章实验，覆盖广播、Module 参数统计和 Flex 自动微分。
+- [x] 完成第 3 章八节正文、逐文件来源映射和 CubeCL/CubeK 源码核验。
+- [x] 实现 CubeCL CPU scale Kernel，覆盖拓扑、raw buffer 与 unsafe 边界。
+- [x] 在 CubeCL CPU 和 WGPU Runtime 上验证同一 Kernel 与 host reference。
+- [x] 完成 M2 基础篇，形成 Burn Tensor API 到 CubeCL Kernel 的学习闭环。
 - [x] 建立根 Git 基线提交 `e1769a5`。
-- [x] 验证 `mdbook build book`、`cargo fmt --all --check`、
-  `cargo clippy --workspace --all-targets -- -D warnings` 和
-  `cargo test --workspace`。
+- [x] 验证 `make check`、`make check-local-sources` 和
+  `cargo test -p ch03-cubecl-kernel --features wgpu`。
 
 ## 已知问题
 
