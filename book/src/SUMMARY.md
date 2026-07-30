@@ -36,6 +36,14 @@
 # 系统篇
 
 - [第 4 章 AI 编译器与运行时系统](ch04-compiler-and-runtime.md)
+  - [编译栈与中间表示](ch04/01-stack-and-ir.md)
+  - [静态信息、Pass 与自动微分边界](ch04/02-static-analysis-and-passes.md)
+  - [Burn IR 与运行时融合](ch04/03-burn-ir-and-fusion.md)
+  - [图优化、Kernel 选择与回退](ch04/04-graph-and-kernel-selection.md)
+  - [CubeCL Lowering、JIT 与缓存](ch04/05-cubecl-lowering-and-jit.md)
+  - [内存、Stream 与异步执行](ch04/06-memory-streams-execution.md)
+  - [实验：观察 Fusion 执行计划](ch04/07-fusion-inspector-lab.md)
+  - [练习、延伸阅读与来源](ch04/08-exercises-and-sources.md)
 - [第 5 章 数据处理系统](ch05-data-processing.md)
 - [第 6 章 训练系统](ch06-training-systems.md)
 

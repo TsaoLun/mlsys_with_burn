@@ -8,18 +8,17 @@ M3：系统篇。
 
 ## 当前目标
 
-建立第 4 章“AI 编译器与运行时系统”的 OpenMLSys、Burn IR/Fusion 和
-CubeCL IR/Runtime 来源映射。
+建立第 5 章“数据处理系统”的 OpenMLSys 与 burn-dataset 来源映射。
 
 ## 进行中
 
-- [ ] 审校基础篇的跨章术语，并建立第 4 章来源与源码映射。
+- [ ] 审校第 4 章与基础篇的跨章术语，并建立第 5 章来源映射。
 
 ## 下一步
 
-1. 映射 OpenMLSys v1 frontend/IR、backend/runtime 章节。
-2. 核验 Burn IR、Fusion、CubeCL IR/opt/runtime 的固定源码边界。
-3. 设计一个 CPU 可验证的 IR 或 Fusion 观察实验。
+1. 映射 OpenMLSys v1 数据处理章节。
+2. 核验 burn-dataset、DataLoader、Batcher 与多线程读取边界。
+3. 设计可复现的数据流水线、shuffle 和 batching 实验。
 
 ## 已完成
 
@@ -39,9 +38,13 @@ CubeCL IR/Runtime 来源映射。
 - [x] 实现 CubeCL CPU scale Kernel，覆盖拓扑、raw buffer 与 unsafe 边界。
 - [x] 在 CubeCL CPU 和 WGPU Runtime 上验证同一 Kernel 与 host reference。
 - [x] 完成 M2 基础篇，形成 Burn Tensor API 到 CubeCL Kernel 的学习闭环。
+- [x] 完成第 4 章八节正文、逐文件来源映射和 Burn/CubeCL 源码核验。
+- [x] 实现 FusionInspector CPU 实验，验证 add→exp 融合与同步切分。
+- [x] 区分 autodiff tape、Burn Fusion IR、CubeCL IR 和设备 graph capture。
 - [x] 建立根 Git 基线提交 `e1769a5`。
 - [x] 验证 `make check`、`make check-local-sources` 和
   `cargo test -p ch03-cubecl-kernel --features wgpu`。
+- [x] 验证 `cargo test -p ch04-fusion-inspector` 与 Fusion 计划观测输出。
 
 ## 已知问题
 
