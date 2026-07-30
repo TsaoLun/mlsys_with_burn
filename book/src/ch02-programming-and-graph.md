@@ -1,35 +1,41 @@
 # 第 2 章 编程接口与计算图
 
+第 1 章把机器学习系统画成从模型接口到设备执行的分层路径。本章进入这条
+路径的上半部分：用户如何表达张量程序，模型如何注册参数，系统又如何记录
+运算依赖并计算梯度。
+
+固定快照中的 Burn 0.22 正在经历一次重要 API 转变。旧版本常将 Backend
+作为 `Tensor<B, D>` 的类型参数；本书使用的源码已经采用
+`Tensor<D, K>`，由 `Device` 在运行时选择后端。这个变化会贯穿本章，
+也说明为什么代码必须以 `pins.toml` 对应源码为准。
+
 ## 本章问题
 
-张量程序如何表达数据、设备和梯度？系统如何记录、转换并执行用户计算？
+张量程序如何同时表达编译期约束和运行时数据？Module 如何管理参数与
+状态？Eager 运算产生的依赖如何形成反向传播所需的动态图？自动微分 tape、
+融合 IR 和设备 graph capture 为什么不能混为一谈？
 
-## 计划内容
+## 学习目标
 
-- Tensor、形状、数据类型与 Device
-- Backend 抽象和运行时设备选择
-- Module、参数与模型状态
-- 自动微分和反向传播
-- Eager 执行、IR 与图级优化
-- Rust 类型系统带来的接口设计差异
+完成本章后，你应该能够：
 
-## 起始实验：张量基础
+1. 解释机器学习工作流为何需要张量、Module、损失和训练循环等接口；
+2. 区分 `Tensor` 的编译期秩/类别与运行时 shape、dtype、Device；
+3. 描述张量运算如何经 bridge 和 dispatch 到达具体 Backend；
+4. 使用 `Module`、参数化层和前向方法组织一个最小模型；
+5. 用算子、张量边、依赖和控制流解释计算图；
+6. 解释 Burn 的 eager 前向与一阶反模式 autodiff tape；
+7. 使用 `require_grad`、`backward` 和 `grad` 验证链式法则；
+8. 区分 autodiff tape、Burn IR/Fusion 与后端 graph capture。
 
-以下代码直接来自可测试的示例：
+## 先修知识
 
-```rust
-{{#include ../../examples/ch02-tensor-basics/src/lib.rs:example}}
-```
+建议先阅读第 1 章，并了解向量、矩阵、导数和 Rust 所有权的基础概念。
+本章会给出反向模式的直观推导，不要求预先掌握编译器 IR。
 
-运行：
+## 本章路线
 
-```bash
-cargo run -p ch02-tensor-basics
-```
-
-## 来源与改编说明
-
-计划参考 OpenMLSys v1 `chapter_programming_interface/`、
-`chapter_computational_graph/` 及自动微分相关内容。Python/C++ 扩展和
-MindSpore 执行模式将按 Burn 的 Tensor、Device、Autodiff、IR 重写。
+我们先从完整工作流抽取编程接口，再依次进入 Tensor/Device、Module、
+计算图和自动微分。类型与 IR 一节只建立边界，融合、编译和运行时优化留到
+第 4 章。最后的 CPU 实验把张量广播、参数注册和梯度计算连接起来。
 

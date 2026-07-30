@@ -15,6 +15,14 @@
   - [实验：探测执行栈](ch01/06-stack-probe-lab.md)
   - [练习、延伸阅读与来源](ch01/07-exercises-and-sources.md)
 - [第 2 章 编程接口与计算图](ch02-programming-and-graph.md)
+  - [从工作流到编程接口](ch02/01-interface-and-workflow.md)
+  - [Tensor、Device 与运行时后端](ch02/02-tensor-device-backend.md)
+  - [Module、参数与模型状态](ch02/03-module-and-state.md)
+  - [计算图的构成与生成](ch02/04-computational-graph.md)
+  - [自动微分](ch02/05-autodiff.md)
+  - [类型、IR 与调度边界](ch02/06-types-ir-scheduling.md)
+  - [实验：张量、Module 与梯度](ch02/07-labs.md)
+  - [练习、延伸阅读与来源](ch02/08-exercises-and-sources.md)
 - [第 3 章 AI 加速器与编程](ch03-accelerator.md)
 
 # 系统篇

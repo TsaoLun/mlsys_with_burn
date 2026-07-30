@@ -13,7 +13,8 @@ must add independent verification, modern context, and runnable Rust examples.
 2. `planning/MASTER_PLAN.md` — milestones and definitions of done.
 3. `planning/CHAPTER_MATRIX.md` — scope and source mapping.
 4. `pins.toml` — the only supported upstream snapshot.
-5. The relevant file under `docs/`.
+5. The latest relevant entry under `planning/session-logs/`.
+6. The relevant file under `docs/`.
 
 ## Repository Boundaries
 

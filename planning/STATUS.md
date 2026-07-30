@@ -4,22 +4,22 @@
 
 ## 当前里程碑
 
-M1：第一条完整内容路径。
+M2：基础篇。
 
 ## 当前目标
 
-完成第 1 章评审稿，并以第 2 章为下一条纵向切片。
+完成第 3 章“AI 加速器与编程”，形成从 Rust API 到 CubeCL/CubeK 的
+基础篇闭环。
 
 ## 进行中
 
-- [ ] 对第 1 章进行读者视角审校，并设计第 2 章的小节与实验边界。
+- [ ] 对第 2 章进行读者视角审校，并建立第 3 章来源与源码映射。
 
 ## 下一步
 
-1. 将 OpenMLSys v1 的编程接口、计算图和自动微分各节映射到第 2 章。
-2. 核对 Burn 0.22.0-pre.1 的 `Tensor`、`Device`、`Module` 和 Autodiff
-   实现路径。
-3. 为第 2 章拆出可独立验收的小节与实验，并复用第 1 章的来源模板。
+1. 映射 OpenMLSys v1 加速器章节与 CubeCL/CubeK 当前源码。
+2. 选择不依赖专有驱动的 CubeCL CPU 基础实验，再设计可选 GPU 路径。
+3. 明确 GPU 架构、Kernel 编程、CubeCL 编译和 CubeK 算子的章节边界。
 
 ## 已完成
 
@@ -33,6 +33,8 @@ M1：第一条完整内容路径。
 - [x] Cargo 统一使用 GitHub 固定 revision；本地上游镜像仅供 Agent 阅读。
 - [x] 补齐 CC BY-NC-SA 4.0、MIT 和 Apache-2.0 完整许可证文本。
 - [x] 完成第 1 章七节正文、来源映射、练习和 Flex 执行栈实验。
+- [x] 完成第 2 章八节正文、逐文件来源映射和 Burn 0.22 API 核验。
+- [x] 扩展第 2 章实验，覆盖广播、Module 参数统计和 Flex 自动微分。
 - [x] 建立根 Git 基线提交 `e1769a5`。
 - [x] 验证 `mdbook build book`、`cargo fmt --all --check`、
   `cargo clippy --workspace --all-targets -- -D warnings` 和

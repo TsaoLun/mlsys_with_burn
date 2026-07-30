@@ -15,7 +15,7 @@ rust-version = "1.95"
 # Build and CI always resolve Burn from GitHub. The revision identifies the
 # 0.22.0-pre.1 writing snapshot; Burn's own manifest pins CubeCL and CubeK.
 # Local source mirrors are intentionally never wired through `path`.
-burn = { git = "https://github.com/tracel-ai/burn.git", rev = "976aa9c5ec1d2dd3412710f99759e3c44bdff03d", default-features = false, features = ["std", "flex"] }
+burn = { git = "https://github.com/tracel-ai/burn.git", rev = "976aa9c5ec1d2dd3412710f99759e3c44bdff03d", default-features = false, features = ["std", "flex", "autodiff"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
