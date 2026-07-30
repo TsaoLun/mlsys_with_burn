@@ -19,9 +19,12 @@ must add independent verification, modern context, and runnable Rust examples.
 
 - Editable: `book/`, `examples/`, `tools/`, `docs/`, `planning/`, root project
   files, and project CI.
-- Read-only by default: `burn/`, `burn-onnx/`, `cubecl/`, `cubek/`,
-  `openmlsys/`.
+- Optional local source mirrors: `burn/`, `burn-onnx/`, `cubecl/`, `cubek/`,
+  `openmlsys/`. When present, they are read-only and exist only for fast source
+  inspection.
 - Never edit an upstream checkout to make a textbook example pass.
+- Never add a Cargo `path` dependency or `[patch]` pointing at a local source
+  mirror. Builds use the GitHub revisions in `pins.toml`.
 - Never add upstream repositories, nested `.git` directories, `target/`, or
   generated mdBook output to the root repository.
 - `cubek/cubecl/` is an untracked duplicate checkout and is not a source of
@@ -48,8 +51,8 @@ must add independent verification, modern context, and runnable Rust examples.
   have a CPU-testable core where practical.
 - Avoid `unwrap` in instructional library code; in tiny binaries/tests it must
   have an obvious invariant or a descriptive `expect`.
-- Before handoff run `make check`, or document exactly which command could not
-  run and why.
+- Before handoff run `make check`, which does not require local mirrors. When
+  mirrors are available, also run `make check-local-sources`.
 
 ## Planning and Handoff
 

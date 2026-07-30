@@ -38,3 +38,13 @@
 - 原因：v2 正文尚未完成，而第 2 章最能验证“原理—Burn API—底层源码—
   可运行实验”的完整工作流。
 
+## D006：远程依赖与本地源码镜像
+
+- 日期：2026-07-30
+- 决策：Cargo 构建只使用 `pins.toml` 对应的 GitHub revision。Burn
+  `0.22.0-pre.1` 的 commit 决定其 CubeCL 与 CubeK revision；禁止使用
+  本地 `path` 依赖或 `[patch]` 覆盖。
+- 原因：公开构建和 CI 不应依赖特定目录布局。根目录下可选的 Burn、
+  CubeCL、CubeK、burn-onnx 和 OpenMLSys clone 被 Git 忽略，仅供 Agent
+  快速搜索和源码阅读。
+

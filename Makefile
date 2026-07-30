@@ -1,10 +1,13 @@
-.PHONY: book check check-upstreams fmt lint test
+.PHONY: book check check-local-sources check-upstreams fmt lint test
 
 book:
 	mdbook build book
 
 check-upstreams:
 	python3 tools/check_upstreams.py
+
+check-local-sources:
+	python3 tools/check_upstreams.py --check-local
 
 fmt:
 	cargo fmt --all --check

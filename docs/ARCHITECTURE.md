@@ -18,7 +18,7 @@ Burn IR/Fusion → CubeCL → CubeK/设备运行时
 - 内容范围：`planning/CHAPTER_MATRIX.md`
 - 进行中工作：`planning/STATUS.md`
 - 版本：`pins.toml`
-- Burn 行为：固定 commit 的源码和测试
+- Burn 行为：GitHub 固定 commit 的源码和测试
 - OpenMLSys 来源：固定 commit 下的 v1 中文章节
 - 可执行结论：`examples/` 中通过测试的代码
 
@@ -31,7 +31,9 @@ Burn IR/Fusion → CubeCL → CubeK/设备运行时
 - `examples/` 保存可编译代码及测试，是代码片段的唯一真相。
 - `tools/` 保存项目级校验，不复制上游构建系统。
 - `planning/` 保存跨会话协作状态，不承载正文。
-- 五个上游目录用于研究和本地核验，始终保持独立。
+- 五个可选上游目录只用于 Agent 快速阅读和本地核验，始终保持独立。
+- Cargo 构建只使用 GitHub revision，不使用这些镜像的 `path` 或
+  `[patch]` 覆盖。
 
 ## 版本升级流程
 

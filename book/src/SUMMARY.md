@@ -7,6 +7,13 @@
 # 基础篇
 
 - [第 1 章 导论](ch01-introduction.md)
+  - [机器学习应用与系统负载](ch01/01-applications-and-loads.md)
+  - [机器学习系统的设计目标](ch01/02-design-goals.md)
+  - [从编程接口到硬件](ch01/03-system-architecture.md)
+  - [Burn 技术栈](ch01/04-burn-stack.md)
+  - [生命周期、生态与阅读路径](ch01/05-lifecycle-and-ecosystem.md)
+  - [实验：探测执行栈](ch01/06-stack-probe-lab.md)
+  - [练习、延伸阅读与来源](ch01/07-exercises-and-sources.md)
 - [第 2 章 编程接口与计算图](ch02-programming-and-graph.md)
 - [第 3 章 AI 加速器与编程](ch03-accelerator.md)
 

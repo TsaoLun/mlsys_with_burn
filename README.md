@@ -18,10 +18,14 @@ The project is currently establishing its infrastructure and content outline.
 See [`planning/STATUS.md`](planning/STATUS.md) for live progress, next tasks,
 and handoff notes.
 
-## Local Layout
+## Dependency Sources
 
-The project expects five independent, read-only upstream checkouts in the
-project root:
+Builds and CI resolve Burn from its GitHub repository at the exact revision
+recorded in [`pins.toml`](pins.toml). Burn's own manifest pins the compatible
+CubeCL and CubeK revisions for the `0.22.0-pre.1` writing snapshot. Project
+Cargo manifests must not use local path dependencies.
+
+Optional, read-only source mirrors may be placed in the project root:
 
 ```text
 mlsys_with_burn/
@@ -34,10 +38,9 @@ mlsys_with_burn/
 └── examples/
 ```
 
-The root repository does not track these upstream directories. The source
-snapshot used by the textbook is recorded in [`pins.toml`](pins.toml). Agents
-and contributors must not modify upstream working trees without explicit
-authorization.
+These directories are ignored by Git and exist only to let agents inspect
+upstream source quickly. They are not required to build or test the project and
+must not affect Cargo dependency resolution.
 
 ## Quick Start
 
@@ -54,6 +57,13 @@ make test
 ```
 
 The generated book is written to `book/book/`.
+
+If the optional source mirrors are present, verify that they match the remote
+snapshot with:
+
+```bash
+make check-local-sources
+```
 
 ## Project Structure
 

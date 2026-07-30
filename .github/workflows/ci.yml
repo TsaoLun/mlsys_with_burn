@@ -24,7 +24,7 @@ jobs:
           mdbook-version: "0.4.51"
 
       - name: Validate committed snapshot metadata
-        run: python3 tools/check_upstreams.py --metadata-only
+        run: python3 tools/check_upstreams.py
 
       - name: Build book
         run: mdbook build book

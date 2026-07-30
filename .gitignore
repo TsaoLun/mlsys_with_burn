@@ -2,7 +2,8 @@
 .idea/
 .vscode/
 
-# Independent upstream checkouts: tracked only through pins.toml.
+# Optional local source mirrors for fast agent reading only.
+# Cargo builds must use the GitHub revisions recorded in pins.toml.
 /burn/
 /burn-onnx/
 /cubecl/

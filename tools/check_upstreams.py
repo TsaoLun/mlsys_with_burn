@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate the pinned upstream snapshot without modifying any checkout."""
+"""Validate remote dependency pins and optional local source mirrors."""
 
 from __future__ import annotations
 
@@ -47,19 +47,54 @@ def validate_metadata(config: dict[str, Any]) -> None:
             fail(f"{name}.rev is not a full lowercase Git SHA")
         if not repository.get("url", "").startswith("https://github.com/"):
             fail(f"{name}.url must be an HTTPS GitHub URL")
-        if not repository.get("path"):
-            fail(f"{name}.path is missing")
+        if not repository.get("local_path"):
+            fail(f"{name}.local_path is missing")
+
+    relationships = config.get("relationships", {})
+    expected_relationships = {
+        "burn_cubecl_rev",
+        "burn_cubek_rev",
+        "burn_onnx_burn_rev",
+    }
+    if set(relationships) != expected_relationships:
+        fail(f"relationships must be exactly {sorted(expected_relationships)}")
+    for name, revision in relationships.items():
+        if not SHA_PATTERN.fullmatch(revision):
+            fail(f"relationships.{name} is not a full lowercase Git SHA")
+    if relationships["burn_cubecl_rev"] != repositories["cubecl"]["rev"]:
+        fail("Burn and CubeCL snapshot revisions disagree")
+    if relationships["burn_cubek_rev"] != repositories["cubek"]["rev"]:
+        fail("Burn and CubeK snapshot revisions disagree")
 
     root_manifest = (ROOT / "Cargo.toml").read_text()
     burn_revision = repositories["burn"]["rev"]
     if f'rev = "{burn_revision}"' not in root_manifest:
         fail("root Cargo.toml does not use the pinned Burn revision")
+    if repositories["burn"]["url"] not in root_manifest:
+        fail("root Cargo.toml does not use the pinned Burn GitHub repository")
+
+    manifests = [ROOT / "Cargo.toml", *sorted((ROOT / "examples").glob("**/Cargo.toml"))]
+    for manifest in manifests:
+        if re.search(r"(?m)(?:^|[,{])\s*path\s*=", manifest.read_text()):
+            fail(f"{manifest} contains a local path dependency")
+
+    lockfile = (ROOT / "Cargo.lock").read_text()
+    remote_dependencies = {
+        "burn": repositories["burn"],
+        "cubecl": repositories["cubecl"],
+        "cubek": repositories["cubek"],
+    }
+    for name, repository in remote_dependencies.items():
+        if repository["url"].removesuffix(".git") not in lockfile:
+            fail(f"Cargo.lock does not resolve {name} from its GitHub repository")
+        if repository["rev"] not in lockfile:
+            fail(f"Cargo.lock does not contain the pinned {name} revision")
 
 
 def validate_checkouts(config: dict[str, Any]) -> None:
     repositories = config["repositories"]
     for name, repository in repositories.items():
-        path = ROOT / repository["path"]
+        path = ROOT / repository["local_path"]
         if not (path / ".git").exists():
             fail(f"{name} checkout is missing at {path}")
 
@@ -98,15 +133,15 @@ def validate_checkouts(config: dict[str, Any]) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--metadata-only",
+        "--check-local",
         action="store_true",
-        help="validate committed metadata without requiring local checkouts",
+        help="also verify optional local source mirrors against the remote pins",
     )
     args = parser.parse_args()
 
     config = load_pins()
     validate_metadata(config)
-    if not args.metadata_only:
+    if args.check_local:
         validate_checkouts(config)
     print("Upstream snapshot is consistent.")
 
