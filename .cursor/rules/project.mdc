@@ -1,0 +1,16 @@
+---
+description: MLSys with Burn 的全局项目边界与协作流程
+alwaysApply: true
+---
+
+# 项目规则
+
+- 开始工作前阅读 `AGENTS.md`、`planning/STATUS.md` 和 `pins.toml`。
+- 默认只修改根项目文件；`burn/`、`burn-onnx/`、`cubecl/`、`cubek/`
+  和 `openmlsys/` 只读。
+- 只描述固定源码快照中能核验的能力，不从最新在线文档猜测。
+- 示例代码是正文代码片段的唯一真相，正文使用 mdBook include。
+- 完成任务后更新 `planning/STATUS.md`，记录验证命令与下一步。
+- 影响范围、版本、许可证或架构的决定写入 `planning/DECISIONS.md`。
+- 不提交生成目录、Rust `target/` 或任何嵌套上游仓库。
+

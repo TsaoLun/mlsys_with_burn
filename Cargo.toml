@@ -1,0 +1,20 @@
+[workspace]
+members = ["examples/ch02-tensor-basics"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+publish = false
+rust-version = "1.95"
+
+[workspace.dependencies]
+burn = { git = "https://github.com/tracel-ai/burn.git", rev = "976aa9c5ec1d2dd3412710f99759e3c44bdff03d", default-features = false, features = ["std", "flex"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+dbg_macro = "deny"
+todo = "warn"
+

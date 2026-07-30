@@ -1,0 +1,22 @@
+.DS_Store
+.idea/
+.vscode/
+
+# Independent upstream checkouts: tracked only through pins.toml.
+/burn/
+/burn-onnx/
+/cubecl/
+/cubek/
+/openmlsys/
+
+# Rust and mdBook build outputs.
+target/
+**/target/
+/book/book/
+**/.mdbook*/
+
+# Local Python state.
+__pycache__/
+*.py[cod]
+.venv/
+

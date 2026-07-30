@@ -1,0 +1,15 @@
+[book]
+authors = ["MLSys with Burn Contributors"]
+language = "zh-CN"
+multilingual = false
+src = "src"
+title = "机器学习系统：基于 Burn 与 Rust 的设计和实现"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+mathjax-support = true
+preferred-dark-theme = "navy"
+

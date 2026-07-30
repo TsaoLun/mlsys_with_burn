@@ -1,0 +1,41 @@
+# Reproducible source snapshot for the first writing cycle.
+# Updating a revision requires a decision entry and a full project check.
+
+[snapshot]
+name = "burn-0.22.0-pre.1"
+updated = "2026-07-30"
+
+[repositories.burn]
+url = "https://github.com/tracel-ai/burn.git"
+rev = "976aa9c5ec1d2dd3412710f99759e3c44bdff03d"
+version = "0.22.0-pre.1"
+path = "burn"
+
+[repositories.cubecl]
+url = "https://github.com/tracel-ai/cubecl.git"
+rev = "be278a1e76aed881e2cc6b165414ee6103ca4634"
+version = "0.11.0-pre.1"
+path = "cubecl"
+
+[repositories.cubek]
+url = "https://github.com/tracel-ai/cubek.git"
+rev = "f82a6d07ebf35a1d446893b32712458744d80f13"
+version = "0.3.0-pre.1"
+path = "cubek"
+
+[repositories.burn-onnx]
+url = "https://github.com/tracel-ai/burn-onnx.git"
+rev = "af2dfb43af43bf363dc2d7d858d933d86e2a65a8"
+version = "0.22.0-pre.1"
+path = "burn-onnx"
+
+[repositories.openmlsys]
+url = "https://github.com/openmlsys/openmlsys.git"
+rev = "9c289782ccbb165ac8ad7c960ecffc12942a5560"
+path = "openmlsys"
+
+[relationships]
+burn_cubecl_rev = "be278a1e76aed881e2cc6b165414ee6103ca4634"
+burn_cubek_rev = "f82a6d07ebf35a1d446893b32712458744d80f13"
+burn_onnx_burn_rev = "78f10aec1ca6c6ffb1edd17a0fa131ae59ad5403"
+

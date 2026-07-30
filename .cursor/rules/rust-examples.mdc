@@ -1,0 +1,17 @@
+---
+description: 教材 Rust 示例的可运行性与教学约束
+globs: examples/**/*.rs
+alwaysApply: false
+---
+
+# Rust 示例
+
+- 默认使用无需专有驱动的 CPU 后端。
+- 示例必须有可测试的数值、形状或状态预期。
+- 保持示例聚焦，不隐藏与当前知识点有关的关键步骤。
+- 教学库代码避免 `unwrap`；二进制和测试仅在不变量明显时使用带说明的
+  `expect`。
+- 不修改上游项目来适配示例。
+- 依赖版本与 `pins.toml` 保持一致。
+- 提交前运行 `cargo fmt --all --check`、`cargo clippy` 和 `cargo test`。
+
