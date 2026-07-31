@@ -6,6 +6,7 @@ members = [
     "examples/ch03-tile-loads",
     "examples/ch04-fusion-inspector",
     "examples/ch05-data-pipeline",
+    "examples/ch06-training-loop",
 ]
 resolver = "2"
 

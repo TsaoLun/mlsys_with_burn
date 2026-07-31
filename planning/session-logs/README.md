@@ -42,4 +42,6 @@ Agent 开始工作时依次阅读：
   第 1–4 章术语/原理/实验补全与计划文档关闭。
 - [`2026-08-01-ch05-data-processing.md`](2026-08-01-ch05-data-processing.md)：
   第 5 章数据处理系统来源映射、Burn DataLoader 核验和 CPU 实验。
+- [`2026-08-01-ch06-training-systems.md`](2026-08-01-ch06-training-systems.md)：
+  第 6 章训练系统来源映射、Burn optimizer/DDP 核验和 CPU 训练循环。
 

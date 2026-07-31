@@ -8,19 +8,19 @@ M3：系统篇。
 
 ## 当前目标
 
-建立第 6 章“训练系统”的 OpenMLSys 与 burn-train/多设备训练来源映射。
+建立第 7 章“模型服务”的 OpenMLSys 与 burn-onnx/Record/Remote 来源映射。
 
 ## 进行中
 
-- [ ] 映射 OpenMLSys v1 `chapter_distributed_training/`，核验 Burn 固定快照
-  中 burn-train、优化器、多设备和通信边界。
+- [ ] 映射 OpenMLSys v1 `chapter_model_deployment/`，核验 Burn 固定快照
+  中 burn-onnx、Record、Remote 和 WASM/no_std 边界。
 
 ## 下一步
 
-1. 逐文件审查 OpenMLSys v1 `chapter_distributed_training/`。
-2. 核验 `burn-train`、optimizer、`split_dataloader` 与可诚实验证的多设备
-   能力。
-3. 设计 CPU 可测试的训练循环实验，并把跨节点能力单独标成边界或未来工作。
+1. 逐文件审查 OpenMLSys v1 `chapter_model_deployment/`。
+2. 核验固定 `burn-onnx` 与 Burn revision 的关系，以及 Record、Remote、
+   WASM/no_std 的实际边界。
+3. 设计 CPU 可测试的模型导出/加载或远程推理实验，区分部署格式与运行时。
 
 ## 已完成
 
@@ -57,18 +57,33 @@ M3：系统篇。
 - [x] 将 `burn` 的 `dataset` feature 接入固定 Git revision，更新
   `Cargo.lock`，未使用本地 path 或 `[patch]`。
 - [x] 本机运行 `make check` 与 `make check-local-sources` 均通过。
+- [x] 完成第 6 章八节正文、`SUMMARY.md` 导航和
+  `planning/chapter-sources/ch06.md` 逐文件来源映射。
+- [x] 核验固定 `burn-train` 的 `TrainStep`、`Learner`、optimizer、
+  scheduler、checkpoint、本机 `MultiDevice` 和 DDP 策略。
+- [x] 核验 `DistributedContext`、autodiff gradient registration、
+  backend `all_reduce`/`sync_collective`，并确认 Flex CPU 没有
+  collective 实现。
+- [x] 新增 `examples/ch06-training-loop`，测试 CPU autodiff、SGD loss
+  下降、参数变化和训练参数错误。
+- [x] 增加 D009，明确 CPU 单设备实验与 DDP/跨节点能力边界。
+- [x] 本机运行第 6 章示例检查、`make check` 与
+  `make check-local-sources` 均通过。
 
 ## 本次交接
 
-- 已完成：第 5 章从 OpenMLSys v1 数据处理原则重组为 Burn/Rust
-  Dataset→DataLoader→Batcher 路线；D008 记录多 worker 不默认保序的范围决定。
-- 验证：`cargo test -p ch05-data-pipeline`（5 tests passed）、
-  `cargo clippy -p ch05-data-pipeline --all-targets -- -D warnings`、
-  `cargo run -p ch05-data-pipeline`、`mdbook build book`、`make check`、
-  `make check-local-sources`、`git diff --check` 均通过。
-- 偏差：实验没有把粗粒度墙钟结果写成性能结论；多 worker 到达顺序只作为
-  运行时观察量，严格保序留给单 worker 或后续显式重排设计。
-- 下一步：从 OpenMLSys v1 `chapter_distributed_training/` 开始第 6 章映射。
+- 已完成：第 6 章从 OpenMLSys v1 分布式训练原则重组为
+  Burn/Rust 训练状态→TrainStep→Learner→本机多设备/DDP 路线；D009
+  记录 Flex CPU 不验证 collective 的范围决定。
+- 验证：`cargo test -p ch06-training-loop`（2 tests passed）、
+  `cargo clippy -p ch06-training-loop --all-targets -- -D warnings`、
+  `cargo run -p ch06-training-loop`、`mdbook build book`、`make check`、
+  `make check-local-sources`、`git diff --check` 均通过；`make check`
+  的 workspace 测试全部通过。
+- 偏差：实验没有实现 `burn-train` DDP、AllReduce、参数服务器或流水线
+  并行；固定源码中 Flex 的 collective 边界和 CUDA/NCCL 的运行前提已写入
+  正文、来源映射与 D009。
+- 下一步：从 OpenMLSys v1 `chapter_model_deployment/` 开始第 7 章映射。
 
 ## 已知问题
 

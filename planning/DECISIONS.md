@@ -74,3 +74,19 @@
 - 影响：需要稳定全局顺序的示例使用 `num_workers = 0`，或另行实现带序号
   的 reorder layer；第 6 章讨论多设备训练时的 sampler/checkpoint 协议。
 
+## D009：第 6 章以 CPU 单设备训练验证循环，隔离 DDP 后端边界
+
+- 日期：2026-08-01
+- 决策：第 6 章实验使用 `Device::flex().autodiff()` 和
+  `burn-optim` 手写训练循环，验证 forward → backward →
+  optimizer step → loss 进展；不把 CPU Flex 作为 DDP 或 AllReduce
+  的运行验证路径。
+- 原因：固定 Burn 源码中的 `burn-train` DDP API 和 `DistributedContext`
+  已存在，但 `burn-flex/src/ops/transaction.rs` 明确使用不支持 collective
+  operations 的默认实现。可运行的 DDP 还需要实现 collective 的后端、匹配
+  的设备集合以及每个节点一致的启动配置；仅凭 CPU API 编译不能证明跨设备/
+  跨节点通信成立。
+- 影响：正文分别描述 `MultiDevice` 本机策略、DDP 的 verified API 边界和
+  参数服务器/流水线并行的未覆盖范围；后续若增加 CUDA/NCCL 或远程运行实验，
+  必须单独记录设备、进程、通信库和验证结果。
+

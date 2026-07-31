@@ -54,6 +54,14 @@
   - [实验：可复现数据管道](ch05/07-reproducible-pipeline-lab.md)
   - [练习、延伸阅读与来源](ch05/08-exercises-and-sources.md)
 - [第 6 章 训练系统](ch06-training-systems.md)
+  - [训练状态、迭代与成本模型](ch06/01-training-state-and-cost.md)
+  - [前向、反向与自定义训练循环](ch06/02-forward-backward-loop.md)
+  - [burn-train 的 Learner 与训练装配](ch06/03-burn-train-orchestration.md)
+  - [优化器、学习率与检查点](ch06/04-optimizer-and-checkpoint.md)
+  - [本机多设备与数据并行](ch06/05-local-data-parallel.md)
+  - [集合通信、DDP 与能力边界](ch06/06-collective-and-ddp.md)
+  - [实验：CPU 线性回归训练循环](ch06/07-training-loop-lab.md)
+  - [练习、延伸阅读与来源](ch06/08-exercises-and-sources.md)
 
 # 应用与扩展篇
 
