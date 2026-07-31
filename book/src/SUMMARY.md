@@ -45,6 +45,14 @@
   - [实验：观察 Fusion 执行计划](ch04/07-fusion-inspector-lab.md)
   - [练习、延伸阅读与来源](ch04/08-exercises-and-sources.md)
 - [第 5 章 数据处理系统](ch05-data-processing.md)
+  - [数据路径、语义与成本模型](ch05/01-data-pipeline-and-cost.md)
+  - [Dataset 与惰性变换](ch05/02-dataset-abstractions.md)
+  - [Batcher、DataLoader 与设备边界](ch05/03-batching-and-device.md)
+  - [Shuffle、采样与数据划分](ch05/04-shuffle-sampling-split.md)
+  - [多线程加载与保序性边界](ch05/05-multithread-and-order.md)
+  - [存储、缓存与扩展路径](ch05/06-storage-and-scaling.md)
+  - [实验：可复现数据管道](ch05/07-reproducible-pipeline-lab.md)
+  - [练习、延伸阅读与来源](ch05/08-exercises-and-sources.md)
 - [第 6 章 训练系统](ch06-training-systems.md)
 
 # 应用与扩展篇

@@ -40,4 +40,6 @@ Agent 开始工作时依次阅读：
   第 4 章编译器、运行时与 FusionInspector。
 - [`2026-07-31-backfill-ch01-ch04.md`](2026-07-31-backfill-ch01-ch04.md)：
   第 1–4 章术语/原理/实验补全与计划文档关闭。
+- [`2026-08-01-ch05-data-processing.md`](2026-08-01-ch05-data-processing.md)：
+  第 5 章数据处理系统来源映射、Burn DataLoader 核验和 CPU 实验。
 

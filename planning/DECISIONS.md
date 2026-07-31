@@ -61,3 +61,16 @@
   `planning/session-logs/2026-07-31-backfill-ch01-ch04.md`。临时计划文件
   已删除。
 
+## D008：第 5 章以数据守恒与顺序边界分开验证
+
+- 日期：2026-08-01
+- 决策：第 5 章实验将 Dataset map、batching、seed 和多 worker 作为
+  独立可观察量；多 worker 默认只断言样本守恒、变换值和 progress，不把
+  batch 到达顺序写成 Burn 的保序能力。
+- 原因：固定 Burn `MultiThreadDataLoader` 通过分片 worker 和 bounded
+  message channel 返回 batch，消息没有全局样本序号或消费者侧重排；这与
+  OpenMLSys v1 用 MindSpore Connector 实现的保序语义不同。把两者混写会
+  将来源系统的能力错误外推到 Burn。
+- 影响：需要稳定全局顺序的示例使用 `num_workers = 0`，或另行实现带序号
+  的 reorder layer；第 6 章讨论多设备训练时的 sampler/checkpoint 协议。
+

@@ -1,6 +1,6 @@
 # 实时状态
 
-更新日期：2026-07-31
+更新日期：2026-08-01
 
 ## 当前里程碑
 
@@ -8,17 +8,19 @@ M3：系统篇。
 
 ## 当前目标
 
-建立第 5 章“数据处理系统”的 OpenMLSys 与 burn-dataset 来源映射。
+建立第 6 章“训练系统”的 OpenMLSys 与 burn-train/多设备训练来源映射。
 
 ## 进行中
 
-- [ ] 映射 OpenMLSys v1 数据处理章节，并核验 burn-dataset 边界。
+- [ ] 映射 OpenMLSys v1 `chapter_distributed_training/`，核验 Burn 固定快照
+  中 burn-train、优化器、多设备和通信边界。
 
 ## 下一步
 
-1. 映射 OpenMLSys v1 `chapter_data_processing/`。
-2. 核验 burn-dataset、DataLoader、Batcher 与多线程读取边界。
-3. 设计可复现的数据流水线、shuffle 和 batching 实验。
+1. 逐文件审查 OpenMLSys v1 `chapter_distributed_training/`。
+2. 核验 `burn-train`、optimizer、`split_dataloader` 与可诚实验证的多设备
+   能力。
+3. 设计 CPU 可测试的训练循环实验，并把跨节点能力单独标成边界或未来工作。
 
 ## 已完成
 
@@ -46,6 +48,27 @@ M3：系统篇。
   分支 autodiff 与三操作 Fusion 扩展；计划文档已删除。
 - [x] 本机验证：`ch01`/`ch02`/`ch03-tile-loads` 测试与 Clippy、mdBook、
   pin 检查、`cargo fmt --all --check`。
+- [x] 完成第 5 章八节正文、`SUMMARY.md` 导航和
+  `planning/chapter-sources/ch05.md` 逐文件来源映射。
+- [x] 核验固定 Burn `Dataset`、惰性 transform、`Batcher`、DataLoader、
+  shuffle、采样、分片、SQLite 和多 worker 错误/顺序边界。
+- [x] 新增 `examples/ch05-data-pipeline`，测试 map、batching、固定 seed、
+  epoch RNG、multi-worker 数据守恒、Device 传递和参数错误。
+- [x] 将 `burn` 的 `dataset` feature 接入固定 Git revision，更新
+  `Cargo.lock`，未使用本地 path 或 `[patch]`。
+- [x] 本机运行 `make check` 与 `make check-local-sources` 均通过。
+
+## 本次交接
+
+- 已完成：第 5 章从 OpenMLSys v1 数据处理原则重组为 Burn/Rust
+  Dataset→DataLoader→Batcher 路线；D008 记录多 worker 不默认保序的范围决定。
+- 验证：`cargo test -p ch05-data-pipeline`（5 tests passed）、
+  `cargo clippy -p ch05-data-pipeline --all-targets -- -D warnings`、
+  `cargo run -p ch05-data-pipeline`、`mdbook build book`、`make check`、
+  `make check-local-sources`、`git diff --check` 均通过。
+- 偏差：实验没有把粗粒度墙钟结果写成性能结论；多 worker 到达顺序只作为
+  运行时观察量，严格保序留给单 worker 或后续显式重排设计。
+- 下一步：从 OpenMLSys v1 `chapter_distributed_training/` 开始第 6 章映射。
 
 ## 已知问题
 
@@ -53,10 +76,9 @@ M3：系统篇。
   的 Burn commit；ONNX 章节必须按该关系单独验证，不能假定与本地 Burn
   HEAD 可互换。
 - Burn 的分布式文档仍在演进，第 6、9 章不能只依赖 Burn Book。
-- 固定 CubeCL 依赖的 `tracel-llvm v22.1.4-5` 无 `macos-x64` 发布资产；
-  Intel macOS 上 `ch03-cubecl-kernel` 与 `ch04-fusion-inspector` 的完整
-  `make check` 会被 bundler 下载阻断。Linux CI 与 `macos-AArch64` 不受影响。
-  host 侧 `ch03-tile-loads` 可在无 LLVM 环境验证 tiling 模型。
+- `tracel-llvm v22.1.4-5` 的 bundler 资产在不同平台/缓存环境可能影响
+  CubeCL CPU 路径；本次 Intel macOS 工作区的完整 `make check` 已通过，
+  干净环境仍应以 CI 结果为准。
 
 ## 交接模板
 
