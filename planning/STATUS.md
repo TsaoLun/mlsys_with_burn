@@ -8,19 +8,19 @@ M3：系统篇。
 
 ## 当前目标
 
-建立第 7 章“模型服务”的 OpenMLSys 与 burn-onnx/Record/Remote 来源映射。
+建立第 8 章“强化学习系统”的 OpenMLSys 与 Burn 环境交互/采样来源映射。
 
 ## 进行中
 
-- [ ] 映射 OpenMLSys v1 `chapter_model_deployment/`，核验 Burn 固定快照
-  中 burn-onnx、Record、Remote 和 WASM/no_std 边界。
+- [ ] 映射 OpenMLSys v1 `chapter_reinforcement_learning/`，核验 Burn 固定快照
+  中 burn-rl、环境交互、采样与训练边界。
 
 ## 下一步
 
-1. 逐文件审查 OpenMLSys v1 `chapter_model_deployment/`。
-2. 核验固定 `burn-onnx` 与 Burn revision 的关系，以及 Record、Remote、
-   WASM/no_std 的实际边界。
-3. 设计 CPU 可测试的模型导出/加载或远程推理实验，区分部署格式与运行时。
+1. 逐文件审查 OpenMLSys v1 `chapter_reinforcement_learning/`。
+2. 核验固定 Burn `burn-rl`、环境 trait、rollout/trajectory 和可验证的
+   CPU 训练边界。
+3. 设计 CPU 可测试的环境交互与采样实验，区分 RL 算法、环境和训练 runtime。
 
 ## 已完成
 
@@ -69,21 +69,32 @@ M3：系统篇。
 - [x] 增加 D009，明确 CPU 单设备实验与 DDP/跨节点能力边界。
 - [x] 本机运行第 6 章示例检查、`make check` 与
   `make check-local-sources` 均通过。
+- [x] 完成第 7 章八节正文、`SUMMARY.md` 导航和
+  `planning/chapter-sources/ch07.md` 逐文件来源映射。
+- [x] 核验固定 `burn-onnx` 的 ONNX→BurnGraph→Rust codegen→Burnpack
+  路径、四种 `LoadStrategy`，以及主线 `ModuleRecord`、burn-store、
+  Remote 和 WASM/no_std 边界。
+- [x] 新增 `examples/ch07-record-roundtrip`，测试 CPU Linear 参数
+  Burnpack 内存 round-trip、输出 shape 和数值误差。
+- [x] 增加 D010，隔离 `burn-onnx` 旧 Burn revision 与当前主线实验。
+- [x] 本机运行第 7 章示例、`make check` 与
+  `make check-local-sources` 均通过。
 
 ## 本次交接
 
-- 已完成：第 6 章从 OpenMLSys v1 分布式训练原则重组为
-  Burn/Rust 训练状态→TrainStep→Learner→本机多设备/DDP 路线；D009
-  记录 Flex CPU 不验证 collective 的范围决定。
-- 验证：`cargo test -p ch06-training-loop`（2 tests passed）、
-  `cargo clippy -p ch06-training-loop --all-targets -- -D warnings`、
-  `cargo run -p ch06-training-loop`、`mdbook build book`、`make check`、
+- 已完成：第 7 章从 OpenMLSys v1 模型部署原则重组为
+  artifact→转换→runtime→服务策略路线；覆盖主线 `ModuleRecord`/Burnpack、
+  `burn-onnx` codegen、压缩边界、Remote 和 WASM/no_std。
+- 验证：`cargo test -p ch07-record-roundtrip`（1 test passed）、
+  `cargo clippy -p ch07-record-roundtrip --all-targets -- -D warnings`、
+  `cargo run -p ch07-record-roundtrip`、`mdbook build book`、`make check`、
   `make check-local-sources`、`git diff --check` 均通过；`make check`
-  的 workspace 测试全部通过。
-- 偏差：实验没有实现 `burn-train` DDP、AllReduce、参数服务器或流水线
-  并行；固定源码中 Flex 的 collective 边界和 CUDA/NCCL 的运行前提已写入
-  正文、来源映射与 D009。
-- 下一步：从 OpenMLSys v1 `chapter_model_deployment/` 开始第 7 章映射。
+  的 workspace lint 与测试全部通过。
+- 偏差：没有将固定 `burn-onnx` 加入当前 workspace，也没有实现 ONNX、
+  HTTP/gRPC、Remote、WASM 或量化的端到端实验；原因是 `burn-onnx`
+  manifest pin 到 `78f10aec...`，与主线 Burn `976aa9...` 不一致，
+  其余路径还需要网络/目标 backend/平台前提。D010 已记录。
+- 下一步：从 OpenMLSys v1 `chapter_reinforcement_learning/` 开始第 8 章映射。
 
 ## 已知问题
 

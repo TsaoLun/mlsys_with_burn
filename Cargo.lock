@@ -918,6 +918,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch07-record-roundtrip"
+version = "0.1.0"
+dependencies = [
+ "burn",
+]
+
+[[package]]
 name = "chacha20"
 version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"

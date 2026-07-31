@@ -44,4 +44,7 @@ Agent 开始工作时依次阅读：
   第 5 章数据处理系统来源映射、Burn DataLoader 核验和 CPU 实验。
 - [`2026-08-01-ch06-training-systems.md`](2026-08-01-ch06-training-systems.md)：
   第 6 章训练系统来源映射、Burn optimizer/DDP 核验和 CPU 训练循环。
+- [`2026-08-01-ch07-model-serving.md`](2026-08-01-ch07-model-serving.md)：
+  第 7 章模型服务来源映射、burn-onnx/Record/Remote 核验和 CPU artifact
+  round-trip。
 

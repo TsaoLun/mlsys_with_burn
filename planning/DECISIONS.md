@@ -90,3 +90,20 @@
   参数服务器/流水线并行的未覆盖范围；后续若增加 CUDA/NCCL 或远程运行实验，
   必须单独记录设备、进程、通信库和验证结果。
 
+## D010：第 7 章隔离 burn-onnx 的 Burn revision，实验使用主线 ModuleRecord
+
+- 日期：2026-08-01
+- 决策：第 7 章按固定 `burn-onnx` 源码核验 ONNX→Rust→Burnpack
+  的生成和加载策略，但不把 `burn-onnx` 加入当前根 workspace 的同一
+  Burn 依赖图；CPU 实验使用主线 Burn 的 `ModuleRecord` 内存
+  round-trip，验证参数 artifact 加载后推理输出保持一致。
+- 原因：`pins.toml` 中 `burn-onnx` 为 `af2dfb...`，其 manifest 明确把
+  `burn`、`burn-flex`、`burn-store` 指向 `78f10aec...`，而根项目当前
+  Burn pin 为 `976aa9c...`。相同 crate 名称的不同 revision 不能证明
+  `Tensor`、`Module` 和 store 类型兼容；强行混用会使实验依赖两个不一致
+  的 Burn API/类型世界。
+- 影响：正文把 ONNX importer 的源码核验与当前主线 Record 实验分开；
+  本章不声称根 workspace 已完成 ONNX 导入或 Remote/WASM 端到端部署。
+  将来更新 pin 时，必须先对齐 burn-onnx 的 Burn revision，再增加真正的
+  ONNX fixture 与目标平台验证。
+
