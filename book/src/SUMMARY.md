@@ -75,5 +75,13 @@
   - [实验：CPU 模型状态 round-trip](ch07/07-record-roundtrip-lab.md)
   - [练习、延伸阅读与来源](ch07/08-exercises-and-sources.md)
 - [第 8 章 强化学习系统](ch08-rl-systems.md)
+  - [MDP、环境与轨迹边界](ch08/01-mdp-environment-and-trajectory.md)
+  - [Policy、观察转换与动作批处理](ch08/02-policy-and-batching.md)
+  - [Transition、回放与采样](ch08/03-replay-and-sampling.md)
+  - [Rollout 吞吐、异步环境与推理队列](ch08/04-rollout-throughput.md)
+  - [TD 更新、off-policy 与训练编排](ch08/05-learning-and-off-policy.md)
+  - [多智能体与分布式系统边界](ch08/06-multi-agent-boundary.md)
+  - [实验：CPU 确定性 rollout 与 replay](ch08/07-rollout-lab.md)
+  - [练习、延伸阅读与来源](ch08/08-exercises-and-sources.md)
 - [第 9 章 大规模 GPU 集群管理](ch09-gpu-cluster.md)
 

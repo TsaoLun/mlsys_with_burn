@@ -47,4 +47,7 @@ Agent 开始工作时依次阅读：
 - [`2026-08-01-ch07-model-serving.md`](2026-08-01-ch07-model-serving.md)：
   第 7 章模型服务来源映射、burn-onnx/Record/Remote 核验和 CPU artifact
   round-trip。
+- [`2026-08-01-ch08-reinforcement-learning.md`](2026-08-01-ch08-reinforcement-learning.md)：
+  第 8 章强化学习来源映射、burn-rl/burn-train 核验和 CPU rollout/replay
+  实验。
 

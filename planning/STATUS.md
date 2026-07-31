@@ -4,23 +4,25 @@
 
 ## 当前里程碑
 
-M3：系统篇。
+M4：应用与扩展篇。
 
 ## 当前目标
 
-建立第 8 章“强化学习系统”的 OpenMLSys 与 Burn 环境交互/采样来源映射。
+建立第 9 章“大规模 GPU 集群管理”的 OpenMLSys 与 Burn/CubeCL
+集群运行时来源映射。
 
 ## 进行中
 
-- [ ] 映射 OpenMLSys v1 `chapter_reinforcement_learning/`，核验 Burn 固定快照
-  中 burn-rl、环境交互、采样与训练边界。
+- [ ] 映射 OpenMLSys v1 分布式训练中的集群/系统内容，核验 Burn 固定快照
+  中 GPU、通信、调度、遥测与容错边界。
 
 ## 下一步
 
-1. 逐文件审查 OpenMLSys v1 `chapter_reinforcement_learning/`。
-2. 核验固定 Burn `burn-rl`、环境 trait、rollout/trajectory 和可验证的
-   CPU 训练边界。
-3. 设计 CPU 可测试的环境交互与采样实验，区分 RL 算法、环境和训练 runtime。
+1. 逐文件审查 OpenMLSys v1 分布式训练的 cluster/system 相关文件。
+2. 核验固定 Burn/CubeCL/CubeK 的 GPU、collective、通信和运行时入口，
+   区分已有 backend 能力与外部调度器职责。
+3. 设计 CPU 可测试的调度/通信成本或故障模型实验，区分集群控制面、
+   工作负载运行时和设备 backend。
 
 ## 已完成
 
@@ -79,22 +81,34 @@ M3：系统篇。
 - [x] 增加 D010，隔离 `burn-onnx` 旧 Burn revision 与当前主线实验。
 - [x] 本机运行第 7 章示例、`make check` 与
   `make check-local-sources` 均通过。
+- [x] 完成第 8 章八节正文、`SUMMARY.md` 导航和
+  `planning/chapter-sources/ch08.md` 逐文件来源映射。
+- [x] 核验固定 `burn-rl` 的 Environment、Policy、Batchable、
+  TransitionBuffer、AsyncPolicy，以及 `burn-train` 的多环境 rollout、
+  off-policy、evaluation 和 checkpoint 边界。
+- [x] 新增 `examples/ch08-rl-rollout`，测试确定性环境的 done/truncated、
+  circular replay、随机 batch shape 和表格 TD 更新。
+- [x] 增加 D011，隔离 `burn-rl` 组合抽象与完整 DQN/MARL 算法实验。
+- [x] 本机运行第 8 章示例、`make check` 与
+  `make check-local-sources` 均通过。
 
 ## 本次交接
 
-- 已完成：第 7 章从 OpenMLSys v1 模型部署原则重组为
-  artifact→转换→runtime→服务策略路线；覆盖主线 `ModuleRecord`/Burnpack、
-  `burn-onnx` codegen、压缩边界、Remote 和 WASM/no_std。
-- 验证：`cargo test -p ch07-record-roundtrip`（1 test passed）、
-  `cargo clippy -p ch07-record-roundtrip --all-targets -- -D warnings`、
-  `cargo run -p ch07-record-roundtrip`、`mdbook build book`、`make check`、
+- 已完成：第 8 章从 OpenMLSys v1 的 MDP、单节点采样和多智能体系统
+  重组为 environment→policy→trajectory/replay→learner→系统边界路线；
+  覆盖固定 `burn-rl` traits、`TransitionBuffer`、`AsyncPolicy` 和
+  `burn-train` off-policy 编排。
+- 验证：`cargo test -p ch08-rl-rollout`（4 tests passed）、
+  `cargo clippy -p ch08-rl-rollout --all-targets -- -D warnings`、
+  `cargo run -p ch08-rl-rollout`、`mdbook build book`、`make check`、
   `make check-local-sources`、`git diff --check` 均通过；`make check`
   的 workspace lint 与测试全部通过。
-- 偏差：没有将固定 `burn-onnx` 加入当前 workspace，也没有实现 ONNX、
-  HTTP/gRPC、Remote、WASM 或量化的端到端实验；原因是 `burn-onnx`
-  manifest pin 到 `78f10aec...`，与主线 Burn `976aa9...` 不一致，
-  其余路径还需要网络/目标 backend/平台前提。D010 已记录。
-- 下一步：从 OpenMLSys v1 `chapter_reinforcement_learning/` 开始第 8 章映射。
+- 偏差：没有将 gym-rs/SDL2、完整 DQN、GPU simulator、网络 Actor–Learner
+  或 MARL league 加入根 workspace；原因是它们不是 `burn-rl` 的内置能力，
+  且固定 DQN example 的 native simulator 依赖不适合作为默认 CPU CI。
+  D011 已记录。
+- 下一步：审查 OpenMLSys v1 分布式训练 cluster/system 内容，开始第 9 章
+  “大规模 GPU 集群管理”的 Burn/CubeCL 能力映射。
 
 ## 已知问题
 
@@ -102,6 +116,9 @@ M3：系统篇。
   的 Burn commit；ONNX 章节必须按该关系单独验证，不能假定与本地 Burn
   HEAD 可互换。
 - Burn 的分布式文档仍在演进，第 6、9 章不能只依赖 Burn Book。
+- `burn-rl` 当前固定快照提供环境、policy、replay 和 runner 组合抽象，
+  不提供通用 DQN/PPO/SAC、prioritized replay 或 MARL/Actor–Learner
+  集群协议；第 8 章 D011 和来源映射已标出这些边界。
 - `tracel-llvm v22.1.4-5` 的 bundler 资产在不同平台/缓存环境可能影响
   CubeCL CPU 路径；本次 Intel macOS 工作区的完整 `make check` 已通过，
   干净环境仍应以 CI 结果为准。

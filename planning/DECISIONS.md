@@ -107,3 +107,22 @@
   将来更新 pin 时，必须先对齐 burn-onnx 的 Burn revision，再增加真正的
   ONNX fixture 与目标平台验证。
 
+## D011：第 8 章以确定性环境隔离 burn-rl 抽象与具体 RL 算法
+
+- 日期：2026-08-01
+- 决策：第 8 章基础实验使用自定义确定性 `Environment`、主线 Burn
+  `TransitionBuffer` 和表格 TD/Q-learning 更新，验证 rollout、终止边界、
+  replay sampling 与 bootstrapping；不把实验扩展为完整 DQN、PPO、SAC、
+  多智能体或分布式 actor/learner 系统。
+- 原因：固定 `burn-rl` 提供的是环境、policy、batching、transition
+  buffer 和 device conversion traits，具体 learner/loss/optimizer 由用户
+  实现。固定 `burn-train` 的 `OffPolicyStrategy` 可以编排多环境、异步
+  inference、replay、`PolicyLearner` 和 checkpoint，但完整 DQN example
+  还依赖 native gym-rs/SDL2，并自行实现 TD target、target network、
+  optimizer 和自定义 record。将这些工程依赖放进基础 CPU 实验会把
+  simulator/算法/训练编排混成一个不可隔离的验证。
+- 影响：正文把 Burn 已提供的 RL 组合抽象与算法实现边界分开；实验可以在
+  无外部 simulator、无 GPU 和无网络的环境运行。后续若加入 DQN 或多环境
+  benchmark，必须单独记录 simulator、随机种子、policy update、设备、
+  checkpoint 和吞吐测量。
+
