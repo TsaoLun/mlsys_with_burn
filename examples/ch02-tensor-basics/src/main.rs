@@ -1,7 +1,8 @@
 use std::process::ExitCode;
 
 use ch02_tensor_basics::{
-    average_vectors, broadcast_rows_and_columns, inspect_tiny_model, multiply_with_gradients,
+    average_vectors, branch_gradient, broadcast_rows_and_columns, inspect_tiny_model,
+    multiply_with_gradients,
 };
 
 fn main() -> ExitCode {
@@ -18,6 +19,12 @@ fn main() -> ExitCode {
 
         let (params, output_dims) = inspect_tiny_model();
         println!("TinyModel：{params} 个参数，输出形状 {output_dims:?}");
+
+        let branch = branch_gradient(true)?;
+        println!(
+            "控制流分支 {}：输出 {:?}，梯度 {:?}",
+            branch.branch, branch.output, branch.input_gradient
+        );
 
         Ok::<(), ch02_tensor_basics::ExampleError>(())
     })();

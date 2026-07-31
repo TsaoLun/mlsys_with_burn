@@ -6,18 +6,19 @@
 高效可靠运行的问题。
 
 本书以 Burn 为贯穿案例，但不会把“学习一个框架的 API”当作最终目标。
-我们将反复在三个层次之间移动：
+我们将反复在三个层次之间移动。系统分层地图（与第 1 章架构节、第 4 章
+编译栈同一套层名）可写成：
 
 ```text
 框架无关的系统原理
         ↓
-Burn 的张量、训练与部署抽象
+模型与训练程序（Tensor / Module / 优化器）
         ↓
-Burn IR / Fusion → burn-cubecl
-                    ├→ 通用 CubeCL Kernel
-                    └→ CubeK 高性能算子
-                         ↓
-                  CubeCL runtime → 设备
+张量执行与 autodiff tape
+        ↓
+Burn IR / Fusion 计划
+        ↓
+CubeCL / CubeK Kernel → 设备 Runtime
 ```
 
 选择 Rust 不是为了假装机器学习系统只有一种语言。Python、C++、CUDA

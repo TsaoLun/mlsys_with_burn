@@ -21,15 +21,40 @@ Runtime 约束影响。view 可能共享 allocation；非连续 Tensor 也不能
 设备内存。一般图中的最佳静态内存规划很难，动态 shape 和异步 stream 又
 让精确生命周期更复杂，所以运行时常使用池化和启发式。
 
+用条带图表示时间（横轴）与 allocation（纵轴）。连续 `add → exp` 且中间
+结果不被同步读回时，中间值的寿命可以很短，甚至落入同一融合块内部：
+
+```text
+时间 →
+t0   t1        t2
+left ████
+right ████
+ mid      ██                 （仅块内临时，可能不单独暴露）
+ out         ████████
+```
+
+若在 `add` 后 `Device::sync()`（本章 FusionInspector 实验的切分路径），
+中间结果必须在同步点可观察，寿命被拉长，复用窗口也切开：
+
+```text
+时间 →
+t0   sync    t1
+left ████
+right ████
+ mid      ████████           （同步边界强制物化）
+ out              ████████
+```
+
 Burn IR 的 `TensorStatus` 提供局部依据：
 
 - `NotInit`：输出尚无现有 handle；
 - `ReadOnly`：输入还可能共享，读取时保留 handle；
 - `ReadWrite`：最后使用者可取得所有权，具备原地/复用机会。
 
-`HandleContainer` 以 TensorId 管理底层 handle。ReadWrite 允许“移动”
-handle，并不表示任意操作都可原地覆盖；shape、dtype、别名和 Kernel
-语义仍要满足。
+`HandleContainer` 以 TensorId 管理底层 handle。`ReadWrite` / in-place
+只是必要条件之一，不是充分条件：shape、dtype、别名、Kernel 语义以及
+是否仍有其他读者，都必须同时满足。不能把状态枚举读成“运行时总会原地
+覆盖”。
 
 ## 3. CubeCL 内存池
 

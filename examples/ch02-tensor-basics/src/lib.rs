@@ -108,6 +108,40 @@ pub fn multiply_with_gradients() -> Result<GradientReport, ExampleError> {
 }
 // ANCHOR_END: autodiff
 
+/// 控制流分支实验：只走一侧前向路径时的梯度。
+#[derive(Debug, Clone, PartialEq)]
+pub struct BranchGradientReport {
+    /// 实际执行的分支名。
+    pub branch: &'static str,
+    /// 前向输出。
+    pub output: Vec<f32>,
+    /// 对输入叶子的梯度。
+    pub input_gradient: Vec<f32>,
+}
+
+// ANCHOR: branch_autodiff
+/// Eager 控制流只把被执行分支记入 autodiff tape。
+pub fn branch_gradient(use_double: bool) -> Result<BranchGradientReport, ExampleError> {
+    let device = Device::flex().autodiff();
+    let input = Tensor::<1>::from_floats([2.0, 3.0], &device).require_grad();
+    let output = if use_double {
+        input.clone() * 2.0
+    } else {
+        input.clone() + 1.0
+    };
+    let gradients = output.clone().backward();
+    let input_gradient = input
+        .grad(&gradients)
+        .ok_or(ExampleError::GradientMissing("input"))?;
+
+    Ok(BranchGradientReport {
+        branch: if use_double { "double" } else { "plus_one" },
+        output: values(output)?,
+        input_gradient: values(input_gradient)?,
+    })
+}
+// ANCHOR_END: branch_autodiff
+
 // ANCHOR: module
 /// 由一个线性层和激活函数组成的最小 Module。
 #[derive(Module, Debug)]
@@ -178,5 +212,19 @@ mod tests {
 
         assert_eq!(num_params, 8);
         assert_eq!(output_dims, [4, 2]);
+    }
+
+    #[test]
+    fn autodiff_tape_follows_executed_branch_only() {
+        let doubled = branch_gradient(true).expect("double 分支应成功");
+        let plus_one = branch_gradient(false).expect("plus_one 分支应成功");
+
+        assert_eq!(doubled.branch, "double");
+        assert_eq!(doubled.output, vec![4.0, 6.0]);
+        assert_eq!(doubled.input_gradient, vec![2.0, 2.0]);
+
+        assert_eq!(plus_one.branch, "plus_one");
+        assert_eq!(plus_one.output, vec![3.0, 4.0]);
+        assert_eq!(plus_one.input_gradient, vec![1.0, 1.0]);
     }
 }

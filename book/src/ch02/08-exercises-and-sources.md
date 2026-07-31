@@ -39,6 +39,8 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
    叶子；再尝试 `set_require_grad(false)` 比较结果。
 5. 比较 `Device::flex()`、`.autodiff()` 和 `.inner()` 的
    `is_autodiff()`。
+6. 调用 `branch_gradient(false)`，断言输出与梯度，并解释为何未执行的
+   `* 2` 分支不会出现在 tape 中。
 
 ### 源码题
 
@@ -90,7 +92,12 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 - `chapter_computational_graph/schedule_of_computational_graph.md`
 
 本章保留图表示、依赖、控制流、静动态图与拓扑调度思想，删除 TensorFlow 1
-和 MindSpore 专用 API，并把数据流水线、模型并行后移。
+和 MindSpore 专用 API，并把数据流水线、模型并行后移。补全时增加了拓扑序
+小例子、图外控制流与循环展开/循环依赖区分，以及两分支 autodiff 实验；
+统一用语见 `docs/TERM_GLOSSARY.md`。
+
+未迁入：原书长控制流教程、`tf.cond`/`while_loop` API 走读、完整训练工作流
+与数据并行展开（后移第 5/6 章）。
 
 ### 自动微分、类型与 IR
 

@@ -8,21 +8,23 @@
 模型与训练程序
   │  编程接口、Module、Tensor、优化器
   ▼
-张量执行与自动微分
-  │  记录操作、梯度、设备与数据类型
+张量执行与 autodiff tape
+  │  Device、dtype、eager 前向、反向依赖
   ▼
-图与中间表示
+Burn IR / Fusion 计划
   │  分析、融合、布局和算子选择
   ▼
-Kernel 编译与高性能算子
-  │  生成设备程序、自动调优
+CubeCL / CubeK Kernel
+  │  Scope → KernelDefinition → JIT / 自动调优
   ▼
-CPU / GPU / WebGPU / 远程设备
+设备 Runtime（CPU / GPU / WebGPU / 远程）
 
 数据管道 ─────► 训练执行 ─────► 状态与模型部署
                      │
                 通信与集群系统
 ```
+
+术语与三张地图的固定叫法见仓库 `docs/TERM_GLOSSARY.md`。
 
 ## 编程接口
 
@@ -45,9 +47,9 @@ CPU / GPU / WebGPU / 远程设备
 - 是否需要为反向传播保存信息。
 
 “计算图”是表示操作及依赖的一种方式，但不是所有框架都只有一张静态图。
-Eager 执行可以在程序运行时逐个分派操作，自动微分可以记录反向依赖，融合
-系统又可以把一段操作转换为 IR 后批量优化。后续章节会区分这些用途，避免
-把它们统称为单一的“图模式”。
+Eager 执行可以在程序运行时逐个分派操作；autodiff tape 记录反向依赖；
+Fusion 把一段操作注册为 Burn IR 后再搜索执行计划。第 2 章把这三种表示
+分开定义，避免统称为单一“Burn 计算图”。
 
 ## 编译器与运行时
 

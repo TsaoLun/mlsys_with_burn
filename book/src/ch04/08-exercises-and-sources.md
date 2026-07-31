@@ -29,13 +29,13 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 
 ### Rust 与实验题
 
-1. 将实验扩为 add→mul→exp，断言连续路径包含三操作 ElementWise block。
-2. 分别在 add 后、mul 后插入同步，比较报告切分。
-3. 增加一个 broadcast 输入，比较输出与 Fusion 计划。
-4. 使用 `Device::flex()` 计算相同结果作为数值 reference，并解释 Inspector
+1. 运行已交付的 `inspect_add_mul_exp`，确认三操作 ElementWise block；再
+   分别在 add 后、mul 后插入同步，比较报告切分。
+2. 增加一个 broadcast 输入，比较输出与 Fusion 计划。
+3. 使用 `Device::flex()` 计算相同结果作为数值 reference，并解释 Inspector
    为什么没有对应报告。
-5. 让两个测试使用显式不同 StreamId，验证报告互不污染。
-6. 把 `FusionSummary` 序列化为稳定的教材快照；不要序列化完整 Debug 文本。
+4. 让两个测试使用显式不同 StreamId，验证报告互不污染。
+5. 把 `FusionSummary` 序列化为稳定的教材快照；不要序列化完整 Debug 文本。
 
 ### 源码题
 
@@ -113,9 +113,15 @@ compute/schedule 思想。MindSpore Graph Kernel、SOMAS、Ascend task 下沉
 
 OpenMLSys v2 固定快照只有第 4 章 TODO，没有可迁移正文。本章没有复制
 OpenMLSys ch04/ch05 图片或 Python/C++ 示例。新增 Burn OperationIr/Fusion、
-CubeCL lowering/JIT/stream 内容。Rust 实验参考固定 Burn
-`fusion_shape.rs` 的 add→exp 与同步切分回归模式，重新设计了独立 Stream、
-可传播错误、稳定 summary、教学输出和双重结构/数值断言。
+CubeCL lowering/JIT/stream 内容，以及常量传播→DCE 手推、生命周期条带图
+与三操作 Fusion 断言。术语见 `docs/TERM_GLOSSARY.md`。
+
+未迁入：MindSpore Graph Kernel / SOMAS 实现细节、Ascend task 下沉、长
+TVM schedule 教程（仅延伸阅读对照）。
+
+Rust 实验参考固定 Burn `fusion_shape.rs` 的 add→exp 与同步切分回归模式，
+重新设计了独立 Stream、可传播错误、稳定 summary、教学输出和双重结构/数值
+断言。
 
 完整逐文件和固定源码映射见 `planning/chapter-sources/ch04.md`。
 OpenMLSys 原作和改编正文采用 CC BY-NC-SA 4.0，原创 Rust 示例采用

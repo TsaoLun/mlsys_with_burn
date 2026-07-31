@@ -71,7 +71,17 @@ product = left * right = [4, 49]
 `grad` 返回 Option，因为没有参与跟踪的 Tensor 不一定有梯度。示例把缺少
 叶子梯度作为可传播错误，而不是在库代码中 panic。
 
-## 5. 运行
+## 5. 控制流只记录实际分支
+
+```rust
+{{#include ../../../examples/ch02-tensor-basics/src/lib.rs:branch_autodiff}}
+```
+
+`use_double = true` 时前向为 `input * 2`，梯度为全 2；为 `false` 时前向
+为 `input + 1`，梯度为全 1。两次调用各自构建 tape，互不混入未执行分支。
+这固定了图外控制流与 eager autodiff 的边界，不是完整训练循环。
+
+## 6. 运行
 
 ```bash
 cargo run -p ch02-tensor-basics
@@ -86,20 +96,20 @@ cargo run -p ch02-tensor-basics
 left 梯度：[4.0, 7.0]
 right 梯度：[1.0, 7.0]
 TinyModel：8 个参数，输出形状 [4, 2]
+控制流分支 double：输出 [4.0, 6.0]，梯度 [2.0, 2.0]
 ```
 
-## 6. 测试
+## 7. 测试
 
 ```bash
 cargo test -p ch02-tensor-basics
 ```
 
-四个测试分别验证逐元素数值、广播 shape 与数值、Module 参数注册和自动
-微分梯度。张量、广播和梯度行为可在固定上游的 `burn-backend-tests`
-找到对应回归；Module 参数遍历与统计由 `burn-core` 的 Module 测试支撑。
-因此这些断言不只来自教材实现本身。
+测试覆盖逐元素数值、广播、Module 参数注册、乘法梯度以及控制流分支
+梯度。张量、广播和梯度行为可在固定上游的 `burn-backend-tests` 找到对应
+回归；Module 参数遍历与统计由 `burn-core` 的 Module 测试支撑。
 
-## 7. 沿源码追踪
+## 8. 沿源码追踪
 
 建议按顺序阅读：
 

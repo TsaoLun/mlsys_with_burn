@@ -30,15 +30,18 @@
 
 ## 本章路线
 
-我们先建立框架无关的 IR 与 Pass 模型，再沿两层实现下行：
+我们先建立框架无关的 IR 与 Pass 模型，再沿第 1 章系统分层下行：
 
 ```text
-Tensor 操作 → burn-ir / burn-fusion → 优化执行块
-          → burn-cubecl-fusion / CubeK 或回退
-          → CubeCL Scope → KernelDefinition → Compiler → Runtime
+Tensor 操作
+  → burn-ir / burn-fusion（Burn IR / Fusion 计划）
+  → burn-cubecl-fusion / CubeK 或回退
+  → CubeCL Scope → KernelDefinition → Compiler
+  → 设备 Runtime（allocate / schedule / launch → read/sync）
 ```
 
-随后讨论 Kernel 选择、内存生命周期、stream 和异步边界。实验使用
-FusionInspector 观察计划结构和同步切分；它是固定快照中的测试 API，不是
-生产诊断接口。AOT、设备 graph 与性能测量只建立边界，不超出已核验能力。
+这与第 2 章的三种表示一致：本章处理 Fusion 计划与 CubeCL IR，不把它们
+写成 autodiff tape 或 device graph capture。随后讨论 Kernel 选择、内存
+生命周期、stream 和异步边界。实验使用 FusionInspector 观察计划结构与
+同步切分；它是固定快照中的测试 API，不是生产诊断接口。
 

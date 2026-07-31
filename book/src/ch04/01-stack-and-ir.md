@@ -53,7 +53,7 @@ graph capture 又服务于命令重放，不等于求导或融合图。
 
 ## 4. 编译器与运行时的交界
 
-可把流水线抽象为：
+可把流水线抽象为（与 `docs/TERM_GLOSSARY.md` 编译栈地图一致）：
 
 ```text
 capture/register
@@ -62,7 +62,8 @@ capture/register
     → lowering
     → code generation
     → compile/cache
-    → allocate/schedule/launch/sync
+    → allocate/schedule/launch
+    → read / Device::sync   （完成边界；flush 只是提交/推进）
 ```
 
 前五步偏编译器，后三步偏运行时，但边界会移动。JIT 在运行时拿到真实

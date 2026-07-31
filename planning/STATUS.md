@@ -12,11 +12,11 @@ M3：系统篇。
 
 ## 进行中
 
-- [ ] 审校第 4 章与基础篇的跨章术语，并建立第 5 章来源映射。
+- [ ] 映射 OpenMLSys v1 数据处理章节，并核验 burn-dataset 边界。
 
 ## 下一步
 
-1. 映射 OpenMLSys v1 数据处理章节。
+1. 映射 OpenMLSys v1 `chapter_data_processing/`。
 2. 核验 burn-dataset、DataLoader、Batcher 与多线程读取边界。
 3. 设计可复现的数据流水线、shuffle 和 batching 实验。
 
@@ -42,9 +42,10 @@ M3：系统篇。
 - [x] 实现 FusionInspector CPU 实验，验证 add→exp 融合与同步切分。
 - [x] 区分 autodiff tape、Burn Fusion IR、CubeCL IR 和设备 graph capture。
 - [x] 建立根 Git 基线提交 `e1769a5`。
-- [x] 验证 `make check`、`make check-local-sources` 和
-  `cargo test -p ch03-cubecl-kernel --features wgpu`。
-- [x] 验证 `cargo test -p ch04-fusion-inspector` 与 Fusion 计划观测输出。
+- [x] 完成第 1–4 章补全：术语表、计算图/Pass/内存加厚、tile 加载模型、
+  分支 autodiff 与三操作 Fusion 扩展；计划文档已删除。
+- [x] 本机验证：`ch01`/`ch02`/`ch03-tile-loads` 测试与 Clippy、mdBook、
+  pin 检查、`cargo fmt --all --check`。
 
 ## 已知问题
 
@@ -52,6 +53,10 @@ M3：系统篇。
   的 Burn commit；ONNX 章节必须按该关系单独验证，不能假定与本地 Burn
   HEAD 可互换。
 - Burn 的分布式文档仍在演进，第 6、9 章不能只依赖 Burn Book。
+- 固定 CubeCL 依赖的 `tracel-llvm v22.1.4-5` 无 `macos-x64` 发布资产；
+  Intel macOS 上 `ch03-cubecl-kernel` 与 `ch04-fusion-inspector` 的完整
+  `make check` 会被 bundler 下载阻断。Linux CI 与 `macos-AArch64` 不受影响。
+  host 侧 `ch03-tile-loads` 可在无 LLVM 环境验证 tiling 模型。
 
 ## 交接模板
 
@@ -61,4 +66,3 @@ M3：系统篇。
 - 验证：实际运行的命令和结果。
 - 偏差：与计划不同之处及原因。
 - 下一步：一个可以直接执行的动作。
-

@@ -5,6 +5,9 @@ CubeCL Git revision，并启用 `cpu`、`std` 和 `stdlib` feature。CPU Runtime
 通过 LLVM/MLIR 路径编译 Kernel；首次构建明显慢于前两章，增量运行会快得多。
 
 本实验验证编程模型和正确性，不把 CPU 时间当作 GPU 性能数据。
+`examples/ch03-cubecl-kernel` 中的 `scale_kernel` 负责 Runtime 边界；
+`examples/ch03-tile-loads` 中的 `tile_load_counts` 是独立 host 模型，用来
+衔接 GEMM 优化阶梯，**不是**共享内存 Kernel，也不依赖 CubeCL LLVM。
 
 ## 1. Host reference
 
@@ -55,7 +58,28 @@ unsafe block 只覆盖必须证明的 raw 边界。`input_handle` 由同一个 i
 `unsafe_code = "allow"`；这是一处有注释、有测试的 FFI/Runtime 边界，
 不是全项目放宽。
 
-## 4. 运行与测试
+## 4. Tiling 加载次数模型
+
+```rust
+{{#include ../../../examples/ch03-tile-loads/src/lib.rs:tile_loads}}
+```
+
+对 $16\times16\times16$、tile $=8$ 的理想化模型：
+
+```text
+naive_loads = 8192
+tiled_loads = 1024
+```
+
+它说明“一次全局加载服务多个乘加”如何降低加载次数，但不模拟 bank
+conflict、边界 tile、cube 同步或真实带宽。真实共享内存 Kernel 仍属练习。
+
+```bash
+cargo run -p ch03-tile-loads
+cargo test -p ch03-tile-loads
+```
+
+## 5. 运行与测试 scale Kernel
 
 ```bash
 cargo run -p ch03-cubecl-kernel
@@ -75,10 +99,12 @@ output:  [2.0, 4.0, 6.0, 8.0]
 cargo test -p ch03-cubecl-kernel
 ```
 
-测试使用包含负数、零和小数的输入，并与 host reference 做精确比较。整数
-缩放对这些 `f32` 值可精确表示；换成近似函数或累加时应使用容差断言。
+scale 测试使用包含负数、零和小数的输入，并与 host reference 做精确比较。
+整数缩放对这些 `f32` 值可精确表示；换成近似函数或累加时应使用容差断言。
+CubeCL CPU 路径依赖 `tracel-llvm` 的平台资产；当前上游 `v22.1.4-5` 提供
+`macos-AArch64` / `linux-x64` 等，但不提供 `macos-x64`。
 
-## 5. 观察编译边界
+## 6. 观察编译边界
 
 修改 `scale` 会产生不同的 comptime 特化。input 长度本身是 buffer 的运行时
 元数据，但本例还把它交给 `CubeDim::new` 选择 launch 拓扑；CubeDim 属于
@@ -89,7 +115,7 @@ cargo test -p ch03-cubecl-kernel
 不要用删掉 guard 的方式“观察越界”。unchecked raw buffer 错误可能不是
 普通 Rust panic，而是 Runtime 错误甚至进程崩溃。
 
-## 6. 可选 GPU 路径
+## 7. 可选 GPU 路径
 
 本章没有默认启用 WGPU，以确保基础实验不要求图形 API；crate 提供可选
 `wgpu` feature，并复用同一个 Kernel 与 reference：

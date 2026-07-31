@@ -24,16 +24,20 @@ CubeK。
 5. fallback 在可移植算子库中承担什么职责？列出三种触发原因。
 6. 为什么 autotune 结果不能直接复制到另一台机器？
 
-### Rust 与 Kernel 题
+### 已交付实验题
 
-1. 将实验改为 `output[i] = input[i] * scale + bias`，先扩展 host reference，
-   再扩展 Kernel 和测试。
+1. 修改 `scale_kernel` 为 `output[i] = input[i] * scale + bias`，先扩展
+   host reference，再扩展 Kernel 和测试。
 2. 把输入长度改为 5，但将 CubeDim 向上取整到 8，验证 guard 仍使输出正确。
-3. 将 `scale` 从 comptime 整数改为运行时标量。记录生成 launch API 的差异，
-   并核对固定 CubeCL 源码中的 scalar argument 表示。
-4. 为 raw buffer 长度不变量写一个 safe host helper，使 unsafe block 更小。
-5. 增加 `Vector<f32, N>` 版本；验证长度不是 N 倍数时的尾部处理。
-6. 在支持的机器上增加 WGPU feature，用相同输入比较 CPU 与 WGPU 正确性。
+3. 为 `ch03-tile-loads` 增加另一组可整除尺寸并手算 `tiled_loads`。
+4. 在支持的机器上运行 `cargo test -p ch03-cubecl-kernel --features wgpu`。
+
+### 扩展 Kernel 题（未随章交付）
+
+1. 将 `scale` 从 comptime 整数改为运行时标量。记录生成 launch API 的差异。
+2. 为 raw buffer 长度不变量写一个 safe host helper，使 unsafe block 更小。
+3. 增加 `Vector<f32, N>` 版本；验证长度不是 N 倍数时的尾部处理。
+4. 实现真实共享内存 tile Kernel，并与 `tile_load_counts` 的理想模型对照。
 
 ### 源码题
 
@@ -46,12 +50,14 @@ CubeK。
 6. 找出一个 Burn 直接实现的 CubeCL Kernel 和一个经 CubeK 实现的算子，
    比较两条路径。
 
-### 性能实验题
+### 性能实验题（仅概念/扩展，需自备设备）
 
 1. 为不同长度的 scale Kernel 分别报告首次运行与稳态运行时间，解释差异。
 2. 在 GPU 上比较连续索引和跨距索引，记录有效带宽而不只记录耗时。
 3. 为三个 GEMM shape 比较 Burn 默认策略和固定策略。报告 autotune 是否
    包含在计时内，不以单一 shape 宣布普遍胜负。
+
+以上三题不是本章 CI 交付物；测量必须写明设备、同步边界与是否含编译。
 
 ## 延伸阅读
 
@@ -90,7 +96,11 @@ TBE/AKG 与 RTX 3080 性能结果被压缩为历史或生态边界。
 
 本章没有复制 OpenMLSys CUDA C++ 示例、`openmlsys-cuda` 代码或缺失图片；
 全部实验改为固定 CubeCL revision 上的原创 Rust 代码。新增 CubeCL Runtime、
-unsafe 合约、CubeK 分层、Burn 集成、fallback 和 autotune 内容。
+unsafe 合约、CubeK 分层、Burn 集成、fallback、autotune，以及 host 侧
+`tile_load_counts` 加载模型（明确非真实共享内存）。术语见
+`docs/TERM_GLOSSARY.md`。
+
+未迁入：完整 CUDA GEMM 阶梯实现、设备榜单式结论、厂商指令内联汇编教程。
 
 OpenMLSys v2 固定快照只列出 GPU/CUDA/Triton/CUTLASS TODO，没有可迁移
 正文。完整逐文件与源码事实映射见 `planning/chapter-sources/ch03.md`。

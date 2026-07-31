@@ -3,6 +3,7 @@ members = [
     "examples/ch01-stack-probe",
     "examples/ch02-tensor-basics",
     "examples/ch03-cubecl-kernel",
+    "examples/ch03-tile-loads",
     "examples/ch04-fusion-inspector",
 ]
 resolver = "2"

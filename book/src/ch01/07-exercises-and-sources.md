@@ -81,7 +81,10 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 - 新增固定源码快照方法、实验与练习。
 
 本章没有复用 OpenMLSys 的 `framework-architecture.png` 和
-`system-ecosystem.png` 图面；文本架构图是基于通用分层思想重新设计。
+`system-ecosystem.png` 图面；文本架构图是基于通用分层思想重新设计，并与
+第 2、4 章及 `docs/TERM_GLOSSARY.md` 使用同一套层名。
+
+未迁入：原书以 Python/MindSpore/Ascend 为默认栈的图示与生态叙述。
 
 OpenMLSys 原作及本章改编正文采用 CC BY-NC-SA 4.0。完整署名与许可证见
 本书的“许可、来源与独立性声明”和仓库根目录 `NOTICE.md`。

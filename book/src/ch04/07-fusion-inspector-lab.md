@@ -103,12 +103,23 @@ BURN_FUSION_LOG=full cargo run -p ch04-fusion-inspector
 plan 与 explorer 信息，输出量较大；不要在自动测试中依赖完整日志文本，
 其格式比结构化断言更容易演进。
 
-## 7. 可继续观察的边界
+## 7. 三操作 ElementWise 块
 
-1. 把表达式扩为 `((a + b) * c).exp()`，检查操作数；
-2. 在不同位置插入 `sync()`，记录报告切分；
-3. 加入 broadcast，观察 ElementWise fuser 是否接受；
-4. 加入 reduce 或 matmul，记录 fuser 名称和 fallback；
-5. 比较 `StreamId::allocate()` 与 `StreamId::current()` 的测试隔离效果；
-6. 分别记录首次和稳态时间，但把它们作为环境相关测量。
+同 crate 还提供 `inspect_add_mul_exp`：
+
+```rust
+{{#include ../../../examples/ch04-fusion-inspector/src/lib.rs:inspect_triple}}
+```
+
+连续 `((left + right) * scale).exp()` 在固定快照上可落入同一个三操作
+`ElementWise` block；数值仍为 $e^2$（因为 `scale` 为全 1）。这把练习中的
+扩写题收敛为已交付断言，而不改变主实验对同步切分的关注。
+
+## 8. 可继续观察的边界
+
+1. 在不同位置插入 `sync()`，记录报告切分；
+2. 加入 broadcast，观察 ElementWise fuser 是否接受；
+3. 加入 reduce 或 matmul，记录 fuser 名称和 fallback；
+4. 比较 `StreamId::allocate()` 与 `StreamId::current()` 的测试隔离效果；
+5. 分别记录首次和稳态时间，但把它们作为环境相关测量。
 

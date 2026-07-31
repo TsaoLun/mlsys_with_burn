@@ -34,4 +34,10 @@ Agent 开始工作时依次阅读：
 
 - [`2026-07-30-bootstrap-ch01-ch02.md`](2026-07-30-bootstrap-ch01-ch02.md)：
   项目评估、基建、远程依赖策略及第 1–2 章实现。
+- [`2026-07-31-ch03-accelerator.md`](2026-07-31-ch03-accelerator.md)：
+  第 3 章加速器与 CubeCL/CubeK 实验。
+- [`2026-07-31-ch04-compiler-runtime.md`](2026-07-31-ch04-compiler-runtime.md)：
+  第 4 章编译器、运行时与 FusionInspector。
+- [`2026-07-31-backfill-ch01-ch04.md`](2026-07-31-backfill-ch01-ch04.md)：
+  第 1–4 章术语/原理/实验补全与计划文档关闭。
 

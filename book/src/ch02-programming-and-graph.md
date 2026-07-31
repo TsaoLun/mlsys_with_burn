@@ -26,7 +26,8 @@
 5. 用算子、张量边、依赖和控制流解释计算图；
 6. 解释 Burn 的 eager 前向与一阶反模式 autodiff tape；
 7. 使用 `require_grad`、`backward` 和 `grad` 验证链式法则；
-8. 区分 autodiff tape、Burn IR/Fusion 与后端 graph capture。
+8. 区分 autodiff tape、Burn IR / Fusion 计划与 device graph capture，
+   并用分支实验说明 tape 只记录实际路径。
 
 ## 先修知识
 

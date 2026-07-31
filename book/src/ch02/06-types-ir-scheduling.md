@@ -53,19 +53,25 @@ Burn 的 `OperationIr`、Fusion 搜索图和 CubeCL IR 处于不同层。第二�
 - 跨设备数据移动；
 - 后续融合机会。
 
-Flex eager 路径主要帮助我们验证语义，并不代表所有后端都采用完全相同的
-调度方式。GPU 后端可能异步提交工作，Fusion 也可能暂缓单个操作以形成更大
-执行单元。
+本章只建立直觉。固定快照中的分工是：
 
-数据加载与训练执行的流水线属于更高层调度，第 5、6 章展开；跨节点放置与
-拓扑感知调度则属于第 6、9 章。
+| 路径 | 调度窗口 | 本章是否展开 |
+|---|---|---|
+| Flex eager | 单次 Tensor op 尽快执行 | 用于语义与 autodiff tape |
+| Burn Fusion | 按 StreamId 延迟注册，再搜索执行块 | 第 4 章 |
+| CubeCL Runtime | launch 入队；read/`Device::sync` 才是完成边界 | 第 3–4 章 |
+
+因此：拓扑序与控制流影响“有哪些依赖”；Fusion stream 决定“何时物化成
+Kernel”；二者不要混称。数据加载与训练执行的流水线属于更高层调度，第 5、
+6 章展开；跨节点放置与拓扑感知调度属于第 6、9 章。
 
 ## 本章与第 4 章的边界
 
-本章需要知道“记录依赖有多种目的”，但不需要实现编译 pass。第 4 章将继续：
+本章需要知道“记录依赖有多种目的”，并停在 autodiff tape 与调度直觉。
+第 4 章将继续：
 
-- Burn IR 中的 Operation 与 Tensor 标识；
-- Fusion 如何搜索可融合操作；
-- CubeCL 如何从 Rust 风格 Kernel 生成目标代码；
-- 运行时如何缓存、调优、提交和重放。
+- Burn IR 中的 OperationIr 与 TensorId；
+- Fusion 如何按 stream 搜索可融合块，以及 sync 如何切断窗口；
+- CubeCL 如何从 Scope 生成 KernelDefinition 并 JIT；
+- 运行时如何管理内存生命周期、缓存、调优与重放。
 

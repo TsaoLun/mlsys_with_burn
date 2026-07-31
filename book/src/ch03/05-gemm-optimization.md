@@ -78,7 +78,20 @@ CMMA/MMA 类指令一次处理固定 shape 的 fragment，并要求特定 dtype 
 fragment 之间转换。CubeK 的 component、routine 和 blueprint 正是为组合
 这些层次而设计。
 
-## 6. 评价一个实现
+## 6. 本章实验停在哪一步
+
+本章有两类实验，职责不同：
+
+| 实验 | 验证什么 | 不验证什么 |
+|---|---|---|
+| `scale_kernel`（`ch03-cubecl-kernel`） | `#[cube]`、拓扑、raw BufferArg、unchecked launch、CPU/可选 WGPU 正确性 | tiling、共享内存、GEMM 性能 |
+| `tile_load_counts`（`ch03-tile-loads`） | 朴素与 tiled 全局加载次数的数量级差异 | 真实 cube 共享内存、同步或带宽 |
+
+也就是说：优化阶梯 1–5 节是概念地图；可执行最小步目前是“用加载计数理解
+tiling 为何减少全局读”，而不是在 CubeCL 里重写完整共享内存 GEMM。真正的
+共享内存 Kernel 与 CubeK 策略对照留给练习和后续扩展。
+
+## 7. 评价一个实现
 
 至少记录：
 

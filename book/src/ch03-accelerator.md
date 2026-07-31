@@ -22,7 +22,8 @@
 5. 区分 CubeCL 编程语言/运行时、CubeK 算子库与 `burn-cubecl` bridge；
 6. 用 GEMM 解释 tiling、向量化、共享内存和流水线；
 7. 说明 autotune 为何依赖 shape、dtype、设备与运行时状态；
-8. 在 CPU runtime 上运行并测试一个真实 CubeCL Kernel。
+8. 在 CPU runtime 上运行并测试一个真实 CubeCL Kernel，并用 host 加载
+   模型理解 tiling 为何减少全局读（不把它当成共享内存实验）。
 
 ## 先修知识
 
