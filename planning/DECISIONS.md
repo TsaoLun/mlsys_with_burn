@@ -126,3 +126,21 @@
   benchmark，必须单独记录 simulator、随机种子、policy update、设备、
   checkpoint 和吞吐测量。
 
+## D012：第 1–8 章回补以原理—源码—观察闭环为验收单位
+
+- 日期：2026-08-01
+- 决策：在开始第 9 章前，对第 1–8 章执行一次全面回补。每章新增或修订
+  的内容必须同时说明框架无关原理、固定 OpenMLSys/Burn/CubeCL 来源、
+  可运行观察或明确未覆盖边界；保留 Flex CPU 基础路径，不把 GPU、网络、
+  量化、完整 DQN/MARL 或集群性能写成已验证能力。
+- 原因：原有章节已经有 API 和实验骨架，但与 OpenMLSys v1 对照时，部分
+  系统设计被压缩为名词列表，容易让读者把“有 trait/入口”误读为“有完整
+  runtime”。GEMM roofline、数据背压、流水线 bubble、参数服务器版本、
+  PTQ 校准和 RL return/TD 等内容需要补原理，而不是继续增加未经验证的
+  框架代码。
+- 影响：新增 `planning/backfill/ch01-ch08-audit.md` 作为逐章缺口矩阵，
+  更新各章正文、来源映射和术语边界；实验只增加可在当前 workspace
+  观察的指标（如 tile load/intensity、Device autodiff 标志），复杂能力
+  继续以源码证据、成本模型或练习表达。完成后第 9 章从集群控制面、
+  GPU/通信运行时和故障边界继续，不重新打开已隔离的上游依赖问题。
+

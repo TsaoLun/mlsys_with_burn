@@ -72,6 +72,29 @@ DDP 路径；它没有因为存在 `MultiDevice` 就自动提供通用模型并�
 pipeline scheduler。`Learner::grad_sharded()` 是 DDP 相关的梯度同步标记，
 不是任意模型切分 DSL。
 
+## 流水线并行的 micro-batch 时间线
+
+模型/流水线并行的难点不只是“把层放到不同设备”。若阶段为
+$S_0,S_1,\ldots,S_{p-1}$，把一个大 batch 拆成 $m$ 个 micro-batch 后，
+理想的 1F1B 调度会近似经历：
+
+```text
+time →   0    1    2    3    4    5    6    7
+S0       F0   F1   F2   B0   B1   B2   -    -
+S1       -    F0   F1   B0   F2   B1   B2   -
+S2       -    -    F0   B0   F1   B1   F2   B2
+```
+
+具体 schedule 可能不同，但都会面对 warm-up/cool-down 的 pipeline bubble、
+micro-batch 数量、激活保存和 backward 依赖。增加 $m$ 可以摊薄 bubble，
+却可能增加激活缓存；重计算可以降低内存，却增加算力。阶段之间还要定义
+通信 tensor 的 layout、dtype、stream 和失败恢复点。
+
+固定 Burn 的 `ExecutionStrategy` 没有在源码中提供上述 stage scheduler、
+micro-batch 编排或 activation recomputation 协议。这个时间线是框架无关
+的系统模型，不应从 `MultiDevice` 或 `grad_sharded()` 推导出 pipeline
+并行已实现。
+
 ## 设备、loader 与 batch 的三个层次
 
 容易混淆的三个操作是：

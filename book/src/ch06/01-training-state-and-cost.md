@@ -84,6 +84,18 @@ $$
 则以重新计算换峰值内存；这两个机制都不能自动解决数据读取或跨节点带宽
 瓶颈。
 
+并行方法改变的内存项也不同：
+
+- 数据并行复制参数和 optimizer state，换取本地 batch 的计算并行；
+- 模型并行减少单设备参数容量，却增加 activation/gradient 的设备间传输；
+- 流水线并行通过 micro-batch 重叠阶段，但要保存跨阶段 activation，并
+  承受 bubble；
+- 混合并行同时引入 shard、replica、重排和 collective，不能用单一
+  “设备数”变量估算。
+
+因此扩展前应同时列出每个设备的参数、激活、梯度、optimizer、workspace
+和通信 buffer，而不是只计算总参数量。
+
 ## 同步与异步
 
 同步训练的一个轮廓是：

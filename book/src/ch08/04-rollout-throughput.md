@@ -83,6 +83,25 @@ MultiAgentEnvLoop::run_steps(train_interval)
 interrupter 和 checkpoint。它负责训练过程的编排，不替 `PolicyLearner`
 决定 loss 或 optimizer。
 
+## 采样—更新平衡与策略陈旧
+
+设 actor 以 $R_a$ 产生 transition，learner 以 $R_l$ 消费 replay，队列
+容量为 $Q$。当 $R_a>R_l$ 时，系统会积压旧数据；当 $R_l>R_a$ 时，learner
+会等待或反复使用较小的样本集。若 transition 来自 policy version $v$
+而 learner 当前是 $v+\Delta$，则 $\Delta$ 会影响 off-policy 偏差和
+探索分布。
+
+因此调参不能只追求更大的 `num_envs` 或 `train_steps`，还要定义：
+
+- 队列满时阻塞、丢弃还是覆盖；
+- replay 的最小/最大年龄和 version gap；
+- evaluation 使用哪个 policy snapshot；
+- shutdown 时如何 drain、checkpoint 和恢复未确认 transition。
+
+`OffPolicyStrategy` 提供收集、sample、train、evaluation 和 checkpoint 的
+编排顺序，但没有通用的 policy-version freshness 或跨进程队列协议；这些
+仍是 Actor–Learner 系统的应用责任。
+
 ## 吞吐与延迟的测量
 
 采样服务至少要分别记录：

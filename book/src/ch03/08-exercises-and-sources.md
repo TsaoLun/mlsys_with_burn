@@ -23,6 +23,10 @@ CubeK。
 4. 为什么 checked launch 不能证明 raw BufferArg 的长度真实？
 5. fallback 在可移植算子库中承担什么职责？列出三种触发原因。
 6. 为什么 autotune 结果不能直接复制到另一台机器？
+7. 对 `16×16×16` GEMM 手算朴素和 `8×8×8` tiled 的加载次数、FLOP
+   数和简化算术强度；说明这个结果为什么还不是 Roofline 性能证明。
+8. 为 naive → tile → thread tile → double buffer → matrix instruction
+   的每一步写出新增资源、同步不变量和可能的回退条件。
 
 ### 已交付实验题
 

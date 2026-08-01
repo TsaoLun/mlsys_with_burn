@@ -28,6 +28,11 @@ CPU 单设备训练循环。
 5. `CollectiveTensor::resolve` 与异步 operation handle 的完成边界有什么
    关系？
 6. 为什么参数服务器的异步更新需要处理 stale gradient 和版本协议？
+7. 为三个 pipeline stage 画出 1F1B micro-batch 时间线，计算 warm-up/
+   cool-down bubble，并比较增加 micro-batch 与 activation recomputation
+   对内存和算力的影响。
+8. 用 $\theta_{v+1}=U(\theta_v,g(\theta_{v-k}),s_v)$ 设计 stale gradient
+   拒绝、衰减和重放三种策略，列出各自的 checkpoint/幂等要求。
 
 ## Rust 与 API 题
 

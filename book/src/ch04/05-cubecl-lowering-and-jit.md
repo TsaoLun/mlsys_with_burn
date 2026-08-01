@@ -71,6 +71,28 @@ benchmark 要分开报告编译/autotune 与稳态执行，不能只选第二次
 路径还可按配置使用持久化缓存。CubeCL 仍以 JIT 为主；本书不把这些有条件
 的能力扩张为跨所有后端统一、可离线部署的完整 AOT 工具链。
 
+### 4.1 选择、编译、缓存和执行是一条因果链
+
+一次 Tensor 调用可以按下面的顺序追踪：
+
+```text
+op + shape/layout/dtype/device
+  → Fusion block / fallback 计划
+  → Strategy 候选与能力过滤
+  → tune key 选择实现
+  → KernelDefinition + 编译 key
+  → cache hit 或 define/optimize/lower/compile
+  → module/pipeline 加载
+  → ComputeClient launch 入队
+  → read/sync 物化并报告错误
+```
+
+每个箭头都可能改变成本。Fusion block 变了，候选和编译输入就可能变；
+shape 或 comptime 参数变了，可能产生新的 tune key 和 KernelDefinition；
+cache 命中只表示某一层结果可复用，不表示设备 module 已加载，也不表示
+本次 launch 已完成。只有在 read 或明确同步之后，host 才能把设备结果、
+执行错误和端到端耗时当作已观察事实。
+
 ## 5. 编译缓存与调优缓存不同
 
 - **编译缓存**：KernelId 到目标编译产物；

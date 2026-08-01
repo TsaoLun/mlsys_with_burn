@@ -1,8 +1,8 @@
 use std::process::ExitCode;
 
 use ch02_tensor_basics::{
-    average_vectors, branch_gradient, broadcast_rows_and_columns, inspect_tiny_model,
-    multiply_with_gradients,
+    average_vectors, branch_gradient, broadcast_rows_and_columns, inspect_device_modes,
+    inspect_tiny_model, multiply_with_gradients,
 };
 
 fn main() -> ExitCode {
@@ -19,6 +19,9 @@ fn main() -> ExitCode {
 
         let (params, output_dims) = inspect_tiny_model();
         println!("TinyModel：{params} 个参数，输出形状 {output_dims:?}");
+
+        let (plain_autodiff, wrapped_autodiff) = inspect_device_modes();
+        println!("Device autodiff：普通={plain_autodiff}，autodiff 包装={wrapped_autodiff}");
 
         let branch = branch_gradient(true)?;
         println!(

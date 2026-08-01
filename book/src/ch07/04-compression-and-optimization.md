@@ -38,6 +38,30 @@ $$
 - **权重量化**：只改变 weight，激活仍走浮点；
 - **全量化**：weight、activation 和算子共同走低精度路径。
 
+一个最小的 PTQ 校准流程可以写成：
+
+```text
+representative calibration set
+    → collect per-layer min/max or histogram
+    → choose scale/zero-point and granularity
+    → quantize/dequantize reference
+    → compare layer/output error
+    → validate task metric and target runtime
+```
+
+以非对称整数范围 $[q_{\min},q_{\max}]$ 为例，给定校准范围
+$[r_{\min},r_{\max}]$，常见选择是：
+
+$$
+s=\frac{r_{\max}-r_{\min}}{q_{\max}-q_{\min}},\qquad
+z=\operatorname{round}\left(q_{\min}-\frac{r_{\min}}{s}\right).
+$$
+
+实际实现还要处理零范围、离群值、累加精度和饱和率。逐通道校准通常能
+减少卷积/线性层的误差，但会增加 scale 的布局和 kernel 约束。校准集
+版本、范围统计和误差阈值必须成为 artifact metadata，否则同一权重的
+量化结果不可复查。
+
 固定主线 Burn 的 crate 文档明确写出：当前不支持 QAT，部分 backend 在
 开发中的 PTQ 路径支持有限的低精度表示。这个事实不能外推为“任意
 `burn-onnx` 模型都能自动完成量化”。`burn-onnx` 中存在量化相关 ONNX
@@ -82,6 +106,22 @@ $$
 第 4 章的 Fusion/CubeCL 讨论运行时和设备侧表示。这里的“离线优化”
 不应被写成“Burn 每次都会执行某个融合”：真正的行为取决于生成图、
 Burn feature、backend、shape 和设备。
+
+## 压缩收益的必要条件
+
+一次压缩只有在目标 runtime 能消费压缩表示时，才可能同时改善在线内存
+或延迟。可以按以下顺序排查：
+
+1. artifact 是否真的减少 bytes，还是只改变了容器编码；
+2. loader 是否避免了立即展开为原始 dtype；
+3. 目标 kernel 是否支持该 dtype/layout/sparsity；
+4. 索引、scale、zero-point、padding 和转换是否抵消收益；
+5. accuracy、峰值内存和 tail latency 是否仍满足契约。
+
+这也解释了结构化稀疏与非结构化稀疏的差异：前者更容易让 kernel 跳过
+规则 block，后者可能只减少数学乘加，却增加索引读取和负载不均。固定
+Burn 记录/加载 API 能承载参数状态，但不能由此推出压缩 kernel、校准器
+或端到端稀疏执行已经存在。
 
 ## 精度—延迟—内存的验证闭环
 

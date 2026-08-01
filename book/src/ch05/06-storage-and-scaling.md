@@ -18,6 +18,31 @@
 对象存储和数据格式演进。仅仅把 Dataset 放进线程池不会自动解决 I/O
 瓶颈。
 
+## 文件索引与随机读取的成本
+
+一个按索引读取的 Dataset 至少需要回答“索引如何映射到物理数据”：
+
+```text
+logical index
+    → shard id / row id
+    → byte offset 或数据库 key
+    → compressed block
+    → decode / validate
+    → item
+```
+
+索引表越大，初始化和内存成本越高；分片越小，随机访问定位更精确但会
+增加打开文件、元数据和远端请求；分片越大，顺序读取更友好但随机样本
+可能需要读取更多无关数据。压缩还会把 CPU 解码时间加入 $P$，页缓存命中
+则会改变实际 $F$。因此 `Dataset::get` 的平均耗时不能单独代表文件格式
+的性能。
+
+固定 Burn 的 `InMemDataset`、CSV/JSON 构造器和 SQLite Dataset 能说明三种
+边界：完整预加载、解析后驻留内存，以及按 row id 查询。它们没有统一的
+跨格式分片、索引、压缩、远端重试或版本协议。生产系统需要在 Dataset
+外部定义 manifest、数据版本、校验和、shard assignment 与重试策略，再
+把单个 shard 包装成 `Dataset`。
+
 ## 缓存与预取的边界
 
 固定快照的 `Dataset`/`DataLoader` 核心 API 没有一个通用的

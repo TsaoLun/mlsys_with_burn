@@ -87,6 +87,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
    tensor shape 和算子覆盖预算。
 7. 比较“模型文件加密”“transport authorization”“TEE”和“模型混淆”
    所保护的威胁，避免把它们当成同一个开关。
+8. 为一个激活张量选择 PTQ 校准集，计算非对称量化的 scale/zero-point，
+   比较逐层、逐通道和离群值裁剪的误差与 metadata 成本。
+9. 为一个线上模型写四层威胁模型：静态 artifact、传输、运行时内存和
+   恶意行为；给每层列出验证证据，并说明 `ModuleRecord` 哪些问题不能
+   单独解决。
 
 ## 延伸阅读与固定源码入口
 

@@ -40,6 +40,10 @@ map、selection、shuffle、partial 和 window 组合成惰性逻辑。`Batcher`
    数据守恒，不要用一次调度结果建立永久契约。
 6. 把 host Batcher 替换成 `Tensor` batch，明确读取、构造、传输和同步
    的计时边界。
+7. 为一个分片数据集设计 logical index → shard/offset → decode 的索引
+   协议，比较大/小分片对随机读取、元数据和缓存的影响。
+8. 让一个 worker 注入可重试和不可重试错误，定义 batch retry 后的重复
+   语义，并说明 checkpoint 应记录哪个提交边界。
 
 ## 源码题
 

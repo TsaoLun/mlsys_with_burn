@@ -59,6 +59,63 @@
 文本、图像或音频的不同预处理与张量形状。生命周期差异会改变批处理、
 内存、编译和部署的设计选择。
 
+## 用一个负载卡片描述系统
+
+为了让“负载分析”能够指导实现，可以为每个任务填写一张最小负载卡片：
+
+```text
+计算：算子、形状、dtype、算力/带宽倾向
+数据：来源、样本大小、随机访问、预处理、版本
+设备：CPU/GPU/远程、内存、传输、同步
+目标：训练/离线推理/在线服务、吞吐、尾延迟、精度、恢复
+```
+
+这四行不是新的抽象层，而是一组在系统设计初期就应固定的约束。例如，
+一个图像分类训练任务可能是“本地文件 + 随机 shuffle + CPU 解码 + GPU
+训练 + 每个 epoch 保存状态”；一个在线文本服务则可能是“对象存储
+artifact + 可变序列 + 动态 batch + p99 延迟 + 失败重试”。它们都可能
+调用矩阵乘，却不会选择同一套数据结构、队列策略或 checkpoint 协议。
+
+可以进一步用三个量判断瓶颈：
+
+$$
+\text{有效吞吐} =
+\min(\text{数据供给率},\ \text{模型消费率},\ \text{通信供给率}),
+$$
+
+$$
+\text{可用内存} =
+\text{设备容量}-
+(\text{参数}+\text{激活}+\text{workspace}+\text{通信缓冲}).
+$$
+
+这两个式子只是早期预算模型。它们不能代替 benchmark，却能在写代码前
+暴露明显矛盾：如果数据供给率小于模型消费率，先换更快的 Kernel 不会
+提高端到端吞吐；如果激活和 workspace 已经填满设备，单纯复制更多模型
+副本也无法解决内存问题。
+
+## 一条贯穿全书的生命周期
+
+本书后续章节使用同一条抽象路径：
+
+```text
+workload card
+    │
+    ▼
+Tensor / Module / Device
+    │
+    ├── autodiff tape → optimizer → training state
+    ├── Burn IR / Fusion → CubeCL/CubeK → runtime
+    ├── Dataset/DataLoader → batch → device
+    └── ModuleRecord/ONNX → inference runtime → service or RL rollout
+```
+
+路径中的箭头不是说所有任务都必须经过每个 crate，而是标明问题的归属。
+例如一个 RL 环境可以没有传统 Dataset，却仍然需要 batch、Device、policy
+state 和 replay；一个部署服务不需要 autodiff，却仍要验证 ModuleRecord、
+输入契约和尾延迟。之后遇到新系统时，先把它放到这张图上，再判断应该
+复用哪种抽象。
+
 ## 为什么以神经网络为主线
 
 支持向量机、逻辑回归和树模型同样属于机器学习。考虑到现代系统的大部分

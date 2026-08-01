@@ -69,6 +69,8 @@ unsafe block 只覆盖必须证明的 raw 边界。`input_handle` 由同一个 i
 ```text
 naive_loads = 8192
 tiled_loads = 1024
+naive_intensity = 1.0
+tiled_intensity = 8.0
 ```
 
 它说明“一次全局加载服务多个乘加”如何降低加载次数，但不模拟 bank

@@ -76,6 +76,25 @@ $$
 但在 tail latency 受约束的服务中，最大化吞吐不是唯一目标。应同时报告
 单请求与 batch 请求的 p50/p95/p99，以及 queue wait 和 forward 的分位数。
 
+## worker pool、layout 与算子路径
+
+服务进程通常还要在三个并发层次之间取舍：
+
+- 请求线程或 async runtime 负责接收、校验和取消；
+- batcher/worker pool 负责按 model version、shape bucket 和优先级组批；
+- device stream 负责提交 kernel、读回和同步。
+
+worker 数过少会让 CPU 前后处理成为瓶颈；过多会增加锁、上下文切换、
+内存副本和设备 queue contention。一个“并发数更高”的结果如果没有区分
+queue wait 和 forward time，不能说明模型算得更快。
+
+layout 与算子优化也要放在端到端路径中判断。NCHW→NHWC、transpose、
+padding 或 token packing 可能使单个 kernel 更适合向量化，却增加一次完整
+内存搬运。只有当 layout 转换成本小于后续算子节省的时间，计划才可能
+收益；这与第 4 章的 fusion、lifetime 和 fallback 条件相同。固定 Burn
+提供 Tensor/Device/backend 的执行入口，但没有一个统一的生产线程池、
+动态 batch 服务或自动 layout planner。
+
 ## Burn API 与服务框架的边界
 
 Burn 提供 Tensor、Module、Device、backend 和部分 Remote server/client

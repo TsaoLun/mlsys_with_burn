@@ -91,24 +91,41 @@ M4：应用与扩展篇。
 - [x] 增加 D011，隔离 `burn-rl` 组合抽象与完整 DQN/MARL 算法实验。
 - [x] 本机运行第 8 章示例、`make check` 与
   `make check-local-sources` 均通过。
+- [x] 建立 `planning/backfill/ch01-ch08-audit.md`，逐章对照固定 OpenMLSys
+  v1、Burn/CubeCL/CubeK 证据、缺口等级、回补动作和能力边界。
+- [x] 全面回补第 1–2 章的负载卡片、吞吐/内存预算、完整 ML workflow、
+  Rust/CubeCL 扩展边界、Module visitor 和 Device/autodiff 观察。
+- [x] 全面回补第 3–4 章的 Roofline/算术强度、GEMM 优化不变量、Pass
+  契约、Fusion→Strategy→JIT/cache→launch/read 因果链；扩展
+  `ch03-tile-loads` 的 intensity 模型。
+- [x] 全面回补第 5–6 章的队列背压、文件索引、重试/epoch 提交、流水线
+  micro-batch bubble、并行内存动机和参数服务器版本协议。
+- [x] 全面回补第 7–8 章的 PTQ 校准、稀疏收益条件、推理 worker/layout、
+  artifact 威胁模型、MC/TD、探索策略版本、Actor–Learner freshness 和
+  MARL credit assignment。
+- [x] 更新 `docs/TERM_GLOSSARY.md`、D012 和第 1–8 章来源映射，统一
+  workload/算术强度、done/truncated、behavior/target policy 等术语。
+- [x] 本次回补验证：受影响示例测试与 Clippy、`cargo run` 观察输出、
+  `mdbook build book`、`make check`、`make check-local-sources` 和
+  `git diff --check` 均通过。
 
 ## 本次交接
 
-- 已完成：第 8 章从 OpenMLSys v1 的 MDP、单节点采样和多智能体系统
-  重组为 environment→policy→trajectory/replay→learner→系统边界路线；
-  覆盖固定 `burn-rl` traits、`TransitionBuffer`、`AsyncPolicy` 和
-  `burn-train` off-policy 编排。
-- 验证：`cargo test -p ch08-rl-rollout`（4 tests passed）、
-  `cargo clippy -p ch08-rl-rollout --all-targets -- -D warnings`、
-  `cargo run -p ch08-rl-rollout`、`mdbook build book`、`make check`、
-  `make check-local-sources`、`git diff --check` 均通过；`make check`
-  的 workspace lint 与测试全部通过。
-- 偏差：没有将 gym-rs/SDL2、完整 DQN、GPU simulator、网络 Actor–Learner
-  或 MARL league 加入根 workspace；原因是它们不是 `burn-rl` 的内置能力，
-  且固定 DQN example 的 native simulator 依赖不适合作为默认 CPU CI。
-  D011 已记录。
-- 下一步：审查 OpenMLSys v1 分布式训练 cluster/system 内容，开始第 9 章
-  “大规模 GPU 集群管理”的 Burn/CubeCL 能力映射。
+- 已完成：第 1–8 章全面回补与复核。新增审计矩阵，并把原作中较薄的
+  workload、workflow、GEMM/Roofline、Pass/IR、数据背压、训练并行、
+  PTQ/安全、RL 算法与 Actor–Learner/MARL 系统内容补回正文；每项均保留
+  固定源码证据或明确未覆盖边界。
+- 验证：第 2–8 章受影响示例单包 tests/Clippy 通过；`ch02-tensor-basics`
+  输出普通/autodiff Device 标志，`ch03-tile-loads` 输出
+  naive/tiled load 与 intensity，`ch07-record-roundtrip` 与
+  `ch08-rl-rollout` 输出协议观察；`mdbook build book`、`make check`、
+  `make check-local-sources`、`git diff --check` 和 IDE lint 均通过。
+- 偏差：没有新增真实 GPU 共享内存 GEMM、服务压测、PTQ/QAT runtime、
+  网络 Actor–Learner、MARL league 或 pipeline/parameter-server runtime；
+  这些内容依旧以框架无关模型、固定源码边界和练习表达，符合 D009–D012。
+- 下一步：审查 OpenMLSys v1 分布式训练 cluster/system 文件，核验
+  Burn/CubeCL GPU、collective、通信、调度与遥测边界，开始第 9 章
+  “大规模 GPU 集群管理”的来源映射。
 
 ## 已知问题
 

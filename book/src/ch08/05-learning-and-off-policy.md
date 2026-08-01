@@ -30,6 +30,32 @@ tape。这样读者可以先观察 `done` 如何切断 bootstrap，再进入 Bur
 module、gradient 和 optimizer；这是有意的分层，而不是声称 Burn 的 RL
 训练只需要表格。
 
+## 探索、行为策略与数据分布
+
+训练时执行动作的行为策略 $\mu$ 不一定等于用于评估或更新的目标策略
+$\pi$。最简单的离散探索是 epsilon-greedy：
+
+$$
+a_t =
+\begin{cases}
+\text{随机动作}, & \text{概率 }\varepsilon,\\
+\arg\max_a Q(s_t,a), & \text{概率 }1-\varepsilon.
+\end{cases}
+$$
+
+epsilon 的初值、衰减步数和恢复位置会改变 replay 的数据分布。on-policy
+更新通常要求 batch 仍来自当前 $\pi$；off-policy 更新允许来自较旧的
+$\mu$，但可能需要 importance sampling、target network、行为策略版本或
+其他稳定化措施。仅仅把数据放进 `TransitionBuffer` 不会完成这些校正。
+
+因此 rollout 与 learner 之间至少应能记录：
+
+```text
+transition → behavior_policy_version
+           → exploration state / log-probability (if needed)
+           → target/learner policy version
+```
+
 ## `PolicyLearner` 的职责
 
 固定 `burn-rl::PolicyLearner` 定义：

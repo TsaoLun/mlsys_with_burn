@@ -29,6 +29,10 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
    多智能体强化学习？
 6. policy parameters、target network、optimizer state、exploration step
    和 replay 哪些必须进入严格恢复协议？请给出理由。
+7. 对同一条 episode 分别计算 Monte Carlo return、TD(0) target 和
+   Q-learning target，比较 bias/variance、终止和截断 step 的处理。
+8. 实现 epsilon-greedy 的可恢复衰减状态，记录 behavior policy version；
+   解释为什么仅保存 Q 网络参数不足以重现 replay 分布。
 
 ## Rust 与 API 题
 

@@ -46,7 +46,13 @@ Linear 从 3 个输入特征映射到 2 个输出特征，共有 $3\times2=6$ �
 实验在创建模型前调用 `device.seed(42)`，使随机初始化可复现；测试不依赖
 具体随机值，只断言参数量与 shape。
 
-## 4. 动态自动微分
+## 4. Device 与 autodiff 能力标志
+
+示例还分别读取 `Device::flex()` 和 `.autodiff()` 的
+`is_autodiff()`。这只是设备能力标签，不是一次 backward；真正的 tape
+行为仍由下一节的 `require_grad`、前向操作和 `backward` 验证。
+
+## 5. 动态自动微分
 
 ```rust
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:autodiff}}
@@ -71,7 +77,7 @@ product = left * right = [4, 49]
 `grad` 返回 Option，因为没有参与跟踪的 Tensor 不一定有梯度。示例把缺少
 叶子梯度作为可传播错误，而不是在库代码中 panic。
 
-## 5. 控制流只记录实际分支
+## 6. 控制流只记录实际分支
 
 ```rust
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:branch_autodiff}}
@@ -81,7 +87,7 @@ product = left * right = [4, 49]
 为 `input + 1`，梯度为全 1。两次调用各自构建 tape，互不混入未执行分支。
 这固定了图外控制流与 eager autodiff 的边界，不是完整训练循环。
 
-## 6. 运行
+## 7. 运行
 
 ```bash
 cargo run -p ch02-tensor-basics
@@ -96,10 +102,11 @@ cargo run -p ch02-tensor-basics
 left 梯度：[4.0, 7.0]
 right 梯度：[1.0, 7.0]
 TinyModel：8 个参数，输出形状 [4, 2]
+Device autodiff：普通=false，autodiff 包装=true
 控制流分支 double：输出 [4.0, 6.0]，梯度 [2.0, 2.0]
 ```
 
-## 7. 测试
+## 8. 测试
 
 ```bash
 cargo test -p ch02-tensor-basics
@@ -109,7 +116,7 @@ cargo test -p ch02-tensor-basics
 梯度。张量、广播和梯度行为可在固定上游的 `burn-backend-tests` 找到对应
 回归；Module 参数遍历与统计由 `burn-core` 的 Module 测试支撑。
 
-## 8. 沿源码追踪
+## 9. 沿源码追踪
 
 建议按顺序阅读：
 

@@ -98,6 +98,22 @@ SafeTensors 这类纯 tensor 数据格式可以避免加载时执行任意模型
 防传输窃听、防文件替换、防内存转储，还是防模型结构分析；每个目标需要
 不同机制。
 
+可以把最小威胁模型写成四条边界：
+
+- **artifact at rest**：文件被读取、替换或回滚；需要访问控制、完整性
+  checksum/signature、版本和密钥轮换；
+- **in transit**：模型或输入在 peer/服务之间被窃听或重放；需要传输
+  加密、peer 身份和请求授权；
+- **in use**：进程、日志、core dump 或设备内存暴露权重；需要最小权限、
+  secret 生命周期、内存清理或 TEE 等额外机制；
+- **model behavior**：恶意/不兼容 artifact 触发错误算子、资源耗尽或
+  输出后门；需要 schema/算子 allowlist、资源上限、reference 和审计。
+
+静态加密主要保护第一条，TLS/Iroh transport 主要保护第二条，TEE 试图
+缩小第三条，模型签名和加载校验主要帮助第四条中的篡改检测；它们不能
+互相替代。固定 Burn `ModuleRecord`、Remote endpoint 或
+`PeerAuthorizer` 只提供可组合接口，不能单独构成上述安全产品。
+
 本章实验刻意只覆盖最小边界：主线 Burn 的一个 Linear module 经过
 `ModuleRecord → Burnpack bytes → ModuleRecord → module` 后，CPU forward
 输出保持一致。下一节再讨论压缩和图优化为什么必须用精度/性能数据证明。

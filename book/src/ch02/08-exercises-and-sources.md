@@ -41,6 +41,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
    `is_autodiff()`。
 6. 调用 `branch_gradient(false)`，断言输出与梯度，并解释为何未执行的
    `* 2` 分支不会出现在 tape 中。
+7. 把一个训练函数按 Load/Map、Batch、Model、Loss、Autodiff、
+   Optimizer、Evaluate/Save 七个阶段标注输入、输出和可恢复状态；指出
+   哪些状态不应只放进 ModuleRecord。
 
 ### 源码题
 
@@ -51,6 +54,8 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
    参数。
 5. 在 `burn-backend-tests/tests/autodiff/` 中选择一个广播操作，解释它的
    梯度为何需要归约。
+6. 找到 Module visitor 对 `Param` 和普通字段的处理，说明新增一个字段时
+   如何判断它应进入 optimizer、ModuleRecord 或 Config。
 
 ## 延伸阅读
 
@@ -81,8 +86,10 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 - `chapter_programming_interface/neural_network_layer.md`
 - `chapter_programming_interface/ml_programming_paradigm.md`
 
-`c_python_interaction.md` 仅提供“高层接口与底层实现存在边界”的背景，本章
-没有复用其 Pybind11、MindSpore 或 CUDA 示例。自定义 Kernel 放到第 3、4 章。
+`c_python_interaction.md` 提供“高层接口与底层实现存在边界”的背景。本章
+保留这一系统问题，改用 Rust trait、Device dispatch、CubeCL Kernel 和
+显式错误/所有权边界解释扩展路径；没有复用其 Pybind11、MindSpore 或 CUDA
+示例。自定义 Kernel 的 launch、lowering 和 Runtime 细节放到第 3、4 章。
 
 ### 计算图
 
@@ -96,8 +103,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 小例子、图外控制流与循环展开/循环依赖区分，以及两分支 autodiff 实验；
 统一用语见 `docs/TERM_GLOSSARY.md`。
 
-未迁入：原书长控制流教程、`tf.cond`/`while_loop` API 走读、完整训练工作流
-与数据并行展开（后移第 5/6 章）。
+未迁入：原书长控制流教程、`tf.cond`/`while_loop` API 走读和框架专用训练
+代码；完整训练工作流已用输入/输出/状态契约建立地图，数据与训练执行仍
+分别后移第 5/6 章。
 
 ### 自动微分、类型与 IR
 

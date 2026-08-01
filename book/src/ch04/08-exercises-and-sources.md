@@ -26,6 +26,10 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 6. 区分编译缓存、autotune cache 与设备 pipeline cache。
 7. 为什么只测 host launch 调用不能得到设备执行时间？
 8. 设备 graph capture 与 Burn Fusion 分别复用什么？
+9. 为常量传播、DCE、CSE 和融合各写一条输入/输出不变量，并列出一个
+   必须回退的副作用或别名场景。
+10. 沿一次 shape 改变追踪 Fusion 计划、tune key、编译 key、cache、
+    launch 和 readback 哪些环节会失效或重新发生。
 
 ### Rust 与实验题
 

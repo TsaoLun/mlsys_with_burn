@@ -15,6 +15,19 @@ observation $o_i$，获得自己的 reward $r_i$，并通过通信或环境间�
 其他 agent。系统需要明确游戏是合作、竞争还是混合，否则“最大化 reward”
 甚至没有唯一含义。
 
+奖励也有不同的 credit assignment 语义：
+
+- **共享标量奖励**：所有 agent 看到同一个 $r$，合作简单，但难以判断
+  哪个 agent 对结果负责；
+- **奖励向量**：每个 agent 得到 $r_i$，可以表达竞争或个体目标，但
+  learner 需要定义联合目标或均衡；
+- **集中训练、分散执行（CTDE）**：训练时 critic 可以看到联合状态/
+  动作，执行时 actor 只能使用自己的 observation；这要求训练和部署的
+  schema、网络 topology 和 checkpoint 分开描述。
+
+因此把一个标量 `reward` 复制到 N 个环境 worker，并不会自动实现 MARL
+的 credit assignment。
+
 一个常见架构划分是：
 
 ```text

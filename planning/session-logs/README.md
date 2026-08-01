@@ -50,4 +50,6 @@ Agent 开始工作时依次阅读：
 - [`2026-08-01-ch08-reinforcement-learning.md`](2026-08-01-ch08-reinforcement-learning.md)：
   第 8 章强化学习来源映射、burn-rl/burn-train 核验和 CPU rollout/replay
   实验。
+- [`2026-08-01-backfill-ch01-ch08.md`](2026-08-01-backfill-ch01-ch08.md)：
+  第 1–8 章全面对照审计、原理回补、实验验证和第 9 章交接。
 

@@ -20,6 +20,12 @@
 | 同步边界 | read / `Device::sync` 为完成边界；flush 为提交/推进 | 不把 flush 写成设备完成 |
 | 状态保存 | ModuleRecord | 不写旧 `Record<B>` |
 | 切断依赖 | `detach()`（保留 require-grad 意图） | 不写“detach 后不可求导” |
+| 负载分析 | workload card；计算、数据、设备、目标四元组 | 不用模型名称替代系统负载 |
+| 算术强度 | arithmetic intensity；FLOP/字节（教学模型可用 FLOP/加载元素） | 不把算术强度直接当成实测性能 |
+| 数据供给模型 | $F/P/G$；读取、变换、设备消费速率 | 不把有界队列当成长期瓶颈修复 |
+| 强化学习终止 | `done`（自然终止）与 `truncated`（外部/时间截断） | 不无条件把两者当作同一 bootstrap 语义 |
+| 策略关系 | behavior policy $\mu$ / target policy $\pi$；on-policy/off-policy | 不由“有 replay”单独判断算法类别 |
+| 采样更新架构 | Actor–Learner；actor 采样，learner 更新 | 不把 DDP gradient collective 叫 Actor–Learner |
 
 ## 三张地图（符号约定）
 

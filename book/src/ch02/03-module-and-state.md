@@ -38,6 +38,30 @@ Burn 用 `Module` 统一这些操作。
 
 准确区分三者决定参数统计、设备迁移和保存行为。
 
+## 参数 visitor 是状态边界
+
+`Module` 的递归 visitor 不是单纯的反射工具，它定义了后续几个系统操作的
+共同遍历边界：
+
+```text
+Module
+ ├─ Param<Tensor> ── ParamId ── optimizer / ModuleRecord
+ ├─ 子 Module ─────── recursive visit
+ └─ 普通字段 ─────── config / 常量 / runtime handle
+```
+
+因此，新增一个模型字段时至少要问三件事：
+
+1. 它是否参与梯度和 optimizer step？
+2. 它是否必须随 ModuleRecord 保存，还是可以从 Config 重建？
+3. 它迁移到另一个 Device 时，是否需要转换或拒绝？
+
+例如，训练中的 BatchNorm 统计量、量化 scale、词表或 tokenizer 可能不
+属于同一种参数；把它们全部包成 `Param` 会改变 optimizer 和 record 的
+语义，把它们全部留作普通字段又可能导致恢复后推理不一致。固定 Burn
+源码能验证 visitor/Param 的行为，但业务模型如何分类仍是应用的 schema
+决定。
+
 ## Config 与初始化
 
 层配置和已初始化参数是不同对象。`LinearConfig::new(3, 2)` 描述输入输出

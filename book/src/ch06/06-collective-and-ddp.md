@@ -131,3 +131,21 @@ worker pull parameters
 异步版本允许不同 worker 使用不同参数版本，换来较少等待但增加 stale
 gradient 和收敛分析难度。固定 Burn `burn-train` 源码没有相应的
 parameter-server strategy；本章只把它作为对照协议。
+
+如果把一次异步更新写成：
+
+$$
+\theta_{v+1}=U(\theta_v,\ g(\theta_{v-k};B),\ s_v),
+$$
+
+其中 $v$ 是 server 当前版本、$k$ 是梯度产生时的版本差距，那么协议至少
+要决定：
+
+1. server 是否拒绝过旧的 $v-k$，还是按衰减权重接收；
+2. worker pull 到的参数和 optimizer state 是否来自同一个版本；
+3. worker、server 或网络失败后，未确认的 push 是否重放；
+4. 热点参数是否单独分片，分片之间如何保持 step 或 epoch 语义。
+
+同步 DDP 的 AllReduce 不回答这些问题，因为它在每个 step 形成共同的
+梯度完成点。参数服务器也不能只用“异步 channel + optimizer.step”替代；
+版本、确认、幂等和 checkpoint 一起构成了它的训练协议。

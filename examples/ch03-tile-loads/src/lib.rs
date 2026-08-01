@@ -4,7 +4,7 @@ use std::error::Error;
 use std::fmt::{Display, Formatter};
 
 /// 朴素与 tiled GEMM 的全局加载次数模型。
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct TileLoadReport {
     pub m: usize,
     pub n: usize,
@@ -14,6 +14,10 @@ pub struct TileLoadReport {
     pub tile_k: usize,
     pub naive_loads: usize,
     pub tiled_loads: usize,
+    /// 以输入加载元素为分母的朴素 GEMM 算术强度近似。
+    pub naive_arithmetic_intensity: f64,
+    /// 以输入加载元素为分母的 tiled GEMM 算术强度近似。
+    pub tiled_arithmetic_intensity: f64,
 }
 
 #[derive(Debug)]
@@ -55,6 +59,7 @@ pub fn tile_load_counts(
     let stages = k / tile_k;
     let loads_per_stage = tile_m * tile_k + tile_k * tile_n;
     let tiled_loads = tiles_m * tiles_n * stages * loads_per_stage;
+    let flops = 2 * m * n * k;
 
     Ok(TileLoadReport {
         m,
@@ -65,6 +70,8 @@ pub fn tile_load_counts(
         tile_k,
         naive_loads,
         tiled_loads,
+        naive_arithmetic_intensity: flops as f64 / naive_loads as f64,
+        tiled_arithmetic_intensity: flops as f64 / tiled_loads as f64,
     })
 }
 // ANCHOR_END: tile_loads
@@ -81,6 +88,8 @@ mod tests {
         // tiled: 2*2*2*(8*8 + 8*8) = 1024
         assert_eq!(report.naive_loads, 8192);
         assert_eq!(report.tiled_loads, 1024);
+        assert_eq!(report.naive_arithmetic_intensity, 1.0);
+        assert_eq!(report.tiled_arithmetic_intensity, 8.0);
         assert!(report.tiled_loads < report.naive_loads);
     }
 

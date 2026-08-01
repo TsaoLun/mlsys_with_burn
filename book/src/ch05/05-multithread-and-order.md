@@ -69,3 +69,19 @@ DataLoader 内部，调用者只需要处理 iterator 的 `Result`。
 但 worker 线程安全不意味着 map 函数无副作用。需要可复现的随机增强时，
 应为每个 worker/epoch 明确分配 RNG 状态；不要依赖线程启动顺序或全局
 可变随机源。
+
+## 失败、重试与 epoch 边界
+
+`DatasetError` 能把 worker 的读取错误传回主 iterator，但它不自动定义
+“重试后是否会重复样本”。一个可恢复的数据协议至少需要携带：
+
+- 数据版本和 shard/worker 标识；
+- logical sample index 或 batch sequence；
+- 当前 epoch、attempt 次数和 RNG 派生信息；
+- 读取失败是可重试的 I/O 错误，还是不可重试的格式/校验错误。
+
+如果按 batch 重试，已经成功交给设备但尚未写入进度的 batch 可能再次执行；
+如果按 sample 重试，batch 组装和顺序可能变化。训练系统必须决定 checkpoint
+记录的是“已取出”“已计算”还是“已更新”，不能用 DataLoader 的
+`items_processed` 自动代替 optimizer step 进度。固定 Burn DataLoader
+提供迭代和错误传播边界，但不提供上述跨阶段提交协议。

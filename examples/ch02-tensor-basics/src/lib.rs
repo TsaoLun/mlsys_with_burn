@@ -177,6 +177,14 @@ pub fn inspect_tiny_model() -> (usize, [usize; 2]) {
     (model.num_params(), output.dims())
 }
 
+/// 比较普通 Flex Device 与 autodiff Device 的运行时能力标志。
+pub fn inspect_device_modes() -> (bool, bool) {
+    let plain = Device::flex();
+    let autodiff = plain.clone().autodiff();
+
+    (plain.is_autodiff(), autodiff.is_autodiff())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -212,6 +220,11 @@ mod tests {
 
         assert_eq!(num_params, 8);
         assert_eq!(output_dims, [4, 2]);
+    }
+
+    #[test]
+    fn device_reports_autodiff_mode_separately() {
+        assert_eq!(inspect_device_modes(), (false, true));
     }
 
     #[test]

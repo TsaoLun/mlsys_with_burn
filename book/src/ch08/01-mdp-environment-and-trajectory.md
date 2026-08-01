@@ -26,6 +26,26 @@ J(\pi)=\mathbb{E}_{\pi,\mathcal{T}}
   \left[\sum_{t=0}^{H-1}\gamma^t r_t\right].
 $$
 
+价值函数把“策略长期有多好”与一次 step 的 reward 区分开：
+
+$$
+V^\pi(s)=\mathbb{E}_\pi[G_t\mid s_t=s],\qquad
+Q^\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a],
+$$
+
+其中 return $G_t=\sum_{k=0}^{H-1}\gamma^k r_{t+k}$。这带来两类常见
+更新路径：
+
+- **Monte Carlo** 等 episode 结束后，用完整 $G_t$ 估计价值；方差较大，
+  但不需要 bootstrap；
+- **Temporal Difference (TD)** 在 episode 中途用下一状态估计未来：
+  $r_t+\gamma V(s_{t+1})$ 或
+  $r_t+\gamma\max_a Q(s_{t+1},a)$；更新及时，但会引入估计偏差。
+
+`done` 通常令 TD target 截止；`truncated` 是否截止取决于环境和算法
+协议。这个选择应在 transition schema 中保留，不能只由 buffer 的
+`dones` shape 推断。
+
 这里的“状态”是环境为了决定下一步而维护的内部信息，而“观察量”
 （observation）是策略实际收到的表示。完全可观测环境中观察量可能足够
 恢复状态；部分可观测环境中，策略还需要历史、记忆或 belief state。
