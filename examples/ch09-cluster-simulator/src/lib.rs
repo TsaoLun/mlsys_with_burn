@@ -268,6 +268,112 @@ pub enum TraceEvent {
     },
 }
 
+pub const TRACE_SCHEMA_VERSION: u32 = 1;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TraceRecord {
+    pub schema_version: u32,
+    pub event: &'static str,
+    pub job_id: usize,
+    pub attempt: usize,
+    pub at_us: u64,
+    pub placement: Vec<usize>,
+    pub step: Option<u32>,
+    pub checkpoint_step: Option<u32>,
+    pub replayed_steps: Option<u32>,
+}
+
+impl TraceRecord {
+    pub fn to_json_line(&self) -> String {
+        let placement = self
+            .placement
+            .iter()
+            .map(usize::to_string)
+            .collect::<Vec<_>>()
+            .join(",");
+        let optional = |value: Option<u32>| {
+            value.map_or_else(|| "null".to_string(), |value| value.to_string())
+        };
+        format!(
+            concat!(
+                "{{\"schema_version\":{},\"event\":\"{}\",\"job_id\":{},",
+                "\"attempt\":{},\"at_us\":{},\"placement\":[{}],",
+                "\"step\":{},\"checkpoint_step\":{},\"replayed_steps\":{}}}"
+            ),
+            self.schema_version,
+            self.event,
+            self.job_id,
+            self.attempt,
+            self.at_us,
+            placement,
+            optional(self.step),
+            optional(self.checkpoint_step),
+            optional(self.replayed_steps),
+        )
+    }
+}
+
+impl TraceEvent {
+    pub fn to_record(&self) -> TraceRecord {
+        match self {
+            Self::JobStarted {
+                job_id,
+                attempt,
+                at_us,
+                placement,
+                resume_step,
+            } => TraceRecord {
+                schema_version: TRACE_SCHEMA_VERSION,
+                event: "job_started",
+                job_id: *job_id,
+                attempt: *attempt,
+                at_us: *at_us,
+                placement: placement.clone(),
+                step: Some(*resume_step),
+                checkpoint_step: None,
+                replayed_steps: None,
+            },
+            Self::JobFailed {
+                job_id,
+                attempt,
+                at_us,
+                failed_step,
+                checkpoint_step,
+                replayed_steps,
+            } => TraceRecord {
+                schema_version: TRACE_SCHEMA_VERSION,
+                event: "job_failed",
+                job_id: *job_id,
+                attempt: *attempt,
+                at_us: *at_us,
+                placement: Vec::new(),
+                step: Some(*failed_step),
+                checkpoint_step: Some(*checkpoint_step),
+                replayed_steps: Some(*replayed_steps),
+            },
+            Self::JobCompleted {
+                job_id,
+                attempt,
+                at_us,
+            } => TraceRecord {
+                schema_version: TRACE_SCHEMA_VERSION,
+                event: "job_completed",
+                job_id: *job_id,
+                attempt: *attempt,
+                at_us: *at_us,
+                placement: Vec::new(),
+                step: None,
+                checkpoint_step: None,
+                replayed_steps: None,
+            },
+        }
+    }
+}
+
+pub fn trace_records(events: &[TraceEvent]) -> Vec<TraceRecord> {
+    events.iter().map(TraceEvent::to_record).collect()
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct JobReport {
     pub id: usize,
@@ -878,5 +984,40 @@ mod tests {
         assert_eq!(report.attempts, 2);
         assert_eq!(result.retries, 1);
         assert_eq!(result.free_gpu_count, cluster.gpus().len());
+    }
+
+    #[test]
+    fn trace_schema_is_machine_readable_and_versioned() {
+        let cluster = fixture_cluster();
+        let result = simulate(
+            &cluster,
+            vec![fixture_job(1, 2).with_failure_step(3)],
+            SimulationConfig::default(),
+        )
+        .expect("trace fixture should complete");
+        let records = trace_records(&result.trace);
+
+        assert!(!records.is_empty());
+        assert!(
+            records
+                .iter()
+                .all(|record| record.schema_version == TRACE_SCHEMA_VERSION)
+        );
+        assert!(records.iter().any(|record| record.event == "job_failed"));
+        assert!(
+            records
+                .iter()
+                .any(|record| record.event == "job_started" && !record.placement.is_empty())
+        );
+        assert!(records.iter().any(|record| {
+            record.event == "job_failed"
+                && record.checkpoint_step == Some(2)
+                && record.replayed_steps == Some(1)
+        }));
+        assert!(
+            records
+                .iter()
+                .any(|record| record.to_json_line().contains("\"schema_version\":1"))
+        );
     }
 }

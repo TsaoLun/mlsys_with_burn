@@ -71,3 +71,17 @@ Dataset/DataLoader
 引用其中的训练循环片段。它使用固定快照的 Flex CPU，不下载数据，也不
 把一次本地 loss 曲线当成跨设备性能结论。
 
+## 证据状态
+
+- `CPU 可运行验证`：forward/backward、SGD、loss 下降、参数变化和
+  checkpoint 基础状态；
+- `固定源码核验`：`TrainStep`、`Learner`、optimizer、`MultiDevice`、
+  `DistributedContext` 与 collective 入口；
+- `框架无关模型/协议模拟`：AllReduce、parameter-server、pipeline bubble
+  和 checkpoint version；
+- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：Flex CPU 之外的 DDP、
+  跨节点网络和真实通信性能；
+- `明确未覆盖`：把单机训练 loop 当作分布式训练、集群容错或 NCCL 证明。
+
+对应 collective、版本和 pipeline 协议见[核心主题比较卡](comparison-cards.md#6-分布式训练)。
+

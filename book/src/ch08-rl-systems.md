@@ -77,3 +77,17 @@ inference、replay、训练、评估和 checkpoint，但这不等于已经提供
 表格 TD 更新；它不下载 gym、不使用网络、不训练神经网络，也不把一次
 单进程测试外推为 GPU 仿真或多智能体吞吐结论。
 
+## 证据状态
+
+- `CPU 可运行验证`：Environment、Policy 组合、done/truncated、replay
+  shape 和表格 TD update；
+- `固定源码核验`：`burn-rl` 的 Environment/Policy/TransitionBuffer 与
+  `burn-train` 的 rollout/evaluation/checkpoint 边界；
+- `框架无关模型/协议模拟`：policy freshness、behavior/target metadata、
+  双智能体 action/reward vector 和 credit assignment；
+- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 simulator、
+  神经网络 DQN、Actor–Learner 和 MARL 集群；
+- `明确未覆盖`：把抽象组合 API 描述成完整 DQN/PPO/SAC/MARL runtime。
+
+对应 policy freshness 和 joint transition 协议见[核心主题比较卡](comparison-cards.md#8-强化学习)。
+

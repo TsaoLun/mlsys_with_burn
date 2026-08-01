@@ -1,7 +1,8 @@
 use std::error::Error;
 
 use ch09_cluster_simulator::{
-    Cluster, Job, NetworkModel, PlacementPolicy, SimulationConfig, simulate,
+    Cluster, Job, NetworkModel, PlacementPolicy, SimulationConfig, TRACE_SCHEMA_VERSION, simulate,
+    trace_records,
 };
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -41,6 +42,11 @@ collective_ms={} retries={} peak_allocated_gpus={}",
             to_ms(result.collective_time_us),
             result.retries,
             result.peak_allocated_gpus,
+        );
+        println!(
+            "trace_schema_version={} trace_events={}",
+            TRACE_SCHEMA_VERSION,
+            trace_records(&result.trace).len(),
         );
 
         for job in &result.jobs {

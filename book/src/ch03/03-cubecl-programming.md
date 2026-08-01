@@ -9,7 +9,7 @@ CubeCL 同时包含 Kernel 语言、IR、编译器和 Runtime。本节聚焦程�
 因此它能复用泛型、trait 和编译期分支等 Rust 抽象，但不能把任意 host Rust
 代码原样放到设备执行。
 
-```rust
+```rust,ignore
 #[cube]
 fn inner<F: Float>(value: F) -> F {
     value * value

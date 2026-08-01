@@ -30,7 +30,7 @@ $$
 
 ## 2. 观测代码
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch04-fusion-inspector/src/lib.rs:inspect}}
 ```
 
@@ -107,7 +107,7 @@ plan 与 explorer 信息，输出量较大；不要在自动测试中依赖完�
 
 同 crate 还提供 `inspect_add_mul_exp`：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch04-fusion-inspector/src/lib.rs:inspect_triple}}
 ```
 
@@ -115,7 +115,24 @@ plan 与 explorer 信息，输出量较大；不要在自动测试中依赖完�
 `ElementWise` block；数值仍为 $e^2$（因为 `scale` 为全 1）。这把练习中的
 扩写题收敛为已交付断言，而不改变主实验对同步切分的关注。
 
-## 8. 可继续观察的边界
+## 8. 重复计划与缓存日志
+
+`inspect_add_mul_exp_twice` 在相同 shape、dtype、CPU Fusion device 和
+stream 上重复 `add → mul → exp`，比较两次的 `reports`、block 结构和
+输出值。测试只断言计划/输出一致，不断言第二次更快，也不读取私有 cache
+key：
+
+```bash
+cargo run -p ch04-fusion-inspector --locked --offline
+BURN_FUSION_LOG=full cargo run -p ch04-fusion-inspector --locked --offline
+```
+
+主程序的 `cache_log_enabled=true` 只表示请求了可选日志，不表示发生了
+cache hit。Fusion block 数、cache hit、kernel launch count 和 wall-clock
+time 是四种不同指标；固定快照没有提供稳定的公开 cache-key 读取接口，
+因此正文保留日志/源码核验边界。
+
+## 9. 可继续观察的边界
 
 1. 在不同位置插入 `sync()`，记录报告切分；
 2. 加入 broadcast，观察 ElementWise fuser 是否接受；

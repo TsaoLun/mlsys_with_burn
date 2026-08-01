@@ -70,3 +70,18 @@ CubeCL `ComputeClient` 只作为训练数据面和设备运行时的固定源码
 只用于核验设备、通信、stream、内存和训练入口的边界。本章没有复用上游
 硬件图片或历史性能数字。
 
+## 证据状态
+
+- `CPU 可运行验证`：队列、gang admission、拓扑放置、通信成本、故障
+  retry、checkpoint replay 和资源归还；
+- `固定源码核验`：Burn/CubeCL 的设备、stream、memory、collective 和
+  training data-plane 入口；
+- `框架无关模型/协议模拟`：控制面、故障域、队列公平、链路热点和
+  machine-readable trace；
+- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 GPU 集群、NCCL/
+  RDMA、网络拥塞、多租户 runtime 和弹性 membership；
+- `明确未覆盖`：把模拟器虚拟时间、放置结果或通信 penalty 当作 GPU
+  benchmark。
+
+对应 trace schema、队列指标和控制面边界见[核心主题比较卡](comparison-cards.md#9-gpu-集群与控制面)。
+

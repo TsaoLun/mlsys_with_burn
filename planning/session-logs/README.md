@@ -54,4 +54,6 @@ Agent 开始工作时依次阅读：
   第 1–8 章全面对照审计、原理回补、实验验证和第 9 章交接。
 - [`2026-08-01-ch09-gpu-cluster.md`](2026-08-01-ch09-gpu-cluster.md)：
   第 9 章集群拓扑、调度、通信、故障边界和 CPU 模拟器。
+- [`2026-08-01-p0-p1-openmlsys-comparison.md`](2026-08-01-p0-p1-openmlsys-comparison.md)：
+  OpenMLSys 逐文件 crosswalk、发布门禁、CPU capstone、协议比较卡和终验收。
 

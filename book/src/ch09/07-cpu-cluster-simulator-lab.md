@@ -24,7 +24,7 @@
 `Gpu` 保存逻辑 id、node、rack 和显存容量；`Job` 保存 GPU 数、每步
 compute、gradient bytes、checkpoint interval 和可选 failure step：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch09-cluster-simulator/src/lib.rs:cluster_model}}
 ```
 
@@ -35,7 +35,7 @@ compute、gradient bytes、checkpoint interval 和可选 failure step：
 
 `simulate` 接收 cluster、job 列表和 `SimulationConfig`，返回结构化报告：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch09-cluster-simulator/src/lib.rs:simulator_api}}
 ```
 

@@ -73,7 +73,7 @@ backend 决定；只有 `read` 或 `Device::sync` 等明确边界才能谈完成
 实验把最小 step 保持在一个可读函数附近，下面的 include 是
 `examples/ch06-training-loop/src/lib.rs` 的唯一代码来源：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch06-training-loop/src/lib.rs:train_step}}
 ```
 

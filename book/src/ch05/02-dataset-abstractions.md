@@ -4,7 +4,7 @@
 
 固定 Burn 快照中的核心 trait 是：
 
-```rust
+```rust,ignore
 pub trait Dataset<I, E = DatasetError>: Send + Sync
 where
     E: Error + Send + Sync + 'static,
@@ -53,7 +53,7 @@ Burn 自己的 `DatasetIterator` 只保存当前索引和数据集引用，逐�
 
 本章实验使用同样的设计，但把样本值保持为整数，便于测试直接检查：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch05-data-pipeline/src/lib.rs:dataset}}
 ```
 

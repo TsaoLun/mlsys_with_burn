@@ -1,5 +1,6 @@
 use burn::tensor::{Device, StreamId, Tensor};
 use burn_fusion::inspect::{FusionInspector, matchers};
+use std::env;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
@@ -32,6 +33,15 @@ pub struct TripleFusionSummary {
     pub blocks: Vec<BlockSummary>,
     pub combined_add_mul_exp: bool,
     pub output: Vec<f32>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct RepeatedFusionSummary {
+    pub first: TripleFusionSummary,
+    pub second: TripleFusionSummary,
+    pub same_plan: bool,
+    pub same_output: bool,
+    pub cache_log_enabled: bool,
 }
 
 #[derive(Debug)]
@@ -124,6 +134,10 @@ pub fn inspect_add_exp(split_by_sync: bool) -> Result<FusionSummary, InspectErro
 pub fn inspect_add_mul_exp() -> Result<TripleFusionSummary, InspectError> {
     let stream = StreamId::allocate();
 
+    inspect_add_mul_exp_once(stream)
+}
+
+fn inspect_add_mul_exp_once(stream: StreamId) -> Result<TripleFusionSummary, InspectError> {
     stream.executes(|| {
         let device = Device::cpu();
         let left = Tensor::<2>::ones([4, 4], &device);
@@ -176,6 +190,30 @@ pub fn inspect_add_mul_exp() -> Result<TripleFusionSummary, InspectError> {
 }
 // ANCHOR_END: inspect_triple
 
+/// Repeat the same shape/dtype/device plan and compare observable structure.
+///
+/// The report intentionally compares plan structure and output values, not
+/// wall-clock time or a private cache key. Set `BURN_FUSION_LOG=full` to ask
+/// the fixed runtime for optional compile/cache logs.
+pub fn inspect_add_mul_exp_twice() -> Result<RepeatedFusionSummary, InspectError> {
+    let stream = StreamId::allocate();
+    let first = inspect_add_mul_exp_once(stream)?;
+    let second = inspect_add_mul_exp_once(stream)?;
+    let same_plan = first.reports == second.reports && first.blocks == second.blocks;
+    let same_output = first.output == second.output;
+    let cache_log_enabled = env::var("BURN_FUSION_LOG")
+        .map(|value| value == "full")
+        .unwrap_or(false);
+
+    Ok(RepeatedFusionSummary {
+        first,
+        second,
+        same_plan,
+        same_output,
+        cache_log_enabled,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -211,5 +249,15 @@ mod tests {
                 .iter()
                 .all(|value| (value - std::f32::consts::E.powi(2)).abs() < 1.0e-5)
         );
+    }
+
+    #[test]
+    fn repeated_plan_and_output_are_stable() {
+        let report = inspect_add_mul_exp_twice().expect("重复 Fusion 观察应成功");
+
+        assert!(report.same_plan);
+        assert!(report.same_output);
+        assert_eq!(report.first.output, report.second.output);
+        assert!(report.first.output.iter().all(|value| value.is_finite()));
     }
 }

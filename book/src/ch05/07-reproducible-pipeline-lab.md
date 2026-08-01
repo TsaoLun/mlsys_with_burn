@@ -7,7 +7,7 @@ Flex CPU 和 `burn::data`。数据集只有 12 个整数样本，不下载外部
 
 ## 1. 构造惰性 Dataset
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch05-data-pipeline/src/lib.rs:dataset}}
 ```
 
@@ -17,7 +17,7 @@ Flex CPU 和 `burn::data`。数据集只有 12 个整数样本，不下载外部
 
 ## 2. Batcher 与 Device
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch05-data-pipeline/src/lib.rs:batcher}}
 ```
 
@@ -27,7 +27,7 @@ Flex CPU 和 `burn::data`。数据集只有 12 个整数样本，不下载外部
 
 ## 3. 运行一轮
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch05-data-pipeline/src/lib.rs:pipeline}}
 ```
 
@@ -84,3 +84,10 @@ epoch，并打印墙钟时间和 items/s。这里有意不在测试中断言时�
 3. 一次短测量为多轮 warm-up 与统计分位数；
 4. host Batcher 为 Tensor 构造和设备传输；
 5. “是否更快”问题为带设备、数据量和同步边界的完整报告。
+
+## 7. 接到第 6–7 章
+
+如果希望继续观察样本如何进入真实训练和 artifact，可运行
+[P1 贯穿实验：数据到推理](../capstone-p1.md)。它使用相同的
+`PartialDataset`/`MapperDataset` 思路，但把 host batch 替换为 Tensor，
+再连接 autodiff、SGD、`ModuleRecord` 和恢复后 inference。

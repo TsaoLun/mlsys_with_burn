@@ -142,6 +142,37 @@ pub fn branch_gradient(use_double: bool) -> Result<BranchGradientReport, Example
 }
 // ANCHOR_END: branch_autodiff
 
+/// 观察 `detach` 产生的新 autodiff leaf 与原始 leaf 的梯度状态。
+#[derive(Debug, Clone, PartialEq)]
+pub struct DetachGradientReport {
+    /// detached leaf 的前向输出。
+    pub output: Vec<f32>,
+    /// 原始 leaf 的梯度；只走 detached 分支时应为 `None`。
+    pub original_gradient: Option<Vec<f32>>,
+    /// detached leaf 的梯度。
+    pub detached_gradient: Option<Vec<f32>>,
+}
+
+// ANCHOR: detach_autodiff
+/// `detach` 切断原路径，再由 `require_grad` 建立一个新的 leaf。
+pub fn detached_leaf_gradient() -> Result<DetachGradientReport, ExampleError> {
+    let device = Device::flex().autodiff();
+    let original = Tensor::<1>::from_floats([2.0, 3.0], &device).require_grad();
+    let detached = original.clone().detach().require_grad();
+    let output = detached.clone() * 3.0;
+    let gradients = output.clone().backward();
+
+    let original_gradient = original.grad(&gradients).map(values).transpose()?;
+    let detached_gradient = detached.grad(&gradients).map(values).transpose()?;
+
+    Ok(DetachGradientReport {
+        output: values(output)?,
+        original_gradient,
+        detached_gradient,
+    })
+}
+// ANCHOR_END: detach_autodiff
+
 // ANCHOR: module
 /// 由一个线性层和激活函数组成的最小 Module。
 #[derive(Module, Debug)]
@@ -239,5 +270,15 @@ mod tests {
         assert_eq!(plus_one.branch, "plus_one");
         assert_eq!(plus_one.output, vec![3.0, 4.0]);
         assert_eq!(plus_one.input_gradient, vec![1.0, 1.0]);
+    }
+
+    #[test]
+    fn detach_creates_a_new_leaf_and_cuts_the_original_path() {
+        let report = detached_leaf_gradient().expect("detach 语义实验应成功");
+
+        assert_eq!(report.output, vec![6.0, 9.0]);
+        assert_eq!(report.original_gradient, None);
+        assert_eq!(report.detached_gradient, Some(vec![3.0, 3.0]));
+        assert_eq!(report.detached_gradient.as_ref().map(Vec::len), Some(2));
     }
 }

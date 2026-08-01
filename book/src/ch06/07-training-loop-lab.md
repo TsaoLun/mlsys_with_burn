@@ -17,7 +17,7 @@ forward → loss → backward → GradientsParams → SGD → loss
 
 ## 1. 构造 CPU autodiff model
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch06-training-loop/src/lib.rs:setup}}
 ```
 
@@ -31,7 +31,7 @@ forward → loss → backward → GradientsParams → SGD → loss
 
 ## 2. 执行训练 step
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch06-training-loop/src/lib.rs:train_step}}
 ```
 
@@ -85,3 +85,10 @@ initial_loss=... final_loss=... parameter_delta=...
 
 最后一步尤其重要：不能因为本章已经能在 CPU 上训练一个线性模型，就声称
 跨节点 DDP 已经工作。
+
+## 5. 接到第 5–7 章
+
+完整的 Dataset → autodiff → ModuleRecord → inference 路径见
+[P1 贯穿实验：数据到推理](../capstone-p1.md)。它把本实验的
+`forward → loss → backward → SGD` 放入固定 train/validation split，并
+增加 loader 守恒、record topology 错误和恢复后输出误差检查。

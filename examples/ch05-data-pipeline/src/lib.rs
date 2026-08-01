@@ -285,6 +285,51 @@ pub fn expected_ids() -> Vec<usize> {
     (0..SAMPLE_COUNT).collect()
 }
 
+/// A small, deterministic protocol card for shard/queue/commit reasoning.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct FlowInvariant {
+    pub fetched: usize,
+    pub produced: usize,
+    pub consumed: usize,
+    pub queue_peak: usize,
+    pub queue_capacity: usize,
+}
+
+impl FlowInvariant {
+    pub fn is_valid(&self) -> bool {
+        self.consumed <= self.produced
+            && self.produced <= self.fetched
+            && self.queue_peak <= self.queue_capacity
+    }
+}
+
+/// Divide a logical index space into deterministic half-open shard ranges.
+pub fn deterministic_shards(total: usize, shards: usize) -> Option<Vec<(usize, usize)>> {
+    if shards == 0 {
+        return None;
+    }
+    let base = total / shards;
+    let remainder = total % shards;
+    let mut start = 0;
+    let mut ranges = Vec::with_capacity(shards);
+    for shard in 0..shards {
+        let length = base + usize::from(shard < remainder);
+        ranges.push((start, start + length));
+        start += length;
+    }
+    Some(ranges)
+}
+
+/// Commit an epoch only when its reordered IDs cover the expected logical set.
+pub fn epoch_commit(expected: &[usize], completed: &[(usize, usize)]) -> bool {
+    let mut sequence: Vec<_> = completed.to_vec();
+    sequence.sort_unstable_by_key(|(offset, _)| *offset);
+    sequence
+        .iter()
+        .map(|(_, id)| *id)
+        .eq(expected.iter().copied())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -379,5 +424,34 @@ mod tests {
             measure_throughput(2, 0, 0),
             Err(PipelineError::InvalidEpochs)
         ));
+    }
+
+    #[test]
+    fn protocol_card_preserves_shards_and_epoch_commit() {
+        let shards = deterministic_shards(10, 3).expect("positive shard count");
+        assert_eq!(shards, vec![(0, 4), (4, 7), (7, 10)]);
+        assert_eq!(shards.first().map(|range| range.0), Some(0));
+        assert_eq!(shards.last().map(|range| range.1), Some(10));
+
+        let completed = vec![(2, 2), (0, 0), (3, 3), (1, 1)];
+        assert!(epoch_commit(&[0, 1, 2, 3], &completed));
+        assert!(!epoch_commit(&[0, 1, 2, 3], &[(0, 0), (1, 1), (3, 3)]));
+    }
+
+    #[test]
+    fn protocol_card_distinguishes_conservation_from_backpressure() {
+        let valid = FlowInvariant {
+            fetched: 12,
+            produced: 12,
+            consumed: 12,
+            queue_peak: 3,
+            queue_capacity: 4,
+        };
+        let overflow = FlowInvariant {
+            queue_peak: 5,
+            ..valid.clone()
+        };
+        assert!(valid.is_valid());
+        assert!(!overflow.is_valid());
     }
 }

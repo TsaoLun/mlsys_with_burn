@@ -76,3 +76,17 @@ revision 的 Flex CPU。它验证的是 Burnpack 参数状态的内存导出/加
 一致性，不下载 ONNX、不启动网络服务，也不把一次 CPU 测试外推为浏览器或
 GPU 性能结论。
 
+## 证据状态
+
+- `CPU 可运行验证`：主线 `ModuleRecord`/Burnpack 参数 round-trip 和恢复后
+  inference；
+- `固定源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
+  WASM/no_std 和主线 artifact 入口；
+- `框架无关模型/协议模拟`：manifest、checksum、版本、rollback、batch/
+  queue 和安全威胁模型；
+- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 ONNX fixture、
+  服务治理、浏览器/Remote 部署和设备性能；
+- `明确未覆盖`：burn-onnx 旧 revision 与主线 Burn 的端到端混用。
+
+对应 artifact manifest、rollback 和动态 batching 见[核心主题比较卡](comparison-cards.md#7-模型部署)。
+

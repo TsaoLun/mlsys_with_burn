@@ -1,0 +1,17 @@
+# Release toolchain and snapshot metadata. Dependency revisions remain in
+# pins.toml; this file records the tools used to reproduce a book release.
+
+[snapshot]
+name = "burn-0.22.0-pre.1"
+pins = "pins.toml"
+
+[tools]
+rust = "1.95.0"
+mdbook = "0.4.51"
+python = "3.11+"
+
+[ci]
+actions_are_pinned_to_commit = true
+default_backend = "flex-cpu"
+offline_cargo_gate = true
+mathjax_requires_network_for_browser = true

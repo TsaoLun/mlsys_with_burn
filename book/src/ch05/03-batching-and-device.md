@@ -5,7 +5,7 @@
 Dataset 的 item 通常是便于读取和变换的 Rust struct，而模型需要固定的
 batch 表示。Burn 用 `Batcher<I, O>` 表达这个边界：
 
-```rust
+```rust,ignore
 pub trait Batcher<I, O>: Send + Sync {
     fn batch(&self, items: Vec<I>, device: &Device) -> O;
 }
@@ -19,7 +19,7 @@ DataLoader 或用户实现的职责。
 本章实验的 Batcher 为了突出顺序只保留 host 值，但仍把 `Device` 记录在
 输出中：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch05-data-pipeline/src/lib.rs:batcher}}
 ```
 
@@ -44,7 +44,7 @@ item 计数，即使当前输出是 batch，也不应把 `items_total` 误读成
 
 固定快照中的 builder 主要配置以下参数：
 
-```rust
+```rust,ignore
 let loader = DataLoaderBuilder::new(batcher)
     .batch_size(32)
     .shuffle(42)

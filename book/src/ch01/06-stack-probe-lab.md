@@ -38,7 +38,7 @@ Cargo `path` 或 `[patch]` 参与构建。
 
 下面代码直接来自 `examples/ch01-stack-probe`：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch01-stack-probe/src/lib.rs:example}}
 ```
 

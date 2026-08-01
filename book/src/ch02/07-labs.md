@@ -6,7 +6,7 @@ features。
 
 ## 1. 逐元素运算
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:example}}
 ```
 
@@ -18,7 +18,7 @@ features。
 
 ## 2. 广播与运行时 shape
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:broadcasting}}
 ```
 
@@ -35,7 +35,7 @@ features。
 
 ## 3. Module 与参数注册
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:module}}
 ```
 
@@ -54,7 +54,7 @@ Linear 从 3 个输入特征映射到 2 个输出特征，共有 $3\times2=6$ �
 
 ## 5. 动态自动微分
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:autodiff}}
 ```
 
@@ -79,7 +79,7 @@ product = left * right = [4, 49]
 
 ## 6. 控制流只记录实际分支
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:branch_autodiff}}
 ```
 
@@ -87,7 +87,24 @@ product = left * right = [4, 49]
 为 `input + 1`，梯度为全 1。两次调用各自构建 tape，互不混入未执行分支。
 这固定了图外控制流与 eager autodiff 的边界，不是完整训练循环。
 
-## 7. 运行
+## 7. detach 是 tape 边界
+
+```rust,ignore
+{{#include ../../../examples/ch02-tensor-basics/src/lib.rs:detach_autodiff}}
+```
+
+这个负向实验先让 `original` 成为 autodiff leaf，再用
+`original.detach().require_grad()` 建立新的 `detached` leaf。前向只使用
+新的 leaf，因此 backward 后：
+
+- `original_gradient == None`：原始路径没有参与本次 tape；
+- `detached_gradient == Some([3, 3])`：新 leaf 按 `detached * 3` 获得梯度；
+- 输出 shape 和梯度 shape 都保持为 `[2]`。
+
+这证明的是 tape 的连接语义，不是“所有 runtime 错误都会返回 Result”；
+shape/device 错误仍应按固定 backend 的 API 契约单独验证。
+
+## 8. 运行
 
 ```bash
 cargo run -p ch02-tensor-basics
@@ -104,19 +121,21 @@ right 梯度：[1.0, 7.0]
 TinyModel：8 个参数，输出形状 [4, 2]
 Device autodiff：普通=false，autodiff 包装=true
 控制流分支 double：输出 [4.0, 6.0]，梯度 [2.0, 2.0]
+detach：原始梯度=None，新 leaf 梯度=Some([3.0, 3.0])
 ```
 
-## 8. 测试
+## 9. 测试
 
 ```bash
 cargo test -p ch02-tensor-basics
 ```
 
-测试覆盖逐元素数值、广播、Module 参数注册、乘法梯度以及控制流分支
-梯度。张量、广播和梯度行为可在固定上游的 `burn-backend-tests` 找到对应
-回归；Module 参数遍历与统计由 `burn-core` 的 Module 测试支撑。
+测试覆盖逐元素数值、广播、Module 参数注册、乘法梯度、控制流分支梯度和
+detach 的 `Option`/数值/shape 状态。张量、广播和梯度行为可在固定上游的
+`burn-backend-tests` 找到对应回归；Module 参数遍历与统计由 `burn-core`
+的 Module 测试支撑。
 
-## 9. 沿源码追踪
+## 10. 沿源码追踪
 
 建议按顺序阅读：
 

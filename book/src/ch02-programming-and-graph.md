@@ -40,3 +40,13 @@
 计算图和自动微分。类型与 IR 一节只建立边界，融合、编译和运行时优化留到
 第 4 章。最后的 CPU 实验把张量广播、参数注册和梯度计算连接起来。
 
+## 证据状态
+
+- `CPU 可运行验证`：Tensor、Module、autodiff 和分支 tape 实验；
+- `固定源码核验`：`Tensor`/`Device`/`Module`、参数状态与一阶 autodiff；
+- `框架无关模型/协议模拟`：workflow 输入/输出/状态/错误契约；
+- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：完整静态图 runtime、
+  device graph capture 与跨设备训练；
+- `明确未覆盖`：把 autodiff tape、Fusion IR 和 device graph capture
+  当作同一实现的结论。
+

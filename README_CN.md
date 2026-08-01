@@ -12,7 +12,9 @@ Burn → CubeCL → CubeK 技术栈逐层深入张量、自动微分、编译、
 
 ## 项目状态
 
-当前处于基础设施与内容大纲阶段。实时进度、下一步任务和交接信息见
+当前是固定 `burn-0.22.0-pre.1` 源码快照的九章候选版，正在进行首个稳定
+版本的发布审计。全书已有 CPU-first 可运行证据、逐文件来源 crosswalk
+和明确的可选平台边界。已核验进度与剩余限制见
 [`planning/STATUS.md`](planning/STATUS.md)。
 
 ## 依赖来源
@@ -20,7 +22,8 @@ Burn → CubeCL → CubeK 技术栈逐层深入张量、自动微分、编译、
 构建与 CI 始终从 GitHub 获取 Burn，并使用 [`pins.toml`](pins.toml)
 记录的精确 revision。Burn 自身的 manifest 会为 `0.22.0-pre.1` 写作
 快照固定兼容的 CubeCL 与 CubeK revision。项目 Cargo manifest 禁止使用
-本地 path 依赖。
+本地 path 依赖。固定的 `burn-onnx` checkout 使用不同的 Burn revision，
+因此只作为源码审计输入，不进入主 workspace。
 
 可以在项目根目录放置以下可选、只读的源码镜像：
 
@@ -43,16 +46,17 @@ mlsys_with_burn/
 环境要求：
 
 - Rust 1.95
-- mdBook 0.4
+- mdBook 0.4.51
 - Python 3.11 或更高版本
 
 ```bash
-make check-upstreams
-make book
-make test
+make check
 ```
 
-生成的教材位于 `book/book/`。
+`make check` 统一使用 `--locked`，运行 CPU smoke suite，并在获取锁定依赖
+后执行 Cargo offline gate。生成的教材位于 `book/book/`，不会提交到 Git。
+浏览器公式阅读仍需要 mdBook 配置的 MathJax 资源；Cargo 离线可复现不等于
+MathJax CDN 可以离线访问。
 
 如果本地源码镜像存在，可以检查它们是否与远程快照一致：
 
@@ -67,6 +71,7 @@ make check-local-sources
 - `planning/`：路线图、章节映射和实时状态
 - `docs/`：架构、写作与维护规范
 - `tools/`：版本和内容一致性检查
+- `pins.toml` / `release.toml`：源码 revision 与发布工具版本
 - `.cursor/rules/`、`AGENTS.md`：Agent 协作约束
 
 ## 许可证

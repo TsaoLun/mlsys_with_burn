@@ -33,7 +33,7 @@ ONNX parser/codegen、HTTP/gRPC、Remote、WASM、SafeTensors、量化或 GPU
 
 下面的代码是示例源码的唯一正文真相：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch07-record-roundtrip/src/lib.rs:run_round_trip}}
 ```
 
@@ -87,3 +87,10 @@ record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
 
 第 5 步不能跳过：固定仓库的 `burn-onnx` 仍 pin 到较早 Burn revision，
 本章没有把两个 revision 的 generated model 类型混进当前 workspace。
+
+## 5. 接到第 5–6 章
+
+若要从真实数据和训练状态进入 artifact，而不是手工初始化 Linear，请运行
+[P1 贯穿实验：数据到推理](../capstone-p1.md)。它在本实验的
+`ModuleRecord` round-trip 之前加入 Dataset split、SGD 更新和
+`model.valid()`，并用错误 topology 验证加载失败语义。

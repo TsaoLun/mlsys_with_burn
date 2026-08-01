@@ -55,3 +55,14 @@ GPU 编程或分布式系统也没有关系：本章先建立地图，后续章�
 验证“源码快照 → Cargo feature → Device → Backend → Tensor 执行”的
 最短路径。
 
+## 证据状态
+
+- `CPU 可运行验证`：`ch01-stack-probe` 验证固定 Device/Backend/Tensor 路径；
+- `固定源码核验`：Burn、CubeCL、CubeK 和 burn-onnx 的职责与 revision；
+- `框架无关模型/协议模拟`：workload card、系统分层和成本预算；
+- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 GPU 性能、DDP、
+  ONNX 端到端和集群控制面；
+- `明确未覆盖`：OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人及附录。
+
+逐文件对照见项目文件 `planning/comparison/openmlsys-v1-crosswalk.md`。
+

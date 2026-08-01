@@ -160,3 +160,31 @@
   benchmark 需要另行记录硬件、driver、通信库、launcher、拓扑和故障
   环境，不能由 CPU 模拟器或源码存在外推。
 
+## D014：以核心目录 crosswalk 和 C/S/R/L/E 作为 OpenMLSys 比较口径
+
+- 日期：2026-08-01
+- 决策：本书与 OpenMLSys v1 的比较以
+  `planning/comparison/openmlsys-v1-crosswalk.md` 为逐文件基线。每个
+  核心主题都记录 Correctness、Source、Runnable、Learning path 和
+  Engineering 五类证据，并单独列出推荐系统、联邦学习、可解释 AI、
+  机器人和附录等范围差异。
+- 原因：逐字翻译或按章节标题一一对应会隐藏本书对 Burn/Rust 的重组，也
+  会把源码入口误写成平台 parity。crosswalk 允许一对多/多对一映射，并
+  让读者回答“原作讲什么、固定 Burn 验证到哪层、差异为何存在”。
+- 影响：发布审计检查 crosswalk 覆盖固定 OpenMLSys Markdown、revision、
+  来源入口和九章证据状态；未覆盖能力必须标为协议模型、可选平台实验或
+  明确未覆盖。
+
+## D015：固定快照版采用锁定构建、离线 Cargo gate 和在线 MathJax 边界
+
+- 日期：2026-08-01
+- 决策：发布基线使用 `pins.toml` 的完整 Git revision、`Cargo.lock`、
+  `cargo --locked` 和 Cargo offline gate；Rust/mdBook/Python 版本写入
+  `release.toml`，CI action 固定到完整 commit SHA。mdBook 公式继续由
+  MathJax 渲染，并明确“Cargo 可离线构建”不等于浏览器 CDN 可离线阅读。
+- 原因：预发布 Burn/CubeCL/CubeK 仍可能变化，未锁定依赖和可变 CI action
+  会让同一章节无法复核；MathJax 是阅读产物边界，不能伪装为 Cargo 依赖。
+- 影响：`tools/check_release.py` 检查 SUMMARY/include/source/license/link/
+  formula、生成 HTML 和 offline metadata；默认 CI 不需要本地上游镜像，
+  `--check-local-sources` 只作为额外源码路径审计。
+

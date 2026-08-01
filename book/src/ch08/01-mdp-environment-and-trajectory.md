@@ -75,7 +75,7 @@ $\max\_a Q(s',a)$；时间截断是否 bootstrap 则取决于算法和环境协�
 
 固定 `burn-rl` 用关联类型把环境的状态和动作写进实现：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch08-rl-rollout/src/lib.rs:environment}}
 ```
 

@@ -14,7 +14,7 @@ Burn 用 `Module` 统一这些操作。
 
 一个模型可以像普通 Rust struct 一样声明字段，并派生 `Module`：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:module}}
 ```
 

@@ -8,17 +8,20 @@ M5：首个稳定版审计准备。
 
 ## 当前目标
 
-对九章执行全书术语、链接、许可证、来源和离线构建审计。
+完成以 OpenMLSys v1 固定 revision 为参照的 P0/P1 对照发布审计，并保持
+九章候选版的 CPU-first、源码证据和可选平台边界可复核。
 
 ## 进行中
 
-- [ ] 检查九章来源映射、导航、许可证和可离线构建说明。
+- [ ] P0/P1 已完成；等待发布者决定是否创建候选 tag/发布归档。
 
 ## 下一步
 
-1. 逐章检查 `planning/chapter-sources/` 与正文的来源文件覆盖。
-2. 检查 `SUMMARY.md`、正文链接、许可证声明和示例 include。
-3. 运行固定快照下的离线构建与 workspace 验证，记录首个稳定版审计结果。
+1. 由发布者审阅 `planning/comparison/openmlsys-v1-crosswalk.md` 和
+   `tools/check_release.py` 的机器可读输出，决定候选版归档/tag。
+2. 若要增加真实 GPU、NCCL、ONNX、DDP、DQN/MARL 或网络实验，建立独立
+   平台 profile，不能改变默认 CPU gate。
+3. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
 
 ## 已完成
 
@@ -116,26 +119,53 @@ M5：首个稳定版审计准备。
   通信成本、checkpoint replay、失败重试、资源归还和确定性 trace。
 - [x] 增加 D013，明确第 9 章 CPU 控制面模拟与真实 GPU/NCCL/跨节点集群
   能力隔离；更新集群术语、来源记录和会话日志。
-- [x] 第 9 章验证：示例 5 项测试、Clippy、运行观察、`mdbook build book`、
+- [x] 第 9 章验证：示例 6 项测试、Clippy、运行观察、`mdbook build book`、
   `make check`、`make check-local-sources`、`git diff --check` 均通过；
   全书数学静态复查无未转义下标和 Markdown 结构污染。
+- [x] 建立 `planning/comparison/openmlsys-v1-crosswalk.md`，覆盖 OpenMLSys
+  v1 固定章节 Markdown、扩展篇排除清单、Burn/CubeCL/CubeK/burn-onnx
+  源码入口和 C/S/R/L/E 五类证据；更新 `CHAPTER_MATRIX` 与九份来源映射。
+- [x] 新增 `tools/check_release.py`，自动检查 SUMMARY/八小节、include/
+  anchor、source crosswalk、pins/Cargo.lock、许可证、链接、公式、生成
+  HTML MathJax、代码片段 annotation、Git hygiene 和 offline metadata。
+- [x] 更新 Makefile/CI 的 `--locked`、offline Cargo gate、mdBook test、
+  doctest、十个 CPU smoke、capstone smoke 和 release audit；新增
+  `release.toml` 并固定 Actions commit SHA。
+- [x] 更新中英文 README、书内 README/attribution、NOTICE、AUTHORING、
+  glossary，明确九章候选版、工具版本、快照、burn-onnx revision、MathJax
+  CDN 边界和非官方关系；增加 D014/D015。
+- [x] 新增第 1 章第八小节、`book/src/capstone-p1.md`、`planning/capstone-p1.md`
+  和 `examples/ch05-ch07-capstone`，通过确定性 20 样本完成
+  Dataset→训练→ModuleRecord→恢复后 inference。
+- [x] 第 2 章负向 detach/tape 实验和第 4 章重复 IR/Fusion/cache 观察通过
+  测试、Clippy、CPU run；`BURN_FUSION_LOG=full` 观察到固定 runtime 的
+  cache-hit 日志，但测试只断言计划/输出一致。
+- [x] 新增 `book/src/comparison-cards.md`，并在第 5–9 章示例中加入
+  shard/背压、collective/staleness、artifact contract、policy freshness、
+  trace schema 等纯 Rust 协议测试和统一证据标签。
+- [x] P0/P1 终验收通过：`make check`、`make check-local-sources`、
+  workspace Clippy/test/doctest、mdBook build/test、release audit、离线
+  metadata、`cargo fmt --all --check` 和 `git diff --check`。
 
 ## 本次交接
 
-- 已完成：第 9 章“大规模 GPU 集群管理”。正文、8 个小节、来源映射、
-  CPU 模拟器、导航、术语、D013 和会话日志均已落地；Burn/CubeCL 仅作为
-  已分配设备上的数据面/运行时证据，外部控制面职责已单独列出。
-- 验证：`cargo fmt --all --check`、第 9 章 tests/Clippy/run、
-  `mdbook build book`、`make check`、`make check-local-sources`、
-  `git diff --check` 和 IDE lint 均通过。示例测试 5 passed。
-- 公式复核：全书源码无未转义数学下标和 display 列表标记；生成 HTML 的
-  96 个 display 公式、244 个行内公式候选均无 `<em>`/`<ul>`/`<ol>` 结构
-  污染，含公式页面均加载 MathJax。
-- 偏差：没有新增真实 GPU/NCCL/跨节点 benchmark、集群 scheduler、
-  多租户 runtime、elastic membership、自动故障迁移或分布式 checkpoint
-  共识；这些内容以固定源码边界、成本模型、协议模拟和练习表达。
-- 下一步：进入 M5，逐章审计来源映射、导航、许可证、链接和离线构建说明，
-  为首个稳定版整理发布检查清单。
+- 已完成：P0/P1 OpenMLSys 对照发布。crosswalk、九章证据状态、发布检查器、
+  固定工具/CI、CPU capstone、针对性实验、比较卡、协议测试和文档边界均已
+  落地；计划文件本身未修改。
+- 验证：`make check` 和 `make check-local-sources` 均通过；其中包含
+  `mdbook build/test`、workspace `fmt`/Clippy/test/doctest、十个 CPU
+  smoke、capstone smoke、`--locked`/offline gate 和生成 HTML 公式复查。
+  `cargo metadata --locked --offline`、release audit、IDE lint 和
+  `git diff --check` 也通过。
+- 证据范围：capstone 从 16/4 数据 split 走到 autodiff SGD、
+  `ModuleRecord` bytes、错误 topology 拒绝和恢复后 inference；第 2 章
+  detach 断边实验、第 4 章重复 Fusion/cache 日志、以及第 5–9 章协议卡
+  都有 CPU/源码/模型标签。
+- 偏差：仍没有真实 GPU/NCCL/跨节点 benchmark、ONNX 对齐 fixture、完整
+  DQN/PPO/SAC/MARL、服务治理、集群 scheduler、多租户 runtime、弹性成员、
+  自动故障迁移或分布式 checkpoint 共识；它们被明确标为可选或未覆盖。
+- 下一步：发布者审阅 crosswalk 和机器可读 release 输出，决定候选 tag/
+  归档；任何真实平台轨道需独立 profile，不得放宽默认 CPU gate。
 
 ## 已知问题
 

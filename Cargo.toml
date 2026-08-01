@@ -6,6 +6,7 @@ members = [
     "examples/ch03-tile-loads",
     "examples/ch04-fusion-inspector",
     "examples/ch05-data-pipeline",
+    "examples/ch05-ch07-capstone",
     "examples/ch06-training-loop",
     "examples/ch07-record-roundtrip",
     "examples/ch08-rl-rollout",

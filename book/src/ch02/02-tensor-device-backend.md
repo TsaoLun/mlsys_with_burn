@@ -4,7 +4,7 @@
 
 固定快照中的公开张量定义可以简化为：
 
-```rust
+```rust,ignore
 pub struct Tensor<const D: usize, K = Float>
 where
     K: Basic,
@@ -86,7 +86,7 @@ graph primitive 是不支持状态，CubeCL 后端则可能提供融合和 graph
 Rust 运算符通常按值接收 Tensor。一个值要参与多个后续操作时，需要显式
 `clone()`：
 
-```rust
+```rust,ignore
 let squared = input.clone() * input;
 ```
 

@@ -37,3 +37,14 @@ GEMM 把硬件、Kernel 和算子库三层连接起来。最后在 CPU 上运行
 CubeCL IR；这能验证语义和边界，但不被当作 GPU 性能实验。更深入的 IR、
 融合和运行时系统留到第 4 章。
 
+## 证据状态
+
+- `CPU 可运行验证`：CubeCL CPU Kernel、host reference 和 tile load 模型；
+- `固定源码核验`：CubeCL/CubeK 的拓扑、buffer、算子与 backend 入口；
+- `框架无关模型/协议模拟`：GEMM、算术强度和 Roofline 方向；
+- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：共享内存、真实 GPU
+  GEMM、autotune 性能和厂商设备比较；
+- `明确未覆盖`：用 CPU 正确性结果替代 GPU 带宽、吞吐或 launch 结论。
+
+对应协议与不可比较条件见[核心主题比较卡](comparison-cards.md#3-gemm-与加速器)。
+

@@ -145,6 +145,44 @@ pub fn td_target(reward: f32, next_max_q: f32, done: bool, gamma: f32) -> f32 {
 }
 // ANCHOR_END: td_target
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct MockPolicy {
+    pub version: u64,
+    pub action: i32,
+}
+
+impl MockPolicy {
+    pub fn action_for(&self, _state: CounterState) -> i32 {
+        self.action
+    }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct PolicySampleMetadata {
+    pub behavior_version: u64,
+    pub target_version: u64,
+}
+
+pub fn policy_is_fresh(metadata: PolicySampleMetadata, max_lag: u64) -> bool {
+    metadata
+        .target_version
+        .checked_sub(metadata.behavior_version)
+        .is_some_and(|lag| lag <= max_lag)
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct JointTransition {
+    pub actions: Vec<i32>,
+    pub rewards: Vec<f32>,
+}
+
+pub fn joint_transition(actions: [i32; 2], rewards: [f32; 2]) -> JointTransition {
+    JointTransition {
+        actions: actions.into(),
+        rewards: rewards.into(),
+    }
+}
+
 fn state_tensor(state: CounterState, device: &Device) -> Tensor<2> {
     Tensor::from_data([[state.position as f32, state.step as f32]], device)
 }
@@ -311,6 +349,43 @@ mod tests {
                 requested: 2,
                 available: 1
             })
+        );
+    }
+
+    #[test]
+    fn protocol_card_checks_policy_freshness_and_joint_credit() {
+        let policy = MockPolicy {
+            version: 7,
+            action: 1,
+        };
+        assert_eq!(
+            policy.action_for(CounterState {
+                position: 0,
+                step: 0
+            }),
+            1
+        );
+        assert!(policy_is_fresh(
+            PolicySampleMetadata {
+                behavior_version: 5,
+                target_version: 7
+            },
+            2
+        ));
+        assert!(!policy_is_fresh(
+            PolicySampleMetadata {
+                behavior_version: 4,
+                target_version: 7
+            },
+            2
+        ));
+
+        assert_eq!(
+            joint_transition([0, 1], [1.0, -1.0]),
+            JointTransition {
+                actions: vec![0, 1],
+                rewards: vec![1.0, -1.0]
+            }
         );
     }
 }

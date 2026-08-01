@@ -21,7 +21,7 @@ scale 使用 `u32`，因为 `#[comptime]` 值会参与 Kernel 特化键，必须
 
 ## 2. Kernel
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch03-cubecl-kernel/src/lib.rs:kernel}}
 ```
 
@@ -34,7 +34,7 @@ scale 使用 `u32`，因为 `#[comptime]` 值会参与 Kernel 特化键，必须
 
 ## 3. Host launch
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch03-cubecl-kernel/src/lib.rs:host}}
 ```
 
@@ -60,7 +60,7 @@ unsafe block 只覆盖必须证明的 raw 边界。`input_handle` 由同一个 i
 
 ## 4. Tiling 加载次数模型
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch03-tile-loads/src/lib.rs:tile_loads}}
 ```
 

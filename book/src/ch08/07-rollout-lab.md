@@ -36,7 +36,7 @@ shape assertions + tabular TD update
 
 环境通过固定 `burn-rl::Environment` trait 表达状态、动作和 step 结果：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch08-rl-rollout/src/lib.rs:environment}}
 ```
 
@@ -64,7 +64,7 @@ state/action 类型是 `Tensor<2>`，因此固定快照已经有对应的
 
 实验使用的目标函数是：
 
-```rust
+```rust,ignore
 {{#include ../../../examples/ch08-rl-rollout/src/lib.rs:td_target}}
 ```
 

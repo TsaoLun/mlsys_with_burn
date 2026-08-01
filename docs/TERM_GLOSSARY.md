@@ -23,8 +23,15 @@
 | 负载分析 | workload card；计算、数据、设备、目标四元组 | 不用模型名称替代系统负载 |
 | 算术强度 | arithmetic intensity；FLOP/字节（教学模型可用 FLOP/加载元素） | 不把算术强度直接当成实测性能 |
 | 数据供给模型 | $F/P/G$；读取、变换、设备消费速率 | 不把有界队列当成长期瓶颈修复 |
+| 分片与提交 | deterministic shard/offset；epoch commit；reorder buffer | 不把数据守恒写成全局保序 |
+| 加权集合通信 | weighted AllReduce；按样本数聚合局部梯度 | 不把等权平均用于不等 batch |
+| 梯度新鲜度 | gradient staleness；当前参数版本与梯度版本的差距 | 不静默接受无限 stale update |
+| 流水线空泡 | pipeline bubble；1F1B 的 warm-up/drain 空闲槽 | 不把 micro-batch 数当作 stage 数 |
+| artifact 清单 | artifact manifest；version/payload length/checksum | 不把 checksum 单独当作供应链安全 |
+| 动态 batching | dynamic batching；同 shape 请求按容量成批 | 不跨 shape 拼 batch 或把队列等待算进 kernel |
 | 强化学习终止 | `done`（自然终止）与 `truncated`（外部/时间截断） | 不无条件把两者当作同一 bootstrap 语义 |
 | 策略关系 | behavior policy $\mu$ / target policy $\pi$；on-policy/off-policy | 不由“有 replay”单独判断算法类别 |
+| 策略新鲜度 | policy freshness；behavior/target version lag | 不把 mock policy 版本当作算法实现 |
 | 采样更新架构 | Actor–Learner；actor 采样，learner 更新 | 不把 DDP gradient collective 叫 Actor–Learner |
 | GPU 集群 | GPU cluster；由 GPU、节点、机柜和网络域组成的资源系统 | 不把多张 `Device` 直接称作集群 |
 | 控制面/数据面 | control plane 负责作业与资源；training data plane 负责 rank 间通信 | 不把设备 runtime 的 queue 当作集群控制面 |
@@ -36,6 +43,7 @@
 | 检查点提交 | checkpoint commit；写入、校验、版本确认和可恢复可见性 | 不把异步写文件等同于原子分布式提交 |
 | 幂等重试 | idempotent retry；由 job/attempt/step/version 防止重复更新 | 不只靠进程重启恢复训练进度 |
 | 集群遥测 | cluster telemetry；跨作业、rank、设备和链路的 metrics/tracing | 不把本地 kernel profiler 叫集群遥测 |
+| trace schema | machine-readable trace；`schema_version`、event、job/attempt、time、placement、replay | 不把日志文本格式当成稳定 API |
 | 队列等待 | queue wait；从提交/重新排队到成组准入的时间 | 不把 queue wait 混入 device compute |
 | 作业调度与算子调度 | job scheduler 管资源租约；operator scheduler 管进程/设备内任务 | 不把 Fusion/stream scheduler 当作 GPU 集群调度器 |
 

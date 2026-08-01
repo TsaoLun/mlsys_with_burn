@@ -942,6 +942,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch05-ch07-capstone"
+version = "0.1.0"
+dependencies = [
+ "burn",
+]
+
+[[package]]
 name = "ch05-data-pipeline"
 version = "0.1.0"
 dependencies = [
