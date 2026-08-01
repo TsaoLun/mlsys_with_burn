@@ -5,7 +5,7 @@
 对 SGD 而言，最简单的更新是：
 
 $$
-\theta_{t+1} = \theta_t - \eta_t g_t.
+\theta\_{t+1} = \theta\_t - \eta\_t g\_t.
 $$
 
 加入 momentum、weight decay 或 gradient clipping 后，更新还依赖额外状态

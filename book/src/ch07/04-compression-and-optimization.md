@@ -20,7 +20,7 @@
 
 $$
 q = \operatorname{clip}\left(
-\operatorname{round}\left(\frac{r}{s}+z\right), q_{\min},q_{\max}
+\operatorname{round}\left(\frac{r}{s}+z\right), q\_{\min},q\_{\max}
 \right),
 $$
 
@@ -49,12 +49,12 @@ representative calibration set
     → validate task metric and target runtime
 ```
 
-以非对称整数范围 $[q_{\min},q_{\max}]$ 为例，给定校准范围
-$[r_{\min},r_{\max}]$，常见选择是：
+以非对称整数范围 $[q\_{\min},q\_{\max}]$ 为例，给定校准范围
+$[r\_{\min},r\_{\max}]$，常见选择是：
 
 $$
-s=\frac{r_{\max}-r_{\min}}{q_{\max}-q_{\min}},\qquad
-z=\operatorname{round}\left(q_{\min}-\frac{r_{\min}}{s}\right).
+s=\frac{r\_{\max}-r\_{\min}}{q\_{\max}-q\_{\min}},\qquad
+z=\operatorname{round}\left(q\_{\min}-\frac{r\_{\min}}{s}\right).
 $$
 
 实际实现还要处理零范围、离群值、累加精度和饱和率。逐通道校准通常能
@@ -80,8 +80,8 @@ backend、dtype 和 reference 做验证。
 
 $$
 \mathcal{L} =
-\mathcal{L}_{\mathrm{label}} +
-\lambda\mathcal{L}_{\mathrm{teacher}}.
+\mathcal{L}\_{\mathrm{label}} +
+\lambda\mathcal{L}\_{\mathrm{teacher}}.
 $$
 
 蒸馏的成本主要发生在训练阶段，部署得到的是一个新的拓扑和参数 artifact。

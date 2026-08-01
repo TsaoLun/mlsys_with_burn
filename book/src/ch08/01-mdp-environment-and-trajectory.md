@@ -22,25 +22,25 @@ $(\mathcal{S}, \mathcal{A}, \mathcal{T}, R, \gamma)$：
 策略 $\pi(a|s)$ 产生动作，目标通常是最大化折扣累计回报：
 
 $$
-J(\pi)=\mathbb{E}_{\pi,\mathcal{T}}
-  \left[\sum_{t=0}^{H-1}\gamma^t r_t\right].
+J(\pi)=\mathbb{E}\_{\pi,\mathcal{T}}
+  \left[\sum\_{t=0}^{H-1}\gamma^t r\_t\right].
 $$
 
 价值函数把“策略长期有多好”与一次 step 的 reward 区分开：
 
 $$
-V^\pi(s)=\mathbb{E}_\pi[G_t\mid s_t=s],\qquad
-Q^\pi(s,a)=\mathbb{E}_\pi[G_t\mid s_t=s,a_t=a],
+V^\pi(s)=\mathbb{E}\_\pi[G\_t\mid s\_t=s],\qquad
+Q^\pi(s,a)=\mathbb{E}\_\pi[G\_t\mid s\_t=s,a\_t=a],
 $$
 
-其中 return $G_t=\sum_{k=0}^{H-1}\gamma^k r_{t+k}$。这带来两类常见
+其中 return $G\_t=\sum\_{k=0}^{H-1}\gamma^k r\_{t+k}$。这带来两类常见
 更新路径：
 
-- **Monte Carlo** 等 episode 结束后，用完整 $G_t$ 估计价值；方差较大，
+- **Monte Carlo** 等 episode 结束后，用完整 $G\_t$ 估计价值；方差较大，
   但不需要 bootstrap；
 - **Temporal Difference (TD)** 在 episode 中途用下一状态估计未来：
-  $r_t+\gamma V(s_{t+1})$ 或
-  $r_t+\gamma\max_a Q(s_{t+1},a)$；更新及时，但会引入估计偏差。
+  $r\_t+\gamma V(s\_{t+1})$ 或
+  $r\_t+\gamma\max\_a Q(s\_{t+1},a)$；更新及时，但会引入估计偏差。
 
 `done` 通常令 TD target 截止；`truncated` 是否截止取决于环境和算法
 协议。这个选择应在 transition schema 中保留，不能只由 buffer 的
@@ -66,7 +66,7 @@ $$
 - `truncated`：达到时间上限、采样预算或外部截断，但任务不一定自然结束。
 
 二者在 bootstrap 时可能有不同含义。自然 terminal 通常不再使用
-$\max_a Q(s',a)$；时间截断是否 bootstrap 则取决于算法和环境协议。如果
+$\max\_a Q(s',a)$；时间截断是否 bootstrap 则取决于算法和环境协议。如果
 系统把两个标志过早合并，就失去了之后修正这个选择的机会。固定 Burn
 训练 runner 在写入 replay transition 时将它们合并为 `done` tensor，
 所以环境 adapter 仍应保留原始字段并在文档中写清楚这一损失。
@@ -97,13 +97,13 @@ $\max_a Q(s',a)$；时间截断是否 bootstrap 则取决于算法和环境协�
 一次 rollout step 的墙钟时间可以拆成：
 
 $$
-T_{\text{step}} =
-T_{\text{env}}+
-T_{\text{to-observation}}+
-T_{\text{policy}}+
-T_{\text{to-action}}+
-T_{\text{record}}+
-T_{\text{queue}}.
+T\_{\text{step}} =
+T\_{\text{env}}+
+T\_{\text{to-observation}}+
+T\_{\text{policy}}+
+T\_{\text{to-action}}+
+T\_{\text{record}}+
+T\_{\text{queue}}.
 $$
 
 其中 `T_env` 可能来自 CPU 仿真，`T_policy` 可能来自 GPU inference；

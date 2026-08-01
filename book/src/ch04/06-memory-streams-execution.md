@@ -8,7 +8,7 @@
 连续 Tensor 的数据字节数可粗略写为：
 
 $$
-\text{bytes}=\prod_i \text{shape}_i\times \text{sizeof(dtype)}。
+\text{bytes}=\prod\_i \text{shape}\_i\times \text{sizeof(dtype)}。
 $$
 
 实际 allocation 还受对齐、量化 metadata、padding、layout、内存池粒度和

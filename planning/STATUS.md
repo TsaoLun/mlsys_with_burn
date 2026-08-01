@@ -108,6 +108,9 @@ M4：应用与扩展篇。
 - [x] 本次回补验证：受影响示例测试与 Clippy、`cargo run` 观察输出、
   `mdbook build book`、`make check`、`make check-local-sources` 和
   `git diff --check` 均通过。
+- [x] 统一修复第 1–8 章 Markdown 数学公式的下标转义，并处理独立公式
+  续行的 `+` 列表解析；重新构建后复查 86 个 display 公式、244 个行内
+  公式候选，未发现 `<em>`/`<ul>`/`<ol>` 破坏，含公式页面均加载 MathJax。
 
 ## 本次交接
 
@@ -120,6 +123,9 @@ M4：应用与扩展篇。
   naive/tiled load 与 intensity，`ch07-record-roundtrip` 与
   `ch08-rl-rollout` 输出协议观察；`mdbook build book`、`make check`、
   `make check-local-sources`、`git diff --check` 和 IDE lint 均通过。
+- 公式复核：16 个正文文件统一使用 Markdown 数学下标转义；`make book`
+  成功，源码中无未转义数学下标和 display 列表标记，生成 HTML 的 86 个
+  display 公式与 244 个行内公式候选均未出现 Markdown 结构污染。
 - 偏差：没有新增真实 GPU 共享内存 GEMM、服务压测、PTQ/QAT runtime、
   网络 Actor–Learner、MARL league 或 pipeline/parameter-server runtime；
   这些内容依旧以框架无关模型、固定源码边界和练习表达，符合 D009–D012。

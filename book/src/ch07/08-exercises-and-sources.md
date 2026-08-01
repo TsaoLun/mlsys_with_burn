@@ -26,9 +26,9 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
    生命周期；哪一种会在生成代码中使用 `std::path::Path`？
 3. 为什么把 F32 权重存成 F16 不等于完成了低精度推理？列出加载、算子、
    activation 和 reference 校准还需要的条件。
-4. 用 $T_{\mathrm{queue}}$、$T_{\mathrm{pre}}$、$T_{\mathrm{copy}}$、
-   $T_{\mathrm{forward}}$、$T_{\mathrm{readback}}$ 和
-   $T_{\mathrm{post}}$ 分解一次请求，说明动态 batching 可能改善和恶化
+4. 用 $T\_{\mathrm{queue}}$、$T\_{\mathrm{pre}}$、$T\_{\mathrm{copy}}$、
+   $T\_{\mathrm{forward}}$、$T\_{\mathrm{readback}}$ 和
+   $T\_{\mathrm{post}}$ 分解一次请求，说明动态 batching 可能改善和恶化
    哪些项。
 5. Remote peer、模型 registry、HTTP service 和授权系统分别负责什么？
    为什么它们不能仅由 `Device::remote_iroh` 代替？

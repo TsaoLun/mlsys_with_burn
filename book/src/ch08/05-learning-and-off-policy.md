@@ -5,19 +5,19 @@
 以离散动作的 Q-learning 为例，单步 TD target 为：
 
 $$
-y_t =
+y\_t =
 \begin{cases}
-r_t, & d_t=1,\\
-r_t+\gamma\max_{a'}Q_{\bar\theta}(s_{t+1},a'), & d_t=0.
+r\_t, & d\_t=1,\\
+r\_t+\gamma\max\_{a'}Q\_{\bar\theta}(s\_{t+1},a'), & d\_t=0.
 \end{cases}
 $$
 
-当前 Q 值 $Q_\theta(s_t,a_t)$ 再沿误差方向更新：
+当前 Q 值 $Q\_\theta(s\_t,a\_t)$ 再沿误差方向更新：
 
 $$
 \theta \leftarrow \theta -
-\eta\nabla_\theta
-\mathcal{L}\left(Q_\theta(s_t,a_t),y_t\right).
+\eta\nabla\_\theta
+\mathcal{L}\left(Q\_\theta(s\_t,a\_t),y\_t\right).
 $$
 
 这里的 $\bar\theta$ 可以是 target network，也可以是延迟的参数快照。
@@ -36,10 +36,10 @@ module、gradient 和 optimizer；这是有意的分层，而不是声称 Burn �
 $\pi$。最简单的离散探索是 epsilon-greedy：
 
 $$
-a_t =
+a\_t =
 \begin{cases}
 \text{随机动作}, & \text{概率 }\varepsilon,\\
-\arg\max_a Q(s_t,a), & \text{概率 }1-\varepsilon.
+\arg\max\_a Q(s\_t,a), & \text{概率 }1-\varepsilon.
 \end{cases}
 $$
 

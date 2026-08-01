@@ -66,11 +66,11 @@ Burn 的 `Policy` 使用关联类型定义 `Observation`、`ActionDistribution`�
 这是一种吞吐与延迟的交换：
 
 $$
-T_{\text{request}} =
-T_{\text{queue-wait}}+
-T_{\text{batched-inference}}+
-T_{\text{unbatch}}+
-T_{\text{return}}.
+T\_{\text{request}} =
+T\_{\text{queue-wait}}+
+T\_{\text{batched-inference}}+
+T\_{\text{unbatch}}+
+T\_{\text{return}}.
 $$
 
 增大 batch 可能提高设备利用率，但会增加最早到达请求的等待时间，并且

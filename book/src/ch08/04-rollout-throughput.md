@@ -10,15 +10,15 @@ read state → policy action → env.step → record transition → repeat
 ```
 
 它容易理解，却把环境和 inference 串行化。若单步时间分别为
-$T_{\text{env}}$ 和 $T_{\text{policy}}$，单环境吞吐近似为：
+$T\_{\text{env}}$ 和 $T\_{\text{policy}}$，单环境吞吐近似为：
 
 $$
-\text{throughput}_{1}\approx
-\frac{1}{T_{\text{env}}+T_{\text{policy}}+T_{\text{transfer}}}.
+\text{throughput}\_{1}\approx
+\frac{1}{T\_{\text{env}}+T\_{\text{policy}}+T\_{\text{transfer}}}.
 $$
 
 创建 $N$ 个环境并行采样后，理想上可以接近
-$N/T_{\text{env}}$，但实际吞吐受 CPU 核数、锁、内存带宽、policy batch
+$N/T\_{\text{env}}$，但实际吞吐受 CPU 核数、锁、内存带宽、policy batch
 上限、queue wait 和设备传输限制。多环境不是免费加速器。
 
 ## 固定 Burn 的三种 runner
@@ -85,8 +85,8 @@ interrupter 和 checkpoint。它负责训练过程的编排，不替 `PolicyLear
 
 ## 采样—更新平衡与策略陈旧
 
-设 actor 以 $R_a$ 产生 transition，learner 以 $R_l$ 消费 replay，队列
-容量为 $Q$。当 $R_a>R_l$ 时，系统会积压旧数据；当 $R_l>R_a$ 时，learner
+设 actor 以 $R\_a$ 产生 transition，learner 以 $R\_l$ 消费 replay，队列
+容量为 $Q$。当 $R\_a>R\_l$ 时，系统会积压旧数据；当 $R\_l>R\_a$ 时，learner
 会等待或反复使用较小的样本集。若 transition 来自 policy version $v$
 而 learner 当前是 $v+\Delta$，则 $\Delta$ 会影响 off-policy 偏差和
 探索分布。

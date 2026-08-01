@@ -75,7 +75,7 @@ pipeline scheduler。`Learner::grad_sharded()` 是 DDP 相关的梯度同步标�
 ## 流水线并行的 micro-batch 时间线
 
 模型/流水线并行的难点不只是“把层放到不同设备”。若阶段为
-$S_0,S_1,\ldots,S_{p-1}$，把一个大 batch 拆成 $m$ 个 micro-batch 后，
+$S\_0,S\_1,\ldots,S\_{p-1}$，把一个大 batch 拆成 $m$ 个 micro-batch 后，
 理想的 1F1B 调度会近似经历：
 
 ```text

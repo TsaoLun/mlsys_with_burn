@@ -31,7 +31,7 @@ CPU 单设备训练循环。
 7. 为三个 pipeline stage 画出 1F1B micro-batch 时间线，计算 warm-up/
    cool-down bubble，并比较增加 micro-batch 与 activation recomputation
    对内存和算力的影响。
-8. 用 $\theta_{v+1}=U(\theta_v,g(\theta_{v-k}),s_v)$ 设计 stale gradient
+8. 用 $\theta\_{v+1}=U(\theta\_v,g(\theta\_{v-k}),s\_v)$ 设计 stale gradient
    拒绝、衰减和重放三种策略，列出各自的 checkpoint/幂等要求。
 
 ## Rust 与 API 题

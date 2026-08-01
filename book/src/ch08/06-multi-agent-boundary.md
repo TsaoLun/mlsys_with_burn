@@ -2,16 +2,16 @@
 
 ## 从一个 agent 到多个 agent
 
-单智能体 MDP 只有一个动作 $a_t$ 和一个奖励 $r_t$。多智能体系统至少
+单智能体 MDP 只有一个动作 $a\_t$ 和一个奖励 $r\_t$。多智能体系统至少
 需要说明：
 
 $$
-(\mathcal{S},\mathcal{A}_1\times\cdots\times\mathcal{A}_N,
+(\mathcal{S},\mathcal{A}\_1\times\cdots\times\mathcal{A}\_N,
 \mathcal{T},\mathbf{R},\gamma).
 $$
 
 这里的联合动作空间会随 agent 数量扩张；每个 agent 还可能只看到自己的
-observation $o_i$，获得自己的 reward $r_i$，并通过通信或环境间接观察
+observation $o\_i$，获得自己的 reward $r\_i$，并通过通信或环境间接观察
 其他 agent。系统需要明确游戏是合作、竞争还是混合，否则“最大化 reward”
 甚至没有唯一含义。
 
@@ -19,7 +19,7 @@ observation $o_i$，获得自己的 reward $r_i$，并通过通信或环境间�
 
 - **共享标量奖励**：所有 agent 看到同一个 $r$，合作简单，但难以判断
   哪个 agent 对结果负责；
-- **奖励向量**：每个 agent 得到 $r_i$，可以表达竞争或个体目标，但
+- **奖励向量**：每个 agent 得到 $r\_i$，可以表达竞争或个体目标，但
   learner 需要定义联合目标或均衡；
 - **集中训练、分散执行（CTDE）**：训练时 critic 可以看到联合状态/
   动作，执行时 actor 只能使用自己的 observation；这要求训练和部署的

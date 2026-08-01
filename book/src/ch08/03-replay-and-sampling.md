@@ -5,10 +5,10 @@
 一个最小 transition 写作：
 
 $$
-\tau_t=(s_t,a_t,r_t,s_{t+1},d_t).
+\tau\_t=(s\_t,a\_t,r\_t,s\_{t+1},d\_t).
 $$
 
-其中 $d_t$ 表示该 step 是否应切断后续 bootstrap。它不是“日志里的几列
+其中 $d\_t$ 表示该 step 是否应切断后续 bootstrap。它不是“日志里的几列
 数值”这么简单，因为 learner 还需要知道：
 
 - `s_t` 与 `s_{t+1}` 是否属于同一个 observation schema；
@@ -54,7 +54,7 @@ write_head
 内存估算为：
 
 $$
-M_{\text{replay}}\approx C\cdot
+M\_{\text{replay}}\approx C\cdot
 (\operatorname{bytes}(s)+\operatorname{bytes}(s')
 +\operatorname{bytes}(a)+\operatorname{bytes}(r)+\operatorname{bytes}(d)).
 $$
@@ -92,8 +92,8 @@ forward 上分别测试。
 replay 会引入分布偏移：
 
 $$
-\mathcal{D}_{\text{replay}}\ne
-\mathcal{D}_{\text{current policy}}.
+\mathcal{D}\_{\text{replay}}\ne
+\mathcal{D}\_{\text{current policy}}.
 $$
 
 Q-learning 可以通过 bootstrap 使用这类数据，但 policy gradient 通常还

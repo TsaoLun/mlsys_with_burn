@@ -7,7 +7,7 @@
 所有设备得到聚合后的结果：
 
 $$
-x_i' = \operatorname{reduce}(x_0, x_1, \ldots, x_{p-1}).
+x\_i' = \operatorname{reduce}(x\_0, x\_1, \ldots, x\_{p-1}).
 $$
 
 梯度平均时 `reduce` 通常是 `Mean`；如果每个设备先保存的是未归一化的
@@ -22,7 +22,7 @@ $l$ 的消息，其中 $\alpha$ 是延迟项，$\beta$ 反映字节传输成本�
 而言，AllReduce 的实际成本还受算法和拓扑影响：
 
 $$
-T_{\text{collective}} =
+T\_{\text{collective}} =
 T(\text{algorithm},\ \text{topology},\ p,\ \text{bytes},\ \text{dtype}).
 $$
 
@@ -135,7 +135,7 @@ parameter-server strategy；本章只把它作为对照协议。
 如果把一次异步更新写成：
 
 $$
-\theta_{v+1}=U(\theta_v,\ g(\theta_{v-k};B),\ s_v),
+\theta\_{v+1}=U(\theta\_v,\ g(\theta\_{v-k};B),\ s\_v),
 $$
 
 其中 $v$ 是 server 当前版本、$k$ 是梯度产生时的版本差距，那么协议至少

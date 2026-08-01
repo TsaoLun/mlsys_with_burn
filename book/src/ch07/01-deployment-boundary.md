@@ -49,10 +49,10 @@ time-to-accuracy，推理服务通常同时优化以下目标：
 对一个请求，可以用下面的分解开始分析：
 
 $$
-T_{\mathrm{request}} =
-T_{\mathrm{queue}} + T_{\mathrm{pre}} +
-T_{\mathrm{copy}} + T_{\mathrm{forward}} +
-T_{\mathrm{readback}} + T_{\mathrm{post}}.
+T\_{\mathrm{request}} =
+T\_{\mathrm{queue}} + T\_{\mathrm{pre}} +
+T\_{\mathrm{copy}} + T\_{\mathrm{forward}} +
+T\_{\mathrm{readback}} + T\_{\mathrm{post}}.
 $$
 
 批处理会改变其中多个项。若一次批包含 $b$ 个样本，固定调度和 kernel
@@ -63,10 +63,10 @@ backend 的 kernel 选择。
 Remote 场景还要增加网络传输和远端排队：
 
 $$
-T_{\mathrm{remote}} =
-T_{\mathrm{client\ queue}} + T_{\mathrm{upload}} +
-T_{\mathrm{remote\ queue}} + T_{\mathrm{compute}} +
-T_{\mathrm{download}}.
+T\_{\mathrm{remote}} =
+T\_{\mathrm{client\ queue}} + T\_{\mathrm{upload}} +
+T\_{\mathrm{remote\ queue}} + T\_{\mathrm{compute}} +
+T\_{\mathrm{download}}.
 $$
 
 把模型权重在 peer 上常驻，可以避免每个请求重复传输权重；但输入、
