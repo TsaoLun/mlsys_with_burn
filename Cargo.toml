@@ -9,6 +9,7 @@ members = [
     "examples/ch06-training-loop",
     "examples/ch07-record-roundtrip",
     "examples/ch08-rl-rollout",
+    "examples/ch09-cluster-simulator",
 ]
 resolver = "2"
 

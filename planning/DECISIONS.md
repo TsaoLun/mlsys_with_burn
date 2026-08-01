@@ -144,3 +144,19 @@
   继续以源码证据、成本模型或练习表达。完成后第 9 章从集群控制面、
   GPU/通信运行时和故障边界继续，不重新打开已隔离的上游依赖问题。
 
+## D013：第 9 章以 CPU 集群模拟器隔离控制面与真实 GPU 集群
+
+- 日期：2026-08-01
+- 决策：第 9 章默认实验使用纯 Rust、确定性虚拟时间模拟器，覆盖
+  FIFO/topology-aware placement、gang admission、`alpha + beta * bytes`
+  通信成本、checkpoint replay、失败重试和资源归还；不依赖 Burn、
+  CUDA、NCCL、网络或真实 GPU。
+- 原因：固定 Burn/CubeCL 快照可以核验本机/设备的 DDP、collective、
+  ComputeClient、stream 和 memory 入口，但没有集群作业队列、租户配额、
+  拓扑放置、rank rendezvous、elastic membership、故障 detector 或集群级
+  telemetry。把这些控制面能力写成 Burn 已实现，会把 API 入口误读为完整
+  集群 runtime。
+- 影响：正文把模拟结果限定为协议和成本模型观察；真实 CUDA/NCCL 或跨节点
+  benchmark 需要另行记录硬件、driver、通信库、launcher、拓扑和故障
+  环境，不能由 CPU 模拟器或源码存在外推。
+

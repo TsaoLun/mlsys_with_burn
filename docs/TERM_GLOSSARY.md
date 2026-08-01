@@ -26,6 +26,18 @@
 | 强化学习终止 | `done`（自然终止）与 `truncated`（外部/时间截断） | 不无条件把两者当作同一 bootstrap 语义 |
 | 策略关系 | behavior policy $\mu$ / target policy $\pi$；on-policy/off-policy | 不由“有 replay”单独判断算法类别 |
 | 采样更新架构 | Actor–Learner；actor 采样，learner 更新 | 不把 DDP gradient collective 叫 Actor–Learner |
+| GPU 集群 | GPU cluster；由 GPU、节点、机柜和网络域组成的资源系统 | 不把多张 `Device` 直接称作集群 |
+| 控制面/数据面 | control plane 负责作业与资源；training data plane 负责 rank 间通信 | 不把设备 runtime 的 queue 当作集群控制面 |
+| 成组调度 | gang scheduling；同步作业要么获得完整资源，要么等待 | 不允许部分 rank 先启动 |
+| 拓扑感知放置 | topology-aware placement；按节点、机柜、链路域选择资源 | 不只按 GPU 数量或连续 id 放置 |
+| 超额认购 | oversubscription；峰值流量超过共享链路容量 | 不把链路峰值需求写成实测可用带宽 |
+| 资源碎片 | resource fragmentation；总量足够但无法满足成组/显存/拓扑约束 | 不用总空闲 GPU 数代替可成组容量 |
+| 故障域 | failure domain；节点、机柜、链路等共同失效范围 | 不把单个 worker 错误等同于整个集群故障 |
+| 检查点提交 | checkpoint commit；写入、校验、版本确认和可恢复可见性 | 不把异步写文件等同于原子分布式提交 |
+| 幂等重试 | idempotent retry；由 job/attempt/step/version 防止重复更新 | 不只靠进程重启恢复训练进度 |
+| 集群遥测 | cluster telemetry；跨作业、rank、设备和链路的 metrics/tracing | 不把本地 kernel profiler 叫集群遥测 |
+| 队列等待 | queue wait；从提交/重新排队到成组准入的时间 | 不把 queue wait 混入 device compute |
+| 作业调度与算子调度 | job scheduler 管资源租约；operator scheduler 管进程/设备内任务 | 不把 Fusion/stream scheduler 当作 GPU 集群调度器 |
 
 ## 三张地图（符号约定）
 

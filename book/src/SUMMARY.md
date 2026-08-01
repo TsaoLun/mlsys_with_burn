@@ -84,4 +84,12 @@
   - [实验：CPU 确定性 rollout 与 replay](ch08/07-rollout-lab.md)
   - [练习、延伸阅读与来源](ch08/08-exercises-and-sources.md)
 - [第 9 章 大规模 GPU 集群管理](ch09-gpu-cluster.md)
+  - [集群负载、系统分层与能力边界](ch09/01-cluster-workload-and-boundary.md)
+  - [GPU 节点、机柜与网络拓扑](ch09/02-gpu-node-and-network-topology.md)
+  - [作业队列、资源向量与成组调度](ch09/03-job-queue-and-resource-scheduling.md)
+  - [拓扑感知放置与集合通信成本](ch09/04-topology-aware-placement-and-communication.md)
+  - [多租户、配额与资源碎片](ch09/05-multitenancy-and-fragmentation.md)
+  - [故障、检查点与可观测性](ch09/06-faults-checkpoints-and-observability.md)
+  - [实验：CPU 集群调度与故障模拟器](ch09/07-cpu-cluster-simulator-lab.md)
+  - [练习、延伸阅读与来源](ch09/08-exercises-and-sources.md)
 

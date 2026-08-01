@@ -4,25 +4,21 @@
 
 ## 当前里程碑
 
-M4：应用与扩展篇。
+M5：首个稳定版审计准备。
 
 ## 当前目标
 
-建立第 9 章“大规模 GPU 集群管理”的 OpenMLSys 与 Burn/CubeCL
-集群运行时来源映射。
+对九章执行全书术语、链接、许可证、来源和离线构建审计。
 
 ## 进行中
 
-- [ ] 映射 OpenMLSys v1 分布式训练中的集群/系统内容，核验 Burn 固定快照
-  中 GPU、通信、调度、遥测与容错边界。
+- [ ] 检查九章来源映射、导航、许可证和可离线构建说明。
 
 ## 下一步
 
-1. 逐文件审查 OpenMLSys v1 分布式训练的 cluster/system 相关文件。
-2. 核验固定 Burn/CubeCL/CubeK 的 GPU、collective、通信和运行时入口，
-   区分已有 backend 能力与外部调度器职责。
-3. 设计 CPU 可测试的调度/通信成本或故障模型实验，区分集群控制面、
-   工作负载运行时和设备 backend。
+1. 逐章检查 `planning/chapter-sources/` 与正文的来源文件覆盖。
+2. 检查 `SUMMARY.md`、正文链接、许可证声明和示例 include。
+3. 运行固定快照下的离线构建与 workspace 验证，记录首个稳定版审计结果。
 
 ## 已完成
 
@@ -111,27 +107,35 @@ M4：应用与扩展篇。
 - [x] 统一修复第 1–8 章 Markdown 数学公式的下标转义，并处理独立公式
   续行的 `+` 列表解析；重新构建后复查 86 个 display 公式、244 个行内
   公式候选，未发现 `<em>`/`<ul>`/`<ol>` 破坏，含公式页面均加载 MathJax。
+- [x] 完成第 9 章八节正文、`SUMMARY.md` 导航和
+  `planning/chapter-sources/ch09.md` 来源映射，覆盖集群负载、GPU/rack/
+  ToR/Spine 拓扑、队列、gang scheduling、拓扑放置、通信、多租户、故障、
+  checkpoint 和遥测边界。
+- [x] 新增 `examples/ch09-cluster-simulator`，使用纯 Rust 虚拟时间验证
+  FIFO/topology-aware placement、gang admission、`alpha + beta * bytes`
+  通信成本、checkpoint replay、失败重试、资源归还和确定性 trace。
+- [x] 增加 D013，明确第 9 章 CPU 控制面模拟与真实 GPU/NCCL/跨节点集群
+  能力隔离；更新集群术语、来源记录和会话日志。
+- [x] 第 9 章验证：示例 5 项测试、Clippy、运行观察、`mdbook build book`、
+  `make check`、`make check-local-sources`、`git diff --check` 均通过；
+  全书数学静态复查无未转义下标和 Markdown 结构污染。
 
 ## 本次交接
 
-- 已完成：第 1–8 章全面回补与复核。新增审计矩阵，并把原作中较薄的
-  workload、workflow、GEMM/Roofline、Pass/IR、数据背压、训练并行、
-  PTQ/安全、RL 算法与 Actor–Learner/MARL 系统内容补回正文；每项均保留
-  固定源码证据或明确未覆盖边界。
-- 验证：第 2–8 章受影响示例单包 tests/Clippy 通过；`ch02-tensor-basics`
-  输出普通/autodiff Device 标志，`ch03-tile-loads` 输出
-  naive/tiled load 与 intensity，`ch07-record-roundtrip` 与
-  `ch08-rl-rollout` 输出协议观察；`mdbook build book`、`make check`、
-  `make check-local-sources`、`git diff --check` 和 IDE lint 均通过。
-- 公式复核：16 个正文文件统一使用 Markdown 数学下标转义；`make book`
-  成功，源码中无未转义数学下标和 display 列表标记，生成 HTML 的 86 个
-  display 公式与 244 个行内公式候选均未出现 Markdown 结构污染。
-- 偏差：没有新增真实 GPU 共享内存 GEMM、服务压测、PTQ/QAT runtime、
-  网络 Actor–Learner、MARL league 或 pipeline/parameter-server runtime；
-  这些内容依旧以框架无关模型、固定源码边界和练习表达，符合 D009–D012。
-- 下一步：审查 OpenMLSys v1 分布式训练 cluster/system 文件，核验
-  Burn/CubeCL GPU、collective、通信、调度与遥测边界，开始第 9 章
-  “大规模 GPU 集群管理”的来源映射。
+- 已完成：第 9 章“大规模 GPU 集群管理”。正文、8 个小节、来源映射、
+  CPU 模拟器、导航、术语、D013 和会话日志均已落地；Burn/CubeCL 仅作为
+  已分配设备上的数据面/运行时证据，外部控制面职责已单独列出。
+- 验证：`cargo fmt --all --check`、第 9 章 tests/Clippy/run、
+  `mdbook build book`、`make check`、`make check-local-sources`、
+  `git diff --check` 和 IDE lint 均通过。示例测试 5 passed。
+- 公式复核：全书源码无未转义数学下标和 display 列表标记；生成 HTML 的
+  96 个 display 公式、244 个行内公式候选均无 `<em>`/`<ul>`/`<ol>` 结构
+  污染，含公式页面均加载 MathJax。
+- 偏差：没有新增真实 GPU/NCCL/跨节点 benchmark、集群 scheduler、
+  多租户 runtime、elastic membership、自动故障迁移或分布式 checkpoint
+  共识；这些内容以固定源码边界、成本模型、协议模拟和练习表达。
+- 下一步：进入 M5，逐章审计来源映射、导航、许可证、链接和离线构建说明，
+  为首个稳定版整理发布检查清单。
 
 ## 已知问题
 
