@@ -204,3 +204,20 @@
   workflow 写入 `.nojekyll` 并上传 Pages artifact；仓库需在 Settings →
   Pages 选择 Source = GitHub Actions。MathJax CDN 边界仍按 D015。
 
+## D017：P1 以同一初始状态验收，比较卡只作横向证据摘要
+
+- 日期：2026-08-02
+- 决策：P1 的 `initial_loss` 必须来自将要训练的同一个模型、且在第一次
+  SGD 更新前计算；loader 验收必须检查 train/validation 的精确 ID 集合、
+  batch 数和完整 shape，而不能只检查样本总数与第二维。P1 作为
+  `Dataset → autodiff → ModuleRecord → inference` 的纵向学习路径保留；
+  `comparison-cards.md` 作为 OpenMLSys/Burn/CPU/协议证据的横向摘要保留，
+  逐文件映射仍以 crosswalk 为唯一真相。
+- 原因：两个独立随机初始化的模型之间比较 loss 不能证明训练使同一状态
+  变好；仅检查总数和 shape 第二维不能捕获重复 ID、错误 split 或 batch
+  首维错误。P1 与比较卡解决的是不同学习和审计问题，删除任一项都会损失
+  一种可复核性。
+- 影响：固定协议和示例测试保持 CPU-first；比较卡显式标注纯 Rust 协议
+  helper、教学用非密码学 checksum 和 CPU 模拟器，不把它们写成 Burn
+  collective、生产安全或真实集群能力。
+

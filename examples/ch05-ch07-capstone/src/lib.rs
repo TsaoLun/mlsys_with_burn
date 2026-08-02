@@ -217,6 +217,27 @@ fn io_error(message: &'static str) -> Box<dyn Error> {
     Box::new(std::io::Error::other(message))
 }
 
+fn audit_matches_expected(
+    audit: &LoaderAudit,
+    expected_ids: &[usize],
+    expected_batches: usize,
+) -> bool {
+    let mut actual_ids = audit.ids.clone();
+    actual_ids.sort_unstable();
+
+    audit.items_processed == expected_ids.len()
+        && actual_ids == expected_ids
+        && audit.batches == expected_batches
+        && audit
+            .input_shapes
+            .iter()
+            .all(|shape| *shape == [BATCH_SIZE, 2])
+        && audit
+            .target_shapes
+            .iter()
+            .all(|shape| *shape == [BATCH_SIZE, 1])
+}
+
 // ANCHOR: capstone_pipeline
 /// Run the complete deterministic data → train → artifact → inference path.
 pub fn run_capstone() -> Result<CapstoneReport, Box<dyn Error>> {
@@ -229,44 +250,31 @@ pub fn run_capstone() -> Result<CapstoneReport, Box<dyn Error>> {
     let train_audit = audit_loader(&train_loader)?;
     let validation_audit = audit_loader(&validation_loader)?;
 
-    if train_audit.items_processed != TRAIN_SAMPLES
-        || validation_audit.items_processed != VALIDATION_SAMPLES
-        || train_audit.ids.len() != TRAIN_SAMPLES
-        || validation_audit.ids.len() != VALIDATION_SAMPLES
-    {
+    let expected_train_ids = (0..TRAIN_SAMPLES).collect::<Vec<_>>();
+    let expected_validation_ids = (TRAIN_SAMPLES..TOTAL_SAMPLES).collect::<Vec<_>>();
+    if !audit_matches_expected(
+        &train_audit,
+        &expected_train_ids,
+        TRAIN_SAMPLES / BATCH_SIZE,
+    ) {
         return Err(io_error(
-            "loader did not process the expected sample counts",
+            "train loader did not preserve the exact split or batch contract",
         ));
     }
-    if train_audit
-        .ids
-        .iter()
-        .any(|id| validation_audit.ids.contains(id))
-        || train_audit.ids.len() + validation_audit.ids.len() != TOTAL_SAMPLES
-    {
+    if !audit_matches_expected(
+        &validation_audit,
+        &expected_validation_ids,
+        VALIDATION_SAMPLES / BATCH_SIZE,
+    ) {
         return Err(io_error(
-            "train/validation ids overlap or do not cover the dataset",
+            "validation loader did not preserve the exact split or batch contract",
         ));
-    }
-    if train_audit
-        .input_shapes
-        .iter()
-        .chain(validation_audit.input_shapes.iter())
-        .any(|shape| shape[1] != 2)
-        || train_audit
-            .target_shapes
-            .iter()
-            .chain(validation_audit.target_shapes.iter())
-            .any(|shape| shape[1] != 1)
-    {
-        return Err(io_error("batch feature or target shape is incorrect"));
     }
 
     let config = LinearConfig::new(2, 1);
-    let initial_model = config.clone().init(&validation_device);
-    let initial_loss = evaluate_loss(&initial_model, &train_eval_loader)?;
     let mut model = config.init(&train_device);
     let initial_weights: Vec<f32> = model.weight.val().into_data().iter::<f32>().collect();
+    let initial_loss = evaluate_loss(&model.clone().valid(), &train_eval_loader)?;
     let mut optimizer = SgdConfig::new().init();
 
     for _ in 0..TRAIN_EPOCHS {

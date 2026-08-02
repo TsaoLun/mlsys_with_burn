@@ -58,4 +58,8 @@ Agent 开始工作时依次阅读：
   OpenMLSys 逐文件 crosswalk、发布门禁、CPU capstone、协议比较卡和终验收。
 - [`2026-08-02-github-pages-deploy.md`](2026-08-02-github-pages-deploy.md)：
   GitHub Pages 静态书站 workflow、site-url、D016 与启用步骤。
+- [`2026-08-02-p1-comparison-review.md`](2026-08-02-p1-comparison-review.md)：
+  P1 贯穿实验与 OpenMLSys 比较卡的必要性、问题修正和验证。
+- [`2026-08-02-comparison-card-heading.md`](2026-08-02-comparison-card-heading.md)：
+  比较卡章节标题、mdBook 锚点和全书校验结果。
 

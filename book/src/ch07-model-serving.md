@@ -88,5 +88,5 @@ GPU 性能结论。
   服务治理、浏览器/Remote 部署和设备性能；
 - `明确未覆盖`：burn-onnx 旧 revision 与主线 Burn 的端到端混用。
 
-对应 artifact manifest、rollback 和动态 batching 见[核心主题比较卡](comparison-cards.md#7-模型部署)。
+对应 artifact manifest、rollback 和动态 batching 见[核心主题比较卡](comparison-cards.md#第-7-章模型部署)。
 

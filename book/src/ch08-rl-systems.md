@@ -89,5 +89,5 @@ inference、replay、训练、评估和 checkpoint，但这不等于已经提供
   神经网络 DQN、Actor–Learner 和 MARL 集群；
 - `明确未覆盖`：把抽象组合 API 描述成完整 DQN/PPO/SAC/MARL runtime。
 
-对应 policy freshness 和 joint transition 协议见[核心主题比较卡](comparison-cards.md#8-强化学习)。
+对应 policy freshness 和 joint transition 协议见[核心主题比较卡](comparison-cards.md#第-8-章强化学习)。
 

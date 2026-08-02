@@ -46,5 +46,5 @@ CubeCL IR；这能验证语义和边界，但不被当作 GPU 性能实验。更
   GEMM、autotune 性能和厂商设备比较；
 - `明确未覆盖`：用 CPU 正确性结果替代 GPU 带宽、吞吐或 launch 结论。
 
-对应协议与不可比较条件见[核心主题比较卡](comparison-cards.md#3-gemm-与加速器)。
+对应协议与不可比较条件见[核心主题比较卡](comparison-cards.md#第-3-章gemm-与加速器)。
 

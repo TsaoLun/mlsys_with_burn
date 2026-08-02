@@ -83,5 +83,5 @@ CubeCL `ComputeClient` 只作为训练数据面和设备运行时的固定源码
 - `明确未覆盖`：把模拟器虚拟时间、放置结果或通信 penalty 当作 GPU
   benchmark。
 
-对应 trace schema、队列指标和控制面边界见[核心主题比较卡](comparison-cards.md#9-gpu-集群与控制面)。
+对应 trace schema、队列指标和控制面边界见[核心主题比较卡](comparison-cards.md#第-9-章gpu-集群与控制面)。
 

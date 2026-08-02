@@ -148,6 +148,12 @@ GitHub Pages 可读。
 - [x] 新增 `book/src/comparison-cards.md`，并在第 5–9 章示例中加入
   shard/背压、collective/staleness、artifact contract、policy freshness、
   trace schema 等纯 Rust 协议测试和统一证据标签。
+- [x] 复审并收紧 P1 贯穿实验：`initial_loss` 与训练使用同一初始模型，
+  loader 严格检查 train/validation ID 集合、batch 数和完整 shape；比较卡
+  明确 crosswalk 是逐文件真相，并标出协议 helper、教学 checksum 和 CPU
+  模拟器的证据边界；记录 D017。
+- [x] 将比较卡标题统一为“第 N 章：主题”，并同步第 3–9 章正文中的
+  Markdown 锚点链接；不改变 SUMMARY 导航或章节内容范围。
 - [x] P0/P1 终验收通过：`make check`、`make check-local-sources`、
   workspace Clippy/test/doctest、mdBook build/test、release audit、离线
   metadata、`cargo fmt --all --check` 和 `git diff --check`。
@@ -165,6 +171,17 @@ GitHub Pages 可读。
   `.nojekyll`。现有 CI 完整 Rust gate 保持不变。
 - 偏差：线上可达性依赖仓库 Settings → Pages 选择 GitHub Actions，并在
   推送 `main` 后由 Actions 实际部署；本机无法代替该一次性配置。
+- 已完成：P1 与比较卡复审修正，避免以不同随机初始化模型比较 loss，
+  并避免把协议模型误读为 Burn/生产 runtime。
+- 验证：`cargo fmt --all --check`、capstone `cargo test`/Clippy（均
+  `--locked --offline`）、两次 `cargo run` 输出一致、`mdbook build/test`、
+  `tools/check_release.py --require-built-book --json` 和 `git diff --check`
+  均通过；release audit `errors=[]`。
+- 已完成：比较卡标题和 7 个章节引用锚点已统一；全书 `make check` 通过，
+  包含 upstream check、mdBook build/test、workspace test/doctest/Clippy、
+  10 个 CPU smoke、capstone smoke、offline gate 和 release audit。
+- 验证：`make check` 最终退出码为 0；release audit
+  `errors=[]`、`warnings=[]`。
 - 下一步：启用 Pages source 并触发 `Deploy Pages`；随后再决定候选
   tag/归档。
 

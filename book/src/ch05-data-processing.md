@@ -69,5 +69,5 @@ trait、`Iterator`、`Send`/`Sync` 和基本线程通信；不要求先学习 SQ
   memory、跨节点 sampler 和设备数据通道；
 - `明确未覆盖`：把数据守恒或一次 CPU 测量描述成全局保序/真实吞吐。
 
-对应 `F/P/G`、分片和提交协议见[核心主题比较卡](comparison-cards.md#5-数据处理)。
+对应 `F/P/G`、分片和提交协议见[核心主题比较卡](comparison-cards.md#第-5-章数据处理)。
 

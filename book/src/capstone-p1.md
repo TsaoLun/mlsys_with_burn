@@ -18,18 +18,21 @@
 
 实验必须同时检查：
 
-1. train/validation 样本 ID 不重叠，并且合计覆盖 20 个样本；
-2. 每个 batch 的 feature shape 是 `[batch, 2]`，target shape 是
-   `[batch, 1]`；
+1. train/validation 的排序后样本 ID 分别严格等于 `0..15` 和 `16..19`，
+   因而没有重复、重叠或遗漏；
+2. train 有 4 个 batch、validation 有 1 个 batch；每个 batch 的 feature
+   shape 是 `[4, 2]`，target shape 是 `[4, 1]`；
 3. `items_processed`、batch 数、loss、参数变化和所有浮点输出有限；
-4. 训练后 loss 低于固定初始化模型的 loss；
+4. 训练后 loss 低于同一初始模型在第一次更新前的 loss；
 5. record tensor 数、恢复后输出 shape 和最大绝对误差；
 6. 将 record 加载到错误 topology 时，固定 Burn 返回
    `RecordError::Validation`，而不是静默截断或“看起来能运行”。
 
-这里的 `final_loss` 是训练完成后、用普通 Device 重新计算的训练集 loss；
-validation loader 从一开始就使用 `Device::flex()`，不保留 autodiff tape。
-这让“训练时需要梯度”和“评估/推理不需要 tape”成为可观察的边界。
+这里的 `initial_loss` 和 `final_loss` 都是同一组训练参数在训练集上的
+loss：前者在第一次 SGD 更新前计算，后者在训练完成后、用普通 Device
+重新计算。validation loader 从一开始就使用 `Device::flex()`，不保留
+autodiff tape。这让“训练时需要梯度”和“评估/推理不需要 tape”成为可观察
+的边界，而不是拿两个不同随机初始化的模型比较 loss。
 
 ## 示例入口
 
@@ -65,7 +68,8 @@ OpenMLSys v1 的 `chapter_programming_interface/ml_workflow.md` 提供完整
 inference。这里保留 workflow 的状态转移，但把实现重写为 Rust 的
 Dataset/Batcher、所有权、`AutodiffModule::valid` 和 `ModuleRecord`。
 因此本实验是“协议和最小实现的可比较证据”，不是对原作 Python 框架或
-硬件平台的性能 parity。
+硬件平台的性能 parity。逐主题的证据等级见[OpenMLSys 核心主题比较卡](comparison-cards.md)；
+逐文件映射仍以 `planning/comparison/openmlsys-v1-crosswalk.md` 为准。
 
 ## 证据标签
 

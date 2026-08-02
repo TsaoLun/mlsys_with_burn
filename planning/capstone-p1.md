@@ -21,6 +21,8 @@
 - batch size 4，`num_workers=0`，shuffle seed 41；
 - 训练 Device 是 `Device::flex().autodiff()`，validation/inference Device
   是普通 `Device::flex()`；
+- 训练模型在第一次 SGD 更新前记录 `initial_loss`，训练完成后记录
+  `final_loss`；两者来自同一组初始参数，而不是两个独立初始化的模型；
 - 32 个 epoch，`MSE → backward → GradientsParams → SgdConfig::step`；
 - `model.valid() → into_record() → into_bytes() → from_bytes() →
   try_load_record() → inference`；
@@ -33,9 +35,9 @@
 |---|---|
 | `train_samples` / `validation_samples` | 16 / 4，合计 20 |
 | `train_batches` / `validation_batches` | 4 / 1 |
-| loader IDs | 无重叠，覆盖 0–19 |
-| batch shape | input `[batch, 2]`，target `[batch, 1]` |
-| loss/parameter | 有限，最终训练 loss 小于初始化 loss，参数变化大于 0 |
+| loader IDs | train 排序后为 0–15，validation 排序后为 16–19 |
+| batch shape | 4 个 train batch 和 1 个 validation batch 均为 input `[4, 2]`、target `[4, 1]` |
+| loss/parameter | 有限，最终训练 loss 小于同一初始模型的 loss，参数变化大于 0 |
 | record | 2 个参数 tensor，错误 topology 被拒绝 |
 | inference | output `[3, 1]`，恢复前后最大绝对误差 `< 1e-6` |
 

@@ -56,5 +56,5 @@ Tensor 操作
 - `明确未覆盖`：将 Fusion block 数、cache hit、kernel launch count 和
   wall-clock time 当成同一个指标。
 
-对应对象级协议与指标边界见[核心主题比较卡](comparison-cards.md#4-irfusioncache-与-launch)。
+对应对象级协议与指标边界见[核心主题比较卡](comparison-cards.md#第-4-章irfusioncache-与-launch)。
 

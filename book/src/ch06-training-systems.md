@@ -83,5 +83,5 @@ Dataset/DataLoader
   跨节点网络和真实通信性能；
 - `明确未覆盖`：把单机训练 loop 当作分布式训练、集群容错或 NCCL 证明。
 
-对应 collective、版本和 pipeline 协议见[核心主题比较卡](comparison-cards.md#6-分布式训练)。
+对应 collective、版本和 pipeline 协议见[核心主题比较卡](comparison-cards.md#第-6-章分布式训练)。
 
