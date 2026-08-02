@@ -1,6 +1,6 @@
 # 实时状态
 
-更新日期：2026-08-01
+更新日期：2026-08-02
 
 ## 当前里程碑
 
@@ -9,19 +9,24 @@ M5：首个稳定版审计准备。
 ## 当前目标
 
 完成以 OpenMLSys v1 固定 revision 为参照的 P0/P1 对照发布审计，并保持
-九章候选版的 CPU-first、源码证据和可选平台边界可复核。
+九章候选版的 CPU-first、源码证据和可选平台边界可复核；静态书站经
+GitHub Pages 可读。
 
 ## 进行中
 
 - [ ] P0/P1 已完成；等待发布者决定是否创建候选 tag/发布归档。
+- [ ] 仓库 Settings → Pages → Source 需设为 GitHub Actions，并在推送
+  `main` 后确认 `https://tsaolun.github.io/mlsys_with_burn/` 可访问。
 
 ## 下一步
 
-1. 由发布者审阅 `planning/comparison/openmlsys-v1-crosswalk.md` 和
+1. 在 GitHub 仓库启用 Pages（Source = GitHub Actions），推送或手动运行
+   `Deploy Pages` workflow，确认站点根路径与含公式章节可打开。
+2. 由发布者审阅 `planning/comparison/openmlsys-v1-crosswalk.md` 和
    `tools/check_release.py` 的机器可读输出，决定候选版归档/tag。
-2. 若要增加真实 GPU、NCCL、ONNX、DDP、DQN/MARL 或网络实验，建立独立
+3. 若要增加真实 GPU、NCCL、ONNX、DDP、DQN/MARL 或网络实验，建立独立
    平台 profile，不能改变默认 CPU gate。
-3. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
+4. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
 
 ## 已完成
 
@@ -146,26 +151,22 @@ M5：首个稳定版审计准备。
 - [x] P0/P1 终验收通过：`make check`、`make check-local-sources`、
   workspace Clippy/test/doctest、mdBook build/test、release audit、离线
   metadata、`cargo fmt --all --check` 和 `git diff --check`。
+- [x] 新增 GitHub Pages 部署：`.github/workflows/deploy-pages.yml`、
+  `book.toml` 的 `site-url`、D016、`release.toml` pages 元数据和中英文
+  README 在线阅读链接；不提交 `book/book/`，不改默认 CPU gate。
 
 ## 本次交接
 
-- 已完成：P0/P1 OpenMLSys 对照发布。crosswalk、九章证据状态、发布检查器、
-  固定工具/CI、CPU capstone、针对性实验、比较卡、协议测试和文档边界均已
-  落地；计划文件本身未修改。
-- 验证：`make check` 和 `make check-local-sources` 均通过；其中包含
-  `mdbook build/test`、workspace `fmt`/Clippy/test/doctest、十个 CPU
-  smoke、capstone smoke、`--locked`/offline gate 和生成 HTML 公式复查。
-  `cargo metadata --locked --offline`、release audit、IDE lint 和
-  `git diff --check` 也通过。
-- 证据范围：capstone 从 16/4 数据 split 走到 autodiff SGD、
-  `ModuleRecord` bytes、错误 topology 拒绝和恢复后 inference；第 2 章
-  detach 断边实验、第 4 章重复 Fusion/cache 日志、以及第 5–9 章协议卡
-  都有 CPU/源码/模型标签。
-- 偏差：仍没有真实 GPU/NCCL/跨节点 benchmark、ONNX 对齐 fixture、完整
-  DQN/PPO/SAC/MARL、服务治理、集群 scheduler、多租户 runtime、弹性成员、
-  自动故障迁移或分布式 checkpoint 共识；它们被明确标为可选或未覆盖。
-- 下一步：发布者审阅 crosswalk 和机器可读 release 输出，决定候选 tag/
-  归档；任何真实平台轨道需独立 profile，不得放宽默认 CPU gate。
+- 已完成：为九章候选版增加 GitHub Pages 静态发布（D016）。独立 deploy
+  workflow 使用固定 `mdbook 0.4.51` 与 pinned Pages actions；`book.toml`
+  使用 project-site 路径 `/mlsys_with_burn/`；README / STATUS /
+  `release.toml` 记录预期 URL。
+- 验证：本地 `mdbook build book`，产物含 `index.html`；workflow 会写入
+  `.nojekyll`。现有 CI 完整 Rust gate 保持不变。
+- 偏差：线上可达性依赖仓库 Settings → Pages 选择 GitHub Actions，并在
+  推送 `main` 后由 Actions 实际部署；本机无法代替该一次性配置。
+- 下一步：启用 Pages source 并触发 `Deploy Pages`；随后再决定候选
+  tag/归档。
 
 ## 已知问题
 

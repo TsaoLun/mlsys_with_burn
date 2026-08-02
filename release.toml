@@ -15,3 +15,8 @@ actions_are_pinned_to_commit = true
 default_backend = "flex-cpu"
 offline_cargo_gate = true
 mathjax_requires_network_for_browser = true
+
+[pages]
+url = "https://tsaolun.github.io/mlsys_with_burn/"
+workflow = ".github/workflows/deploy-pages.yml"
+source = "github-actions"

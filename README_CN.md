@@ -41,6 +41,16 @@ mlsys_with_burn/
 这些目录被 Git 忽略，只用于让 Agent 快速阅读上游源码。项目构建和测试
 不依赖它们，它们也不得影响 Cargo 的依赖解析。
 
+## 在线阅读
+
+九章候选版通过 GitHub Pages 发布为静态 mdBook 站点：
+
+https://tsaolun.github.io/mlsys_with_burn/
+
+推送到 `main` 后由
+[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml)
+自动重建。浏览器公式渲染仍依赖 mdBook 配置的 MathJax CDN（见 D015 / D016）。
+
 ## 快速开始
 
 环境要求：
@@ -55,6 +65,12 @@ make check
 
 `make check` 统一使用 `--locked`，运行 CPU smoke suite，并在获取锁定依赖
 后执行 Cargo offline gate。生成的教材位于 `book/book/`，不会提交到 Git。
+本地预览：
+
+```bash
+mdbook serve book
+```
+
 浏览器公式阅读仍需要 mdBook 配置的 MathJax 资源；Cargo 离线可复现不等于
 MathJax CDN 可以离线访问。
 

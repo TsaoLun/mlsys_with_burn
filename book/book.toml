@@ -12,4 +12,7 @@ create-missing = false
 [output.html]
 mathjax-support = true
 preferred-dark-theme = "navy"
+site-url = "/mlsys_with_burn/"
+git-repository-url = "https://github.com/TsaoLun/mlsys_with_burn"
+git-repository-icon = "fa-github"
 

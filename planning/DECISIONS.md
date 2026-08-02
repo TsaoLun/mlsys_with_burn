@@ -188,3 +188,19 @@
   formula、生成 HTML 和 offline metadata；默认 CI 不需要本地上游镜像，
   `--check-local-sources` 只作为额外源码路径审计。
 
+## D016：候选版静态书站托管在 GitHub Pages
+
+- 日期：2026-08-02
+- 决策：九章候选版的可读 HTML 由 GitHub Pages 托管，URL 为
+  `https://tsaolun.github.io/mlsys_with_burn/`。构建产物来自固定
+  `mdbook 0.4.51`，由独立 workflow
+  `.github/workflows/deploy-pages.yml` 在 `main` 推送或手动触发时发布；
+  不提交 `book/book/`，不把完整 Rust/Cargo 测试绑进 deploy job，也不改
+  默认 CPU gate。不采用 Deno Deploy。
+- 原因：教材已是 mdBook 静态站点；GitHub Pages 与现有 pinned CI 工具链
+  对齐，且适合 project-site 子路径。Deno 更适合 edge/API，对纯静态产物
+  无额外验收收益。
+- 影响：`book/book.toml` 设置 `site-url = "/mlsys_with_burn/"`；deploy
+  workflow 写入 `.nojekyll` 并上传 Pages artifact；仓库需在 Settings →
+  Pages 选择 Source = GitHub Actions。MathJax CDN 边界仍按 D015。
+

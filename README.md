@@ -46,6 +46,17 @@ These directories are ignored by Git and exist only to let agents inspect
 upstream source quickly. They are not required to build or test the project and
 must not affect Cargo dependency resolution.
 
+## Read Online
+
+The candidate edition is published as a static mdBook site on GitHub Pages:
+
+https://tsaolun.github.io/mlsys_with_burn/
+
+Pushes to `main` rebuild the site via
+[`.github/workflows/deploy-pages.yml`](.github/workflows/deploy-pages.yml).
+Browser formula rendering still depends on the MathJax CDN configured by
+mdBook (see D015 / D016).
+
 ## Quick Start
 
 Requirements:
@@ -60,9 +71,14 @@ make check
 
 `make check` uses `--locked`, runs the CPU smoke suite and the Cargo offline
 gate after fetching locked dependencies. The generated book is written to
-`book/book/` and is not committed. Browser reading of formulas still needs
-the MathJax assets configured by mdBook; Cargo offline reproducibility does
-not imply an offline CDN.
+`book/book/` and is not committed. For local preview:
+
+```bash
+mdbook serve book
+```
+
+Browser reading of formulas still needs the MathJax assets configured by
+mdBook; Cargo offline reproducibility does not imply an offline CDN.
 
 If the optional source mirrors are present, verify that they match the remote
 snapshot with:
