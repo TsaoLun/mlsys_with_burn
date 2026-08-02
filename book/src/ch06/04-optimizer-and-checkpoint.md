@@ -115,5 +115,5 @@ model record
 
 本章实验不保存文件 checkpoint，而是把 `initial_loss`、`final_loss`、
 每一步 `losses` 和参数变化量作为最小状态观测。生产训练应在此基础上再
-测试三个 record 的 round-trip，以及恢复后 scheduler 和 optimizer state
+测试三个 record 的往返保存与恢复，以及恢复后 scheduler 和 optimizer state
 是否与未中断轨迹一致。

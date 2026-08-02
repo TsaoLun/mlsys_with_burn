@@ -18,12 +18,14 @@ CPU、GPU、Web 与嵌入式运行时
 Burn 是贯穿全书的可执行案例，不是机器学习系统的全部。分布式通信、
 集群调度、存储和服务等主题仍会从框架无关的系统原理出发。
 
-本书是固定 `burn-0.22.0-pre.1` 源码快照的九章候选版，默认路径采用
-CPU-first 实验。每章都区分固定源码核验、CPU 可运行验证、框架无关协议
-模型、可选平台实验和明确未覆盖能力；真实 GPU、NCCL、ONNX、DDP 和集群
-控制面不会因为本书使用 Burn 就自动变成已验证事实。
+本书是固定 `burn-0.22.0-pre.1` 源码快照的九章候选版，默认采用
+CPU 可运行路径（CPU-first）。每章都区分固定源码核验、CPU 可运行验证、
+框架无关协议模型、可选平台实验和明确未覆盖能力；这些是本书的证据分类，
+不是 Burn 官方能力等级。真实 GPU、NCCL、ONNX、DDP 和集群控制面不会因为
+本书使用 Burn 就自动变成已验证事实。
 
-发布审计入口位于项目的 `planning/comparison/`、`release.toml` 和
-`tools/check_release.py`。本书公式由 mdBook MathJax 渲染，Cargo 的
-offline gate 只保证源码和依赖可离线构建，不保证浏览器访问 CDN 资源。
+发布审计（release audit）入口位于项目的 `planning/comparison/`、
+`release.toml` 和 `tools/check_release.py`。本书公式由 mdBook MathJax
+渲染，Cargo 离线门禁（offline gate）只保证源码和依赖可离线构建，不保证
+浏览器访问 CDN 资源。
 

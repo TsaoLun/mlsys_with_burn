@@ -1,14 +1,15 @@
 # OpenMLSys 核心主题比较卡
 
-本页把 OpenMLSys v1 的核心系统主题改写成可审计的比较卡。每张卡都回答
+本页把 OpenMLSys v1 的核心系统主题改写成本书定义的主题比较卡。每张卡都回答
 五个问题：原作讨论什么、当前本书用什么模型、固定源码在哪里、读者能
 运行什么观察、哪些能力和硬件条件不能直接比较。
 
 证据标签统一为：`源码核验`、`CPU 可运行验证`、`协议/成本模型`、
-`可选平台实验`、`未覆盖`。标签是证据层级，不是平台 parity 承诺。
+`可选平台实验`、`未覆盖`。标签是本书的证据层级，不是平台能力对等
+（parity）承诺。
 本页是面向读者的横向摘要，不替代
-`planning/comparison/openmlsys-v1-crosswalk.md` 的逐文件映射；第 1–2 章的
-接口、计算图和编程模型对照仍以对应章节和 crosswalk 为准。本页聚焦第
+`planning/comparison/openmlsys-v1-crosswalk.md` 的逐文件对照矩阵；第 1–2 章的
+接口、计算图和编程模型对照仍以对应章节和逐文件对照矩阵为准。本页聚焦第
 3–9 章中最容易把“概念、源码入口、协议模型”误读成“完整运行时”的主题。
 
 ## 第 3 章：GEMM 与加速器
@@ -55,7 +56,7 @@
 - **固定入口**：`burn/crates/burn-dataset/src/` 和
   `burn/crates/burn-core/src/data/dataloader/`。
 - **可运行观察**：`ch05-data-pipeline` 的 Dataset/Mapper/Batcher/DataLoader
-  测试验证数据守恒、分片和背压协议；贯穿 capstone 把 Tensor batch 交给
+  测试验证数据守恒、分片和背压协议；综合实验把 Tensor batch 交给
   第 6 章训练。
 - **不可直接比较**：内存样本和虚拟 queue 不代表磁盘、网络、pinned
   memory 或全局保序吞吐。标签为 `源码核验 + CPU 可运行验证 +
@@ -68,7 +69,7 @@
 - **OpenMLSys 文件**：`chapter_distributed_training/methods.md`、
   `collective.md`、`parameter_servers.md`、`cluster.md`。
 - **本书模型**：加权 AllReduce、版本化 stale gradient、quorum、1F1B
-  bubble 和单调 checkpoint commit 的纯 Rust 协议卡。
+  bubble 和单调 checkpoint commit 的纯 Rust 协议模型测试。
 - **固定入口**：`burn/crates/burn-train/src/`、
   `burn/crates/burn-communication/src/` 和
   `burn/crates/burn-core/src/tensor/distributed.rs`。
@@ -85,12 +86,12 @@
 - **OpenMLSys 文件**：`chapter_model_deployment/model_converter_and_optimizer.md`、
   `model_compression.md`、`model_inference.md`、`model_security.md`。
 - **本书模型**：manifest 的 version/payload length/checksum、回滚条件和
-  同 shape 动态 batching contract；主线 artifact 与 burn-onnx revision
+  同 shape 动态 batching 契约（contract）；当前 workspace 的 artifact 与 burn-onnx revision
   分开。
 - **固定入口**：`burn/crates/burn-core/src/store/`、
   `burn/crates/burn-core/src/module/base.rs` 和
   `burn-onnx/crates/burn-import/src/`。
-- **可运行观察**：`ch07-record-roundtrip` 验证 Burnpack round-trip；
+- **可运行观察**：`ch07-record-roundtrip` 验证 Burnpack 参数往返保存与恢复；
   同 crate 的纯 Rust contract harness 用教学用的非密码学 checksum
   验证 payload length、版本、rollback 和 dynamic batch。
 - **不可直接比较**：manifest/checksum 不是完整供应链安全；旧 revision
@@ -106,7 +107,7 @@
   joint action/reward vector 和已验证的 done/truncated/TD 语义。
 - **固定入口**：`burn/crates/burn-rl/src/`、
   `burn/crates/burn-train/src/learner/`。
-- **可运行观察**：`ch08-rl-rollout` 的 CPU 环境/replay/TD 测试和协议卡；
+- **可运行观察**：`ch08-rl-rollout` 的 CPU 环境/replay/TD 测试和协议模型测试；
   不依赖 gym 或外部 simulator。
 - **不可直接比较**：mock policy 不是 DQN/PPO/SAC；joint vector 不是
   MARL credit assignment runtime；完整 Actor–Learner 是可选/未覆盖。
@@ -128,9 +129,9 @@
 - **不可直接比较**：虚拟时间、cross-rack penalty 和 trace 不代表 GPU、
   NCCL、RDMA、网络拥塞、多租户 runtime 或弹性 membership benchmark。
 
-## 与 P1 贯穿实验的关系
+## 与综合实验的关系
 
-P1 贯穿实验把第 5–7 章串成一条真实 CPU-first 路径：
+综合实验把第 5–7 章串成一条 CPU 可运行路径：
 `Dataset → autodiff → ModuleRecord → inference`；它回答“状态怎样跨过
 数据、训练和 artifact 边界”。本页的比较卡回答“同一主题在 OpenMLSys、
 固定 Burn 源码、CPU 实验和协议模型之间分别有哪种证据”。前者是纵向学习
@@ -139,6 +140,6 @@ P1 贯穿实验把第 5–7 章串成一条真实 CPU-first 路径：
 ## 如何使用这些卡片
 
 先读对应章节的框架无关模型，再运行卡片列出的 CPU 示例，最后回到
-`planning/comparison/openmlsys-v1-crosswalk.md` 检查原作逐文件范围和
+`planning/comparison/openmlsys-v1-crosswalk.md` 这份逐文件对照矩阵检查原作逐文件范围和
 固定 revision。若一个结论没有同时标出证据标签、硬件前提和未覆盖边界，
 它就不能作为本书的发布级比较结论。

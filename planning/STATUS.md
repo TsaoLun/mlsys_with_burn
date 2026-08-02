@@ -154,6 +154,10 @@ GitHub Pages 可读。
   模拟器的证据边界；记录 D017。
 - [x] 将比较卡标题统一为“第 N 章：主题”，并同步第 3–9 章正文中的
   Markdown 锚点链接；不改变 SUMMARY 导航或章节内容范围。
+- [x] 清理读者可见的项目内部术语：P1/capstone 改为“综合实验”，
+  crosswalk 改为“逐文件对照矩阵”，补充 C/S/R/L/E 的完整含义，解释
+  CPU-first、smoke test、parity、release audit 和 offline gate，并将
+  可选轨道、主线、协议卡等表达改为通用描述。
 - [x] P0/P1 终验收通过：`make check`、`make check-local-sources`、
   workspace Clippy/test/doctest、mdBook build/test、release audit、离线
   metadata、`cargo fmt --all --check` 和 `git diff --check`。
@@ -182,6 +186,10 @@ GitHub Pages 可读。
   10 个 CPU smoke、capstone smoke、offline gate 和 release audit。
 - 验证：`make check` 最终退出码为 0；release audit
   `errors=[]`、`warnings=[]`。
+- 已完成：读者可见术语清理完成；项目内部 P1 代号仅保留在 planning、
+  示例 crate 和文件路径中，正文改用“综合实验”等通用描述。
+- 验证：术语修正后的 `make check` 退出码为 0；release audit
+  `errors=[]`、`warnings=[]`，IDE lint 无错误。
 - 下一步：启用 Pages source 并触发 `Deploy Pages`；随后再决定候选
   tag/归档。
 

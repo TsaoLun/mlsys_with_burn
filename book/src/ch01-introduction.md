@@ -22,7 +22,7 @@ CubeCL / CubeK Kernel → 设备 Runtime
 ```
 
 选择 Rust 不是为了假装机器学习系统只有一种语言。Python、C++、CUDA
-仍然是理解现有生态和接口边界的重要组成部分。统一的 Rust 主线只是让我们
+仍然是理解现有生态和接口边界的重要组成部分。统一的 Rust 技术路径只是让我们
 能在同一套类型、所有权与并发语义下，从模型定义一路追踪到 Kernel 和
 运行时，减少因频繁切换技术栈而产生的认知断点。
 
@@ -64,5 +64,6 @@ GPU 编程或分布式系统也没有关系：本章先建立地图，后续章�
   ONNX 端到端和集群控制面；
 - `明确未覆盖`：OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人及附录。
 
-逐文件对照见项目文件 `planning/comparison/openmlsys-v1-crosswalk.md`。
+以上证据标签是本书的发布审计分类，不代表 Burn 官方能力等级。
+逐文件对照矩阵见项目文件 `planning/comparison/openmlsys-v1-crosswalk.md`。
 

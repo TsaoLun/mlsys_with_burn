@@ -62,4 +62,6 @@ Agent 开始工作时依次阅读：
   P1 贯穿实验与 OpenMLSys 比较卡的必要性、问题修正和验证。
 - [`2026-08-02-comparison-card-heading.md`](2026-08-02-comparison-card-heading.md)：
   比较卡章节标题、mdBook 锚点和全书校验结果。
+- [`2026-08-02-reader-terminology-cleanup.md`](2026-08-02-reader-terminology-cleanup.md)：
+  读者可见项目术语清理、证据分类说明和全书校验结果。
 

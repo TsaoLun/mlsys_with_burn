@@ -62,7 +62,7 @@ $$
 版本、范围统计和误差阈值必须成为 artifact metadata，否则同一权重的
 量化结果不可复查。
 
-固定主线 Burn 的 crate 文档明确写出：当前不支持 QAT，部分 backend 在
+固定版本 Burn 的 crate 文档明确写出：当前不支持 QAT，部分 backend 在
 开发中的 PTQ 路径支持有限的低精度表示。这个事实不能外推为“任意
 `burn-onnx` 模型都能自动完成量化”。`burn-onnx` 中存在量化相关 ONNX
 node 代码，也只说明 importer 有对应节点实现入口；仍需针对具体模型、
@@ -140,6 +140,6 @@ reference model + fixed inputs
 保存校准集版本或摘要。一个在 CPU Flex 上变快的结果不能自动外推到
 WebGPU、CUDA 或嵌入式目标。
 
-本项目固定快照没有为第 7 章加入量化 benchmark，因为当前要先验证主线
+本项目固定快照没有为第 7 章加入量化 benchmark，因为当前要先验证根 workspace 的
 Record artifact 的恢复语义。压缩方案可以作为练习或后续章节扩展，不在
 没有目标 backend 和 reference 数据时写成已完成的部署能力。

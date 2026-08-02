@@ -85,13 +85,13 @@ $$
 5. reference 输入下输出误差是否在约定容差内；
 6. 前处理、后处理和类别/token 映射是否同步。
 
-这也是为什么本章把 `ModuleRecord` round-trip 写成测试，而不是只断言
+这也是为什么本章把 `ModuleRecord` 往返保存与恢复写成测试，而不是只断言
 “文件生成成功”。在生产环境中，还应把 model revision、代码 revision、
 backend、dtype、校准集摘要和 schema version 写入发布元数据。
 
 ## Burn 的位置
 
-固定 Burn 主线的核心 `ModuleRecord` 记录 module 参数和 `ParamId`，可以用
+根 workspace 的固定版本 Burn `ModuleRecord` 记录 module 参数和 `ParamId`，可以用
 内存 Burnpack bytes 恢复到一个新 module。它是一个很小、可测试的 artifact
 边界，不等于完整部署 manifest。更丰富的 `burn-store` 再提供
 `ModuleSnapshot`、SafeTensors/PyTorch adapter、过滤和 remap，但这些能力

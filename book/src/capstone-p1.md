@@ -1,4 +1,4 @@
-# P1 贯穿实验：数据 → 训练 → ModuleRecord → 推理
+# 综合实验：数据 → 训练 → ModuleRecord → 推理
 
 第 5–7 章分别讨论数据处理、训练系统和模型 artifact。如果每章只运行
 自己的小例子，读者仍可能看不见系统状态如何穿过边界。本实验用一个
@@ -37,7 +37,7 @@ autodiff tape。这让“训练时需要梯度”和“评估/推理不需要 ta
 ## 示例入口
 
 主程序只输出稳定语义字段，不输出墙钟耗时，因此默认运行可以作为
-workspace smoke test：
+工作区快速验证（smoke test）：
 
 ```rust,ignore
 {{#include ../../examples/ch05-ch07-capstone/src/main.rs:capstone_main}}
@@ -56,10 +56,10 @@ cargo test -p ch05-ch07-capstone --locked --offline
 cargo run -p ch05-ch07-capstone --locked --offline
 ```
 
-输出中的 `max_abs_error` 是 CPU 浮点 round-trip 的数值一致性检查，不是
+输出中的 `max_abs_error` 是 CPU 浮点往返保存/恢复（round-trip）的数值一致性检查，不是
 模型精度或服务 latency 结论。`ModuleRecord` 验证的是 Burn 参数 artifact
 边界；ONNX 转换、HTTP 服务、Remote、GPU 和多节点部署仍然是第 7 章明确
-标出的可选轨道。
+标出的可选路径。
 
 ## 与 OpenMLSys 的比较
 
@@ -68,10 +68,12 @@ OpenMLSys v1 的 `chapter_programming_interface/ml_workflow.md` 提供完整
 inference。这里保留 workflow 的状态转移，但把实现重写为 Rust 的
 Dataset/Batcher、所有权、`AutodiffModule::valid` 和 `ModuleRecord`。
 因此本实验是“协议和最小实现的可比较证据”，不是对原作 Python 框架或
-硬件平台的性能 parity。逐主题的证据等级见[OpenMLSys 核心主题比较卡](comparison-cards.md)；
-逐文件映射仍以 `planning/comparison/openmlsys-v1-crosswalk.md` 为准。
+硬件平台的性能对等性（parity）。逐主题的证据等级见[OpenMLSys 核心主题比较卡](comparison-cards.md)；
+逐文件对照矩阵仍以 `planning/comparison/openmlsys-v1-crosswalk.md` 为准。
 
 ## 证据标签
+
+以下是本书自定义的证据分类，不是 Burn 官方能力等级：
 
 - `CPU 可运行验证`：固定命令运行数据分片、训练、record 和 inference；
 - `固定源码核验`：Burn `PartialDataset`、DataLoader、autodiff、SGD 和

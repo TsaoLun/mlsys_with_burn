@@ -1,4 +1,4 @@
-# 7.7 实验：CPU 模型状态 round-trip
+# 7.7 实验：CPU 模型状态往返保存与恢复
 
 ## 实验目标与边界
 
@@ -7,7 +7,7 @@
 forward 的输出。
 
 ```text
-主线 Burn Linear
+根 workspace 的 Burn Linear
       │
       ├── reference forward
       ├── Module::into_record
@@ -80,7 +80,7 @@ record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
    `ApplyResult`；
 4. 为模型加一个版本 metadata 和固定 reference 输入；
 5. 在 host 上用 `burn-onnx::ModelGen` 生成一个 fixture，并对齐它与
-   当前主线 Burn revision 后再加入 workspace；
+   当前 workspace 的 Burn revision 后再加入 workspace；
 6. 把已加载的 model 放到服务 runner，单独测 queue、pre/post 和
    p95/p99；
 7. 具备匹配网络和 backend 后，再尝试 Remote 或浏览器客户端。
@@ -91,6 +91,6 @@ record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
 ## 5. 接到第 5–6 章
 
 若要从真实数据和训练状态进入 artifact，而不是手工初始化 Linear，请运行
-[P1 贯穿实验：数据到推理](../capstone-p1.md)。它在本实验的
-`ModuleRecord` round-trip 之前加入 Dataset split、SGD 更新和
+[综合实验：数据到推理](../capstone-p1.md)。它在本实验的
+`ModuleRecord` 往返保存与恢复之前加入 Dataset split、SGD 更新和
 `model.valid()`，并用错误 topology 验证加载失败语义。

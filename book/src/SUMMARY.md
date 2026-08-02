@@ -3,7 +3,7 @@
 [首页](README.md)
 [前言](preface.md)
 [许可、来源与独立性声明](attribution.md)
-[P1 贯穿实验：数据到推理](capstone-p1.md)
+[综合实验：数据到推理](capstone-p1.md)
 [OpenMLSys 核心主题比较卡](comparison-cards.md)
 
 # 基础篇
@@ -75,7 +75,7 @@
   - [压缩、精度与离线优化](ch07/04-compression-and-optimization.md)
   - [推理 runtime、批处理与服务接口](ch07/05-inference-runtime-and-service.md)
   - [Remote、WASM/no_std 与部署边界](ch07/06-remote-wasm-and-nostd.md)
-  - [实验：CPU 模型状态 round-trip](ch07/07-record-roundtrip-lab.md)
+  - [实验：CPU 模型状态往返保存与恢复](ch07/07-record-roundtrip-lab.md)
   - [练习、延伸阅读与来源](ch07/08-exercises-and-sources.md)
 - [第 8 章 强化学习系统](ch08-rl-systems.md)
   - [MDP、环境与轨迹边界](ch08/01-mdp-environment-and-trajectory.md)

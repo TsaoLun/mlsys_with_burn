@@ -71,7 +71,7 @@ Runtime / driver
 ```
 
 原作通过 Pybind11 和 C/C++ custom op 解释“高层接口如何调用低层实现”。
-在本书中，Rust/CubeCL 是主线替代，但问题本身没有消失：扩展仍要处理
+在本书中，Rust/CubeCL 是本书的实现路径替代，但问题本身没有消失：扩展仍要处理
 ABI 或 trait 边界、shape/dtype 校验、设备地址、workspace、异步错误和
 版本兼容。第 3、4 章会把其中的 Kernel、launch 和 lowering 展开；本章
 只保留接口责任，避免将一个 backend 内部函数冒充稳定的模型 API。

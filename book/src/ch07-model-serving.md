@@ -16,7 +16,7 @@
 
 完成本章后，你应该能够：
 
-1. 把模型部署拆成 artifact、执行 runtime、请求服务和安全治理四个边界；
+1. 把模型部署拆成模型产物（artifact）、执行运行时（runtime）、请求服务和安全治理四个边界；
 2. 解释 ONNX 图到 Burn Rust source 的转换为什么不是简单的文件改名；
 3. 区分模型拓扑、参数状态、权重格式、运行时 backend 和服务协议；
 4. 使用 `ModuleRecord`/Burnpack 在 CPU 上保存并恢复参数，验证推理输出；
@@ -56,8 +56,8 @@ Remote 把 tensor operation 送到 compute peer；服务端的路由、鉴权、
 限流和故障转移则仍然是应用系统的职责。
 
 本章的固定版本警告很重要：`pins.toml` 中的 `burn-onnx` revision 的
-manifest 仍指向较早的 Burn revision，与项目主线 Burn revision 不同。因而
-本章把 ONNX 源码核验和当前主线 `ModuleRecord` CPU 实验分开，不用一个未对齐
+manifest 仍指向较早的 Burn revision，与根 workspace 使用的 Burn revision 不同。
+因而本章把 ONNX 源码核验和当前 workspace 的 `ModuleRecord` CPU 实验分开，不用一个未对齐
 的依赖图制造“端到端已验证”的印象。
 
 ## 小节
@@ -68,7 +68,7 @@ manifest 仍指向较早的 Burn revision，与项目主线 Burn revision 不同
 4. [压缩、精度与离线优化](ch07/04-compression-and-optimization.md)
 5. [推理 runtime、批处理与服务接口](ch07/05-inference-runtime-and-service.md)
 6. [Remote、WASM/no_std 与部署边界](ch07/06-remote-wasm-and-nostd.md)
-7. [实验：CPU 模型状态 round-trip](ch07/07-record-roundtrip-lab.md)
+7. [实验：CPU 模型状态往返保存与恢复](ch07/07-record-roundtrip-lab.md)
 8. [练习、延伸阅读与来源](ch07/08-exercises-and-sources.md)
 
 示例代码位于 `examples/ch07-record-roundtrip`，使用当前项目固定 Burn
@@ -78,15 +78,15 @@ GPU 性能结论。
 
 ## 证据状态
 
-- `CPU 可运行验证`：主线 `ModuleRecord`/Burnpack 参数 round-trip 和恢复后
-  inference；
+- `CPU 可运行验证`：当前 workspace 的 `ModuleRecord`/Burnpack 参数往返保存与恢复，
+  以及恢复后的 inference；
 - `固定源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
-  WASM/no_std 和主线 artifact 入口；
+  WASM/no_std 和当前 workspace 的 artifact 入口；
 - `框架无关模型/协议模拟`：manifest、checksum、版本、rollback、batch/
   queue 和安全威胁模型；
 - `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 ONNX fixture、
   服务治理、浏览器/Remote 部署和设备性能；
-- `明确未覆盖`：burn-onnx 旧 revision 与主线 Burn 的端到端混用。
+- `明确未覆盖`：burn-onnx 旧 revision 与当前 workspace Burn 的端到端混用。
 
 对应 artifact manifest、rollback 和动态 batching 见[核心主题比较卡](comparison-cards.md#第-7-章模型部署)。
 

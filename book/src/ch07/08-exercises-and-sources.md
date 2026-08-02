@@ -11,7 +11,7 @@ feature 开启后增加 snapshot、Burnpack/SafeTensors/PyTorch store、过滤�
 固定 `burn-onnx` 的 `ModelGen` 将 ONNX graph 解析成 Burn graph，生成 Rust
 source，并收集 Burnpack 权重。`File`、`Embedded`、`Bytes` 和 `None`
 决定权重从哪里进入生成的 model。由于该固定仓库的 manifest 仍依赖旧
-Burn revision，本章源码核验与当前主线 Record 实验保持分离。
+Burn revision，本章源码核验与当前 workspace 的 Record 实验保持分离。
 
 Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 需要异步事件循环；no_std 只缩小标准库依赖，不自动提供文件、网络、线程
@@ -95,7 +95,7 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 
 ## 延伸阅读与固定源码入口
 
-Burn 主线：
+根 workspace 的 Burn：
 
 - `burn/crates/burn-core/src/store/mod.rs`
 - `burn/crates/burn-core/src/module/base.rs`
@@ -151,6 +151,6 @@ OpenMLSys v1：
 
 没有复制 OpenMLSys 的 MindSpore/PyTorch/ARM 汇编代码、图片或 Mate30
 性能数字。完整 revision 关系、逐文件核验和不作出的能力承诺见
-`planning/chapter-sources/ch07.md`；D010 记录 `burn-onnx` 与主线 Burn
+`planning/chapter-sources/ch07.md`；D010 记录 `burn-onnx` 与根 workspace 的 Burn
 revision 隔离的决定。OpenMLSys 改编正文采用 CC BY-NC-SA 4.0；新增 Rust
 示例采用 MIT OR Apache-2.0。

@@ -28,6 +28,10 @@
 | 梯度新鲜度 | gradient staleness；当前参数版本与梯度版本的差距 | 不静默接受无限 stale update |
 | 流水线空泡 | pipeline bubble；1F1B 的 warm-up/drain 空闲槽 | 不把 micro-batch 数当作 stage 数 |
 | artifact 清单 | artifact manifest；version/payload length/checksum | 不把 checksum 单独当作供应链安全 |
+| 读者综合实验 | `Dataset → autodiff → ModuleRecord → inference` 的端到端 CPU 路径；项目 planning 中可标记为 P1 | 正文标题不单独暴露 P1 代号 |
+| 逐文件对照矩阵 | OpenMLSys 文件、本书章节、源码入口和证据状态的映射；英文可写 crosswalk | 不把它写成 OpenMLSys 或 Burn 的官方术语 |
+| 证据分类 | 源码核验、CPU 可运行验证、框架无关协议模型、可选平台实验、明确未覆盖 | 不写成 Burn 官方能力等级或平台 parity |
+| 默认 CPU 路径 | CPU 可运行路径（CPU-first）；用于默认示例和发布门禁 | 不把 CPU 验证外推成 GPU、网络或集群能力 |
 | 动态 batching | dynamic batching；同 shape 请求按容量成批 | 不跨 shape 拼 batch 或把队列等待算进 kernel |
 | 强化学习终止 | `done`（自然终止）与 `truncated`（外部/时间截断） | 不无条件把两者当作同一 bootstrap 语义 |
 | 策略关系 | behavior policy $\mu$ / target policy $\pi$；on-policy/off-policy | 不由“有 replay”单独判断算法类别 |

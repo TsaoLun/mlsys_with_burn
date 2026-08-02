@@ -87,20 +87,20 @@ loader 应用 snapshot 时，还可能触发 dtype 转换、设备分配和 back
 
 ## 为什么本项目不直接接入固定 `burn-onnx`
 
-本项目的 Burn 主线 revision 是 `976aa9...`，而固定 `burn-onnx` 的
+根 workspace 的 Burn revision 是 `976aa9...`，而固定 `burn-onnx` 的
 workspace manifest 把 `burn`、`burn-flex` 和 `burn-store` 指向
 `78f10a...`。依赖图中即使出现相同的 package name，Rust 也会把不同
-revision 的类型视为不同类型；例如旧 `burn::Tensor` 不能自动传给主线
+revision 的类型视为不同类型；例如旧 `burn::Tensor` 不能自动传给根 workspace 的
 `burn::Tensor`。
 
 所以本章采用两条证据线：
 
 1. 读取固定 `burn-onnx` 源码，核验 ONNX graph、codegen、Burnpack 和
    `LoadStrategy` 的行为；
-2. 用主线 Burn 的 `ModuleRecord` 在根 workspace 运行 CPU round-trip，
+2. 用根 workspace 的 Burn `ModuleRecord` 运行 CPU 往返保存与恢复，
    核验当前实验使用的参数状态 API。
 
-未来如果更新 `burn-onnx` pin，使其 manifest 与主线 Burn 对齐，再增加一个
+未来如果更新 `burn-onnx` pin，使其 manifest 与根 workspace 的 Burn 对齐，再增加一个
 小型 ONNX fixture，应该同时比较 ONNX Runtime reference、生成 model 的
 输出和不同 backend 的输出，而不是只把 crate 加进 workspace。
 
