@@ -17,11 +17,13 @@ GitHub Pages 可读。
 - [ ] P0/P1 已完成；等待发布者决定是否创建候选 tag/发布归档。
 - [ ] 仓库 Settings → Pages → Source 需设为 GitHub Actions，并在推送
   `main` 后确认 `https://tsaolun.github.io/mlsys_with_burn/` 可访问。
+- [x] 修复线上 `$...$` 公式不渲染：自定义 theme 启用 MathJax 美元分隔符
+  （D019）；全书 42 个含公式页面 Puppeteer 核验通过。
 
 ## 下一步
 
-1. 在 GitHub 仓库启用 Pages（Source = GitHub Actions），推送或手动运行
-   `Deploy Pages` workflow，确认站点根路径与含公式章节可打开。
+1. 合并 MathJax `$` 分隔符修复并推送 `main`，确认 Pages 上
+   `ch02/07-labs.html` 等含公式页不再显示裸美元符。
 2. 由发布者审阅 `planning/comparison/openmlsys-v1-crosswalk.md` 和
    `tools/check_release.py` 的机器可读输出，决定候选版归档/tag。
 3. 若要增加真实 GPU、NCCL、ONNX、DDP、DQN/MARL 或网络实验，建立独立
@@ -201,6 +203,19 @@ GitHub Pages 可读。
   与折叠提示；`docs/AUTHORING.md` 补充练习体例。
 
 ## 本次交接
+
+- 已完成（2026-08-08 MathJax）：全面排查线上公式渲染失败。根因是
+  mdBook 默认 MathJax 2 配置不识别正文使用的 `$...$`/`$$...$$`。新增
+  `book/theme/head.hbs` 注入 `tex2jax` 美元分隔符（D019），修正 ch07/
+  ch09 两处跨行行内公式与若干表述；加强 `check_release.py` 与
+  AUTHORING 约定。
+- 验证：`mdbook build book`；`check_release.py --require-built-book`
+  `errors=[]`；Puppeteer 对 42 个含公式页面 typeset 后无裸 `$...$`
+  残留且均有 `.MathJax` 节点。
+- 偏差：无；浏览器仍依赖 MathJax CDN（D015）。
+- 下一步：合并推送后确认 Pages 线上公式；再决定候选 tag/归档。
+
+## 前次交接（2026-08-08 第六批）
 
 - 已完成（2026-08-08 第六批）：结构配图与练习完善。新增
   `ch02-expr-graph.svg`、`ch02-topo-memory.svg`、

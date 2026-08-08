@@ -39,7 +39,7 @@ features。
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:module}}
 ```
 
-Linear 从 3 个输入特征映射到 2 个输出特征，共有 $3\times2=6$ 个权重
+Linear 从 3 个输入特征映射到 2 个输出特征，共有 $3 \times 2 = 6$ 个权重
 和 2 个偏置，因此 `num_params()` 返回 8。输入 `[4, 3]` 的 batch 维保持
 不变，输出 shape 为 `[4, 2]`。
 

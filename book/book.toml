@@ -15,4 +15,6 @@ preferred-dark-theme = "navy"
 site-url = "/mlsys_with_burn/"
 git-repository-url = "https://github.com/TsaoLun/mlsys_with_burn"
 git-repository-icon = "fa-github"
+# Enable $...$ / $$...$$ for MathJax 2 (see theme/head.hbs and D019).
+theme = "theme"
 
