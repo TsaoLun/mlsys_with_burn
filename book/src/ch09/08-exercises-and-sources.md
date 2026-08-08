@@ -1,4 +1,4 @@
-# 9.8 练习、延伸阅读与来源
+# 练习、延伸阅读与来源
 
 ## 小结
 
@@ -13,74 +13,297 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 把这些入口组合成集群调度器。CPU 模拟器只验证资源、成本和恢复协议，不
 替代真实集群 benchmark。
 
+## 练习
+
+练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
+（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
+`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+
+
 ## 概念题
 
-1. 为什么“集群有足够 GPU”不等于一个同步作业可以立即启动？请分别从
+1. 【基础】为什么“集群有足够 GPU”不等于一个同步作业可以立即启动？请分别从
    显存、成组调度和通信域回答。
-2. 画出控制面、训练数据面、设备运行时三层，并把队列等待、
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+2. 【基础】画出控制面、训练数据面、设备运行时三层，并把队列等待、
    `all_reduce`、`ComputeClient::sync` 放到正确层。
-3. 用 `alpha + beta * bytes` 比较同机柜、跨机柜和跨 Spine 的消息成本；
+
+<details>
+<summary>提示</summary>
+
+见第 5 章数据路径与背压模型节。
+
+</details>
+
+3. 【基础】用 `alpha + beta * bytes` 比较同机柜、跨机柜和跨 Spine 的消息成本；
    说明这个模型遗漏了哪些真实网络因素。
-4. FIFO 和 topology-aware placement 的公平性目标有什么不同？为什么
+
+<details>
+<summary>提示</summary>
+
+见第 9 章拓扑与调度节及网络配图。
+
+</details>
+
+4. 【基础】FIFO 和 topology-aware placement 的公平性目标有什么不同？为什么
    “减少跨机柜 bytes”可能增加某个租户的 queue wait？
-5. 构造一个 GPU 总容量足够但发生资源碎片的例子；说明保留大块资源和
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+
+</details>
+
+5. 【进阶】构造一个 GPU 总容量足够但发生资源碎片的例子；说明保留大块资源和
    backfilling 的取舍。
-6. 为什么一个 `DistributedContext` 不能自动说明节点 membership、rank
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+6. 【进阶】为什么一个 `DistributedContext` 不能自动说明节点 membership、rank
    rendezvous 和故障恢复已经完成？
-7. 设计一个 checkpoint commit 协议，防止旧 attempt 重复提交 optimizer
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+7. 【进阶】设计一个 checkpoint commit 协议，防止旧 attempt 重复提交 optimizer
    step 或覆盖新版本。
-8. 分别解释 queue wait、collective wait、straggler time 和 recovery
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+
+</details>
+
+8. 【进阶】分别解释 queue wait、collective wait、straggler time 和 recovery
    replay；为什么只报告 GPU utilization 不够定位瓶颈？
+
+<details>
+<summary>提示</summary>
+
+见第 6 章集合通信节与 Flex CPU 无 collective 的边界。
+
+</details>
+
 
 ## Rust 与 API 题
 
-1. 为 `Job` 增加 tenant、priority 和 memory quota，保持资源不满足时不
+1. 【基础】为 `Job` 增加 tenant、priority 和 memory quota，保持资源不满足时不
    允许部分启动。
-2. 为 `PlacementPolicy` 实现一个 first-fit/backfill 变体，测试它不会
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+2. 【基础】为 `PlacementPolicy` 实现一个 first-fit/backfill 变体，测试它不会
    让已承诺的 FIFO 作业无限饥饿。
-3. 将 `communication_cost` 抽象为 `CostModel` trait，写一个不依赖真实
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch08-rl-rollout` 并对照第 8 章对应抽象。
+
+</details>
+
+3. 【进阶】将 `communication_cost` 抽象为 `CostModel` trait，写一个不依赖真实
    时间的 mock，测试 bytes 增加时成本单调。
-4. 为 `TraceEvent` 增加 lease version 和 network domain，测试旧 attempt
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+4. 【进阶】为 `TraceEvent` 增加 lease version 和 network domain，测试旧 attempt
    的 completion 事件不能确认新 attempt。
-5. 将 failure step 改为节点故障，要求同一故障域中的 GPU 一起释放，并从
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+5. 【进阶】将 failure step 改为节点故障，要求同一故障域中的 GPU 一起释放，并从
    最近的有效 checkpoint 恢复。
-6. 为模拟器加入 `Result` 错误边界：非法 GPU 数、显存不足、重复 job id、
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+6. 【进阶】为模拟器加入 `Result` 错误边界：非法 GPU 数、显存不足、重复 job id、
    retry limit 和 scheduler deadlock 都必须有描述性错误。
-7. 阅读固定 Burn 的 `ExecutionStrategy`，实现一个只打印设备集合和策略
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+7. 【进阶】阅读固定 Burn 的 `ExecutionStrategy`，实现一个只打印设备集合和策略
    的 adapter；不要把它命名为 cluster scheduler。
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
 
 ## 性能与系统题
 
-1. 固定 job 数和 step 数，比较 FIFO 与 topology-aware 的 queue wait、
+1. 【进阶】固定 job 数和 step 数，比较 FIFO 与 topology-aware 的 queue wait、
    makespan、cross-rack bytes 和 collective time。
-2. 改变 `gradient_bytes` 与 `cross_rack_multiplier`，验证通信成本模型的
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+
+</details>
+
+2. 【挑战】改变 `gradient_bytes` 与 `cross_rack_multiplier`，验证通信成本模型的
    单调性，并说明它不是实测带宽。
-3. 设计一个 `p95` queue wait 报告，解释为什么平均等待时间会掩盖租户
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+3. 【挑战】设计一个 `p95` queue wait 报告，解释为什么平均等待时间会掩盖租户
    饥饿和队首阻塞。
-4. 为每个 rank 记录 compute、collective、wait、checkpoint 和 retry，
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+4. 【挑战】为每个 rank 记录 compute、collective、wait、checkpoint 和 retry，
    设计一个能定位 straggler 的聚合指标。
-5. 比较 checkpoint interval 较小和较大时的写入开销与 failure replay；
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+
+</details>
+
+5. 【挑战】比较 checkpoint interval 较小和较大时的写入开销与 failure replay；
    给出 time-to-recovery 的成本模型。
-6. 为同一个 job 设计节点内、同 rack、跨 rack 三种 placement，列出需要
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch08-rl-rollout` 并对照第 8 章对应抽象。
+
+</details>
+
+6. 【挑战】为同一个 job 设计节点内、同 rack、跨 rack 三种 placement，列出需要
    真实实验记录的硬件、driver、通信库、rank 和同步信息。
+
+<details>
+<summary>提示</summary>
+
+回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
 
 ## 源码题
 
-1. 阅读 `burn/crates/burn-train/src/learner/supervised/strategies/base.rs`，
+1. 【进阶】阅读 `burn/crates/burn-train/src/learner/supervised/strategies/base.rs`，
    区分 `MultiDevice` 与 `DistributedDataParallel` 的设备范围和优化策略。
-2. 阅读 `burn/crates/burn-tensor/src/tensor/distributed.rs`，追踪
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+
+</details>
+
+2. 【进阶】阅读 `burn/crates/burn-tensor/src/tensor/distributed.rs`，追踪
    `DistributedContext::init`、`all_reduce`、`resolve` 和
    `sync_collective` 的生命周期。
-3. 阅读 `burn/crates/burn-backend/src/backend/distributed/ops.rs`，说明
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+3. 【进阶】阅读 `burn/crates/burn-backend/src/backend/distributed/ops.rs`，说明
    `register_sync_parameters`、`submit_gradient_sync` 和默认 collective
    实现之间的关系。
-4. 阅读 `burn/crates/burn-flex/src/ops/transaction.rs`，解释为什么 Flex
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
+4. 【进阶】阅读 `burn/crates/burn-flex/src/ops/transaction.rs`，解释为什么 Flex
    CPU 不是本章 AllReduce 的运行验证 backend。
-5. 阅读 `cubecl/crates/cubecl-runtime/src/client.rs` 和
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
+5. 【进阶】阅读 `cubecl/crates/cubecl-runtime/src/client.rs` 和
    `stream/scheduler.rs`，画出 `launch → flush → read/sync` 与本地 stream
    对齐的边界。
-6. 阅读 `cubecl/crates/cubecl-cpu/src/runtime.rs`，说明 CPU runtime 的
+
+<details>
+<summary>提示</summary>
+
+见第 3 章 GPU 并行层次节与配图。
+
+</details>
+
+6. 【进阶】阅读 `cubecl/crates/cubecl-cpu/src/runtime.rs`，说明 CPU runtime 的
    `SERVER_COMM_ENABLED` 与集群通信之间的差异。
+
+<details>
+<summary>提示</summary>
+
+见第 3 章 GPU 并行层次节与配图。
+
+</details>
+
 
 ## OpenMLSys v1 来源
 

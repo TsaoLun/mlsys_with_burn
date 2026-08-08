@@ -64,4 +64,7 @@ Agent 开始工作时依次阅读：
   比较卡章节标题、mdBook 锚点和全书校验结果。
 - [`2026-08-02-reader-terminology-cleanup.md`](2026-08-02-reader-terminology-cleanup.md)：
   读者可见项目术语清理、证据分类说明和全书校验结果。
+- [`2026-08-08-reader-facing-p0-fixes.md`](2026-08-08-reader-facing-p0-fixes.md)：
+  读者视角 P0–P1 修订、事实复核、九章深度加厚，以及第六批结构配图
+  （8 张 SVG）与九章练习难度/提示体例。
 

@@ -13,12 +13,7 @@ Host 程序分配 buffer、选择 launch 拓扑并提交 Kernel；Device 执行�
 
 CubeCL 将一次 launch 描述为多个 cube，每个 cube 内含三维排列的 unit：
 
-```text
-CubeCount(x, y, z)
-└─ 每个 Cube
-   └─ CubeDim(x, y, z) 个 Unit
-      └─ 若干相邻 Unit 可组成 Plane
-```
+![CubeCL 并行层次：CubeCount 网格包含多个 Cube，Cube 内是 CubeDim 个 Unit，相邻 Unit 可组成 Plane](../img/ch03-cube-hierarchy.svg)
 
 粗略对照如下：
 
@@ -73,9 +68,16 @@ cache”。常见策略是从全局内存批量加载连续 tile，在 cube 内�
 
 ## 4. 合并、向量化与同步
 
-相邻 unit 访问相邻地址，更容易形成合并访存。CubeCL 的
-`Vector<F, N>` 表示连续元素，可让 Runtime 在合适时使用 SIMD；它不保证
-任意 `N` 或任意地址都高效。
+相邻 unit 访问相邻地址，更容易形成合并访存（coalescing）。以一个
+plane 的 32 个 unit 读 `f32` 为例：若 unit $i$ 读地址 $4i$，32 个
+请求覆盖连续 128 字节，硬件可以把它们合并成少量内存事务；若 unit
+$i$ 改读地址 $4 \cdot S \cdot i$（步长 $S$），同样的 32 个请求散布在
+$128S$ 字节上，事务数随 $S$ 增长，有效带宽近似降为原来的 $1/S$。
+Kernel 的总访存字节数没变，但“请求了多少个不连续段”决定了带宽
+利用率——这是上一节算术强度公式没有覆盖的部分。
+
+CubeCL 的 `Vector<F, N>` 表示连续元素，可让 Runtime 在合适时使用
+SIMD；它不保证任意 `N` 或任意地址都高效。
 
 共享内存带来新的正确性条件：
 

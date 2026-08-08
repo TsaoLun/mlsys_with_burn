@@ -39,18 +39,7 @@ trait、所有权、线程和基本概率/梯度概念。不要求先拥有 CUDA
 
 我们先从框架无关的训练状态和成本模型开始，再进入 Burn 的 API：
 
-```text
-Dataset/DataLoader
-       │ batch
-       ▼
-  forward ──► loss ──► backward/autodiff tape
-       │                         │ GradientsParams
-       └──────── metrics ◄────────┘
-                                  ▼
-                 optimizer + scheduler → new Module
-                                  │
-                    checkpoint / validation / sync
-```
+![训练闭环：Dataset/DataLoader 供给 batch，经 forward/loss 与 backward/autodiff tape 得到 GradientsParams，再进入 optimizer、checkpoint 与 validation](img/ch06-training-loop.svg)
 
 单设备训练是最小闭环；本机多设备把数据和梯度放在同一进程内分摊；DDP
 进一步要求后端 collective 和跨节点启动协议。不要把三者都简称为“并行”：
@@ -73,15 +62,17 @@ Dataset/DataLoader
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：forward/backward、SGD、loss 下降、参数变化和
   checkpoint 基础状态；
-- `固定源码核验`：`TrainStep`、`Learner`、optimizer、`MultiDevice`、
+- `源码核验`：`TrainStep`、`Learner`、optimizer、`MultiDevice`、
   `DistributedContext` 与 collective 入口；
-- `框架无关模型/协议模拟`：AllReduce、parameter-server、pipeline bubble
+- `协议/成本模型`：AllReduce、parameter-server、pipeline bubble
   和 checkpoint version；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：Flex CPU 之外的 DDP、
-  跨节点网络和真实通信性能；
-- `明确未覆盖`：把单机训练 loop 当作分布式训练、集群容错或 NCCL 证明。
+- `可选平台实验`：Flex CPU 之外的 DDP、跨节点网络和真实通信性能；
+- `未覆盖`：把单机训练 loop 当作分布式训练、集群容错或 NCCL 证明。
 
 对应 collective、版本和 pipeline 协议见[核心主题比较卡](comparison-cards.md#第-6-章分布式训练)。
 

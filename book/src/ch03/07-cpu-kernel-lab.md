@@ -120,13 +120,29 @@ CubeCL CPU 路径依赖 `tracel-llvm` 的平台资产；当前上游 `v22.1.4-5`
 ## 7. 可选 GPU 路径
 
 本章没有默认启用 WGPU，以确保基础实验不要求图形 API；crate 提供可选
-`wgpu` feature，并复用同一个 Kernel 与 reference：
+`wgpu` feature，并复用同一个 Kernel 与 host reference：
 
 ```bash
-cargo test -p ch03-cubecl-kernel --features wgpu
+cargo run  -p ch03-cubecl-kernel --features wgpu --locked
+cargo test -p ch03-cubecl-kernel --features wgpu --locked
 ```
 
-命令只有在系统存在 CubeCL/WGPU 可用 adapter 时才能通过。继续扩展 CUDA
+启用 feature 后，主程序会先后运行 CPU 与 WGPU 两个 Runtime，打印各自
+的 runtime 名称和输出，并断言 WGPU 结果与 host reference 一致：
+
+```text
+runtime: cpu
+input:   [1.0, 2.0, 3.0, 4.0]
+output:  [2.0, 4.0, 6.0, 8.0]
+runtime: wgpu<wgsl>
+output:  [2.0, 4.0, 6.0, 8.0]
+wgpu output matches host reference
+```
+
+命令只有在系统存在 CubeCL/WGPU 可用 adapter（Metal、Vulkan、DX12 等
+图形驱动）时才能通过；没有 GPU 的环境继续走默认 CPU 路径即可，这不
+影响任何章节的验收。该观察只证明“同一 Kernel 可以在两类 Runtime 上
+得到相同结果”，不包含 GPU 带宽、占用率或 autotune 结论。继续扩展 CUDA
 等路径时应：
 
 1. 为 crate 增加独立 feature 和对应 CubeCL Runtime；

@@ -89,6 +89,6 @@ initial_loss=... final_loss=... parameter_delta=...
 ## 5. 接到第 5–7 章
 
 完整的 Dataset → autodiff → ModuleRecord → inference 路径见
-[综合实验：数据到推理](../capstone-p1.md)。它把本实验的
+[综合实验：数据到推理](../capstone.md)。它把本实验的
 `forward → loss → backward → SGD` 放入固定 train/validation split，并
 增加 loader 守恒、record topology 错误和恢复后输出误差检查。

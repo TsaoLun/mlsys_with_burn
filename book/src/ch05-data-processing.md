@@ -60,14 +60,17 @@ trait、`Iterator`、`Send`/`Sync` 和基本线程通信；不要求先学习 SQ
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：Dataset、Mapper、Batcher、DataLoader、固定 seed
   和多 worker 数据守恒；
-- `固定源码核验`：内存 Dataset、SQLite、采样、worker 和 Device 边界；
-- `框架无关模型/协议模拟`：文件索引、背压、retry、epoch commit 和
+- `源码核验`：内存 Dataset、SQLite、采样、worker 和 Device 边界；
+- `协议/成本模型`：文件索引、背压、retry、epoch commit 和
   reorder buffer；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实存储吞吐、pinned
-  memory、跨节点 sampler 和设备数据通道；
-- `明确未覆盖`：把数据守恒或一次 CPU 测量描述成全局保序/真实吞吐。
+- `可选平台实验`：真实存储吞吐、pinned memory、跨节点 sampler 和
+  设备数据通道；
+- `未覆盖`：把数据守恒或一次 CPU 测量描述成全局保序/真实吞吐。
 
 对应 `F/P/G`、分片和提交协议见[核心主题比较卡](comparison-cards.md#第-5-章数据处理)。
 

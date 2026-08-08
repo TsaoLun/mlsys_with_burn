@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 430" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <rect width="680" height="430" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <!-- five layers -->
+  <g font-size="13" text-anchor="middle">
+    <rect x="60" y="24" width="400" height="52" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="260" y="45" fill="#1e3a8a" font-size="14">模型与训练程序</text>
+    <text x="260" y="64" fill="#3b5bdb" font-size="11">编程接口、Module、Tensor、优化器</text>
+    <polygon points="260,76 254,86 266,86" fill="#6b7280"/>
+
+    <rect x="60" y="88" width="400" height="52" fill="#e0e7ff" stroke="#6366f1" rx="4"/>
+    <text x="260" y="109" fill="#312e81" font-size="14">张量执行与 autodiff tape</text>
+    <text x="260" y="128" fill="#4f46e5" font-size="11">Device、dtype、eager 前向、反向依赖</text>
+    <polygon points="260,140 254,150 266,150" fill="#6b7280"/>
+
+    <rect x="60" y="152" width="400" height="52" fill="#ede9fe" stroke="#8b5cf6" rx="4"/>
+    <text x="260" y="173" fill="#4c1d95" font-size="14">Burn IR / Fusion 计划</text>
+    <text x="260" y="192" fill="#7c3aed" font-size="11">分析、融合、布局和算子选择</text>
+    <polygon points="260,204 254,214 266,214" fill="#6b7280"/>
+
+    <rect x="60" y="216" width="400" height="52" fill="#fce7f3" stroke="#db2777" rx="4"/>
+    <text x="260" y="237" fill="#831843" font-size="14">CubeCL / CubeK Kernel</text>
+    <text x="260" y="256" fill="#be185d" font-size="11">Scope → KernelDefinition → JIT / 自动调优</text>
+    <polygon points="260,268 254,278 266,278" fill="#6b7280"/>
+
+    <rect x="60" y="280" width="400" height="52" fill="#fee2e2" stroke="#dc2626" rx="4"/>
+    <text x="260" y="301" fill="#7f1d1d" font-size="14">设备 Runtime</text>
+    <text x="260" y="320" fill="#b91c1c" font-size="11">CPU / GPU / WebGPU / 远程</text>
+  </g>
+  <!-- cross-cutting band -->
+  <g font-size="12" text-anchor="middle">
+    <rect x="60" y="352" width="128" height="40" fill="#f0fdf4" stroke="#16a34a" rx="4"/>
+    <text x="124" y="376" fill="#14532d">数据管道</text>
+    <polygon points="188,372 198,368 198,376" fill="#16a34a"/>
+    <rect x="202" y="352" width="128" height="40" fill="#f0fdf4" stroke="#16a34a" rx="4"/>
+    <text x="266" y="376" fill="#14532d">训练执行</text>
+    <polygon points="330,372 340,368 340,376" fill="#16a34a"/>
+    <rect x="344" y="352" width="128" height="40" fill="#f0fdf4" stroke="#16a34a" rx="4"/>
+    <text x="408" y="376" fill="#14532d">状态与模型部署</text>
+    <rect x="116" y="398" width="300" height="26" fill="#fff7ed" stroke="#ea580c" rx="4"/>
+    <text x="266" y="415" fill="#7c2d12">通信与集群系统（横跨各层）</text>
+  </g>
+  <!-- annotation -->
+  <text x="510" y="60" font-size="12" fill="#6b7280">每层抽象逐次降低：</text>
+  <text x="510" y="80" font-size="12" fill="#6b7280">问题应在正确的层解决</text>
+</svg>

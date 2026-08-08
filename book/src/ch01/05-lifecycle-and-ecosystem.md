@@ -57,6 +57,22 @@ Rust 代码可以编译到服务器、桌面、WebAssembly 和部分 `no_std` �
 系统生态。OpenMLSys v1 对其中多个主题有独立章节；为了先完成一条可验证的
 Rust/Burn 技术路径，本书首版不逐一展开它们。
 
+## 关于大模型时代的主题
+
+本书的结构源自 OpenMLSys v1，其写作时间早于大语言模型（large language
+model, LLM）系统的爆发。因此本书**没有**专门展开 LLM 推理与训练的
+专题，包括 KV cache 与分页注意力（paged attention）、连续批处理
+（continuous batching）、投机采样（speculative decoding）、混合专家
+（mixture of experts, MoE）路由、预训练数据流水线和基于人类反馈的
+强化学习（RLHF）。
+
+但这并不意味着本书内容与这些主题无关：KV cache 的容量规划是第 3 章
+算术强度与内存层级、第 7 章 batching 与队列的直接应用；MoE 路由是第
+9 章拓扑放置与负载均衡的近亲；RLHF 采样—训练分离正是第 8 章
+Actor–Learner 架构的生产形态。本书先把这些框架无关的系统机制讲清楚，
+LLM 专题计划在后续版本作为独立章节加入，而不是在本版中给出未经验证
+的转述。
+
 ## 三条阅读路径
 
 ### 模型开发者

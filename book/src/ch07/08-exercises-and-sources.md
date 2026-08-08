@@ -1,4 +1,4 @@
-# 7.8 练习、延伸阅读与来源
+# 练习、延伸阅读与来源
 
 ## 小结
 
@@ -18,80 +18,311 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 或所有 backend。HTTP/gRPC、版本发布、鉴权、限流、指标和故障恢复属于
 应用服务层。
 
+## 练习
+
+练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
+（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
+`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+
+
 ## 概念题
 
-1. 为什么 `ModuleRecord` 不能单独恢复一个任意模型？列出 topology、
+1. 【基础】为什么 `ModuleRecord` 不能单独恢复一个任意模型？列出 topology、
    参数路径、shape 和 dtype 各自的职责。
-2. 比较 `LoadStrategy::File`、`Embedded`、`Bytes` 和 `None` 的 artifact
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+
+</details>
+
+2. 【基础】比较 `LoadStrategy::File`、`Embedded`、`Bytes` 和 `None` 的 artifact
    生命周期；哪一种会在生成代码中使用 `std::path::Path`？
-3. 为什么把 F32 权重存成 F16 不等于完成了低精度推理？列出加载、算子、
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+
+</details>
+
+3. 【基础】为什么把 F32 权重存成 F16 不等于完成了低精度推理？列出加载、算子、
    activation 和 reference 校准还需要的条件。
-4. 用 $T\_{\mathrm{queue}}$、$T\_{\mathrm{pre}}$、$T\_{\mathrm{copy}}$、
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+4. 【基础】用 $T\_{\mathrm{queue}}$、$T\_{\mathrm{pre}}$、$T\_{\mathrm{copy}}$、
    $T\_{\mathrm{forward}}$、$T\_{\mathrm{readback}}$ 和
    $T\_{\mathrm{post}}$ 分解一次请求，说明动态 batching 可能改善和恶化
    哪些项。
-5. Remote peer、模型 registry、HTTP service 和授权系统分别负责什么？
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+5. 【进阶】Remote peer、模型 registry、HTTP service 和授权系统分别负责什么？
    为什么它们不能仅由 `Device::remote_iroh` 代替？
-6. “生成的 model 可以 no_std”与“ONNX converter 可以在 no_std 目标运行”
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+6. 【进阶】“生成的 model 可以 no_std”与“ONNX converter 可以在 no_std 目标运行”
    为什么是两个构建问题？
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
 
 ## Rust 与 API 题
 
-1. 把实验的 Linear 改成两个 Linear 组成的 `Module`，断言 record tensor
+1. 【基础】把实验的 Linear 改成两个 Linear 组成的 `Module`，断言 record tensor
    数量和输出误差。
-2. 使用 `try_load_record` 构造 shape mismatch，记录 `RecordError::Validation`
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+2. 【基础】使用 `try_load_record` 构造 shape mismatch，记录 `RecordError::Validation`
    的行为；再比较 `validate(false)` 和 `allow_partial(true)` 的差异。
-3. 让目标 module 使用不同 dtype，比较默认 `FromRecord` 与
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+3. 【进阶】让目标 module 使用不同 dtype，比较默认 `FromRecord` 与
    `cast_to_module_dtype` 的结果。
-4. 写一个服务 runner，让 model 只在启动阶段加载一次；用 Rust ownership
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+4. 【进阶】写一个服务 runner，让 model 只在启动阶段加载一次；用 Rust ownership
    明确 handler 的借用、锁或 actor 边界。
-5. 给输入增加版本化 schema 和显式前处理函数，测试错误输入不会进入
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+5. 【进阶】给输入增加版本化 schema 和显式前处理函数，测试错误输入不会进入
    `forward`。
-6. 用一个 `Bytes` provider 模拟远端/固件来源，比较 `from_bytes` 和
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+6. 【进阶】用一个 `Bytes` provider 模拟远端/固件来源，比较 `from_bytes` 和
    `from_file` 的错误处理。
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
 
 ## 源码题
 
-1. 阅读 `burn/crates/burn-core/src/store/mod.rs`，追踪
+1. 【进阶】阅读 `burn/crates/burn-core/src/store/mod.rs`，追踪
    `into_record → into_bytes → from_bytes → try_load_record` 的数据路径，
    并找出 `ParamId` 恢复位置。
-2. 阅读 `burn/crates/burn-core/src/module/base.rs`，比较
+
+<details>
+<summary>提示</summary>
+
+见第 9 章拓扑与调度节及网络配图。
+
+</details>
+
+2. 【进阶】阅读 `burn/crates/burn-core/src/module/base.rs`，比较
    `load_record` 与 `try_load_record` 的错误边界。
-3. 阅读 `burn-onnx/crates/burn-onnx/src/model_gen.rs` 和
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+3. 【进阶】阅读 `burn-onnx/crates/burn-onnx/src/model_gen.rs` 和
    `burn-onnx/crates/burn-onnx/src/burn/graph.rs`，画出 ONNX parser、
    graph simplification、codegen 和 Burnpack loader 的调用链。
-4. 阅读 `burn-onnx/crates/burn-onnx/src/burn/graph.rs` 的
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
+4. 【进阶】阅读 `burn-onnx/crates/burn-onnx/src/burn/graph.rs` 的
    `LoadStrategy` 测试，确认四种策略生成了哪些 constructor。
-5. 阅读 `burn/crates/burn-store/src/traits.rs`、`adapter.rs` 和
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
+5. 【进阶】阅读 `burn/crates/burn-store/src/traits.rs`、`adapter.rs` 和
    `tensor_snapshot.rs`，说明 lazy snapshot、filter、remap 和 adapter
    的边界。
-6. 阅读 `burn/crates/burn-remote/src/lib.rs`、`server/builder.rs` 和
+
+<details>
+<summary>提示</summary>
+
+见第 9 章拓扑与调度节及网络配图。
+
+</details>
+
+6. 【进阶】阅读 `burn/crates/burn-remote/src/lib.rs`、`server/builder.rs` 和
    `burn/crates/burn-tensor/src/device.rs`，比较 native Iroh、兼容
    WebSocket 和 WASM async device 的入口。
-7. 对照 `pins.toml`、`burn-onnx/Cargo.toml` 和根 `Cargo.toml`，解释为什么
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
+7. 【进阶】对照 `pins.toml`、`burn-onnx/Cargo.toml` 和根 `Cargo.toml`，解释为什么
    两个 Burn revision 不能直接共用 `Tensor`/`Module` 类型。
+
+<details>
+<summary>提示</summary>
+
+用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+
+</details>
+
 
 ## 性能与系统题
 
-1. 测量 cold start、artifact load、warmup、forward、readback 和
+1. 【进阶】测量 cold start、artifact load、warmup、forward、readback 和
    post-processing，报告设备、backend、dtype、shape 和同步边界。
-2. 实现动态 batching，分别固定最大 batch size 和最大 queue delay，
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+
+</details>
+
+2. 【挑战】实现动态 batching，分别固定最大 batch size 和最大 queue delay，
    报告 throughput、p50、p95、p99 以及 queue wait。
-3. 用固定 reference 输入比较 F32 与一种目标 dtype，分别记录模型大小、
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+3. 【挑战】用固定 reference 输入比较 F32 与一种目标 dtype，分别记录模型大小、
    peak memory、输出误差和延迟；不要只报告压缩率。
-4. 设计模型版本发布协议，列出 topology checksum、weight checksum、
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+4. 【挑战】设计模型版本发布协议，列出 topology checksum、weight checksum、
    schema version、code revision、backend 和回滚点。
-5. 设计 Remote 服务的网络故障测试：peer 断开、请求超时、重复提交、
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+
+</details>
+
+5. 【挑战】设计 Remote 服务的网络故障测试：peer 断开、请求超时、重复提交、
    tensor transfer 失败和模型 reload。
-6. 为 `Embedded`/`Bytes` 的嵌入式部署列出 binary、静态内存、堆、最大
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+6. 【挑战】为 `Embedded`/`Bytes` 的嵌入式部署列出 binary、静态内存、堆、最大
    tensor shape 和算子覆盖预算。
-7. 比较“模型文件加密”“transport authorization”“TEE”和“模型混淆”
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+7. 【挑战】比较“模型文件加密”“transport authorization”“TEE”和“模型混淆”
    所保护的威胁，避免把它们当成同一个开关。
-8. 为一个激活张量选择 PTQ 校准集，计算非对称量化的 scale/zero-point，
+
+<details>
+<summary>提示</summary>
+
+回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+8. 【挑战】为一个激活张量选择 PTQ 校准集，计算非对称量化的 scale/zero-point，
    比较逐层、逐通道和离群值裁剪的误差与 metadata 成本。
-9. 为一个线上模型写四层威胁模型：静态 artifact、传输、运行时内存和
+
+<details>
+<summary>提示</summary>
+
+见第 7 章压缩节的 $s,z$ 带数字演算。
+
+</details>
+
+9. 【挑战】为一个线上模型写四层威胁模型：静态 artifact、传输、运行时内存和
    恶意行为；给每层列出验证证据，并说明 `ModuleRecord` 哪些问题不能
    单独解决。
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+
+</details>
+
 
 ## 延伸阅读与固定源码入口
 
@@ -151,6 +382,8 @@ OpenMLSys v1：
 
 没有复制 OpenMLSys 的 MindSpore/PyTorch/ARM 汇编代码、图片或 Mate30
 性能数字。完整 revision 关系、逐文件核验和不作出的能力承诺见
-`planning/chapter-sources/ch07.md`；D010 记录 `burn-onnx` 与根 workspace 的 Burn
+[`planning/chapter-sources/ch07.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch07.md)；项目决策记录
+[D010](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/DECISIONS.md) 记录
+`burn-onnx` 与根 workspace 的 Burn
 revision 隔离的决定。OpenMLSys 改编正文采用 CC BY-NC-SA 4.0；新增 Rust
 示例采用 MIT OR Apache-2.0。

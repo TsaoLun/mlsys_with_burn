@@ -1,4 +1,4 @@
-# 9.2 GPU 节点、机柜与网络拓扑
+# GPU 节点、机柜与网络拓扑
 
 ## 通信不是一条均匀的总线
 
@@ -14,6 +14,8 @@ OpenMLSys v1 用一个多层树描述机器学习集群：服务器内有多个�
 节点内也不是均匀的：CPU socket、PCIe root complex、GPU 高速互连和
 NUMA 位置都会影响数据搬运。跨机柜则要进一步考虑上行链路是否被多个
 ToR 共享。
+
+![GPU 集群网络分层：节点内互连、机柜内 ToR 下行与跨机柜的 ToR–Spine 共享上行链路](../img/ch09-network-topology.svg)
 
 ## 超额认购与热点
 

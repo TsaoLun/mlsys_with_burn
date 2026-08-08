@@ -78,16 +78,21 @@ pipeline scheduler。`Learner::grad_sharded()` 是 DDP 相关的梯度同步标�
 $S\_0,S\_1,\ldots,S\_{p-1}$，把一个大 batch 拆成 $m$ 个 micro-batch 后，
 理想的 1F1B 调度会近似经历：
 
-```text
-time →   0    1    2    3    4    5    6    7
-S0       F0   F1   F2   B0   B1   B2   -    -
-S1       -    F0   F1   B0   F2   B1   B2   -
-S2       -    -    F0   B0   F1   B1   F2   B2
-```
+![1F1B 调度的 micro-batch 时间线：S0–S2 三个阶段的 warm-up 与 cool-down 空泡](../img/ch06-pipeline-1f1b.svg)
 
 具体 schedule 可能不同，但都会面对 warm-up/cool-down 的 pipeline bubble、
-micro-batch 数量、激活保存和 backward 依赖。增加 $m$ 可以摊薄 bubble，
-却可能增加激活缓存；重计算可以降低内存，却增加算力。阶段之间还要定义
+micro-batch 数量、激活保存和 backward 依赖。这个代价可以定量：设每个
+micro-batch 在每个阶段的前向+反向耗时为 $t$，则理想 1F1B 的总时长约为
+$(m + p - 1)\,t$，而其中有用的 micro-batch 工作只有 $m\,t$，空泡占比
+
+$$
+\frac{p-1}{m+p-1}.
+$$
+
+3 个阶段、3 个 micro-batch（上图）空泡占 $2/5 = 40\%$；把 $m$ 增到
+16 则降到 $2/17 \approx 12\%$。增加 $m$ 可以摊薄 bubble，
+却可能增加激活缓存（每个在途 micro-batch 的激活都要跨阶段保存）；
+重计算可以降低内存，却增加算力。阶段之间还要定义
 通信 tensor 的 layout、dtype、stream 和失败恢复点。
 
 固定 Burn 的 `ExecutionStrategy` 没有在源码中提供上述 stage scheduler、

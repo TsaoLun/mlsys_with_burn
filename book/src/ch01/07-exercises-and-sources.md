@@ -14,39 +14,156 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 
 ## 练习
 
+
+练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
+（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
+`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+
 ### 概念题
 
-1. 选择一个你熟悉的机器学习应用，分别列出其计算、数据、硬件和生命周期
+1. 【基础】选择一个你熟悉的机器学习应用，分别列出其计算、数据、硬件和生命周期
    约束。哪些约束无法从模型结构本身看出？
-2. 为什么“提供统一 Tensor API”不等于“所有后端能力完全一致”？举出
+
+<details>
+<summary>提示</summary>
+
+回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+2. 【基础】为什么“提供统一 Tensor API”不等于“所有后端能力完全一致”？举出
    dtype、融合、同步或部署方面的两个例子。
-3. 自动微分和算子融合都可能记录操作。它们记录操作的目的有何不同？
-4. 为什么把数据处理系统直接当成机器学习框架，或把机器学习框架直接当成
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+3. 【基础】自动微分和算子融合都可能记录操作。它们记录操作的目的有何不同？
+
+<details>
+<summary>提示</summary>
+
+运行/阅读 `examples/ch04-fusion-inspector` 与第 4 章 Fusion 节。
+
+</details>
+
+4. 【基础】为什么把数据处理系统直接当成机器学习框架，或把机器学习框架直接当成
    集群调度器，都会遗漏关键抽象？
-5. 解释 CubeCL 与 CubeK 的职责区别，并说明 Flex 实验为何不经过它们。
-6. 为同一个分类模型填写训练、离线推理和在线服务三张负载卡片，比较
+
+<details>
+<summary>提示</summary>
+
+回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+5. 【进阶】解释 CubeCL 与 CubeK 的职责区别，并说明 Flex 实验为何不经过它们。
+
+<details>
+<summary>提示</summary>
+
+见第 3 章 GPU 并行层次节与配图。
+
+</details>
+
+6. 【进阶】为同一个分类模型填写训练、离线推理和在线服务三张负载卡片，比较
    数据供给率、设备内存、吞吐、尾延迟和恢复性约束。
-7. 用有效吞吐和可用内存的预算式找出一个假想系统的首要瓶颈，并说明
+
+<details>
+<summary>提示</summary>
+
+回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+7. 【进阶】用有效吞吐和可用内存的预算式找出一个假想系统的首要瓶颈，并说明
    为什么更快的 Kernel 或更多模型副本不一定是正确修复。
+
+<details>
+<summary>提示</summary>
+
+回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
 
 ### 源码题
 
-1. 在 `burn/crates/burn/Cargo.toml` 找到 `flex`、`autodiff`、`fusion`、
+1. 【进阶】在 `burn/crates/burn/Cargo.toml` 找到 `flex`、`autodiff`、`fusion`、
    `train` 和 `store` feature，画出它们启用的直接 crate。
-2. 在 `DispatchDevice` 中列出当前 feature 允许的变体。为什么源码中的
+
+<details>
+<summary>提示</summary>
+
+见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+
+</details>
+
+2. 【进阶】在 `DispatchDevice` 中列出当前 feature 允许的变体。为什么源码中的
    枚举定义不等于你的实验二进制会包含全部变体？
-3. 找到 Flex 的 `BackendTypes::GraphPrimitive`。它表达了什么能力边界？
-4. 比较根 `pins.toml` 的 Burn revision 与 `burn-onnx/Cargo.toml` 使用的
+
+<details>
+<summary>提示</summary>
+
+用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+
+</details>
+
+3. 【进阶】找到 Flex 的 `BackendTypes::GraphPrimitive`。它表达了什么能力边界？
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
+4. 【进阶】比较根 `pins.toml` 的 Burn revision 与 `burn-onnx/Cargo.toml` 使用的
    revision。只有版本号相同，为什么仍不足以断言 API 兼容？
+
+<details>
+<summary>提示</summary>
+
+用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+
+</details>
+
 
 ### 实验题
 
-1. 在不修改根依赖快照的前提下，为 `StackReport` 增加默认 bool dtype，
+1. 【基础】在不修改根依赖快照的前提下，为 `StackReport` 增加默认 bool dtype，
    更新测试和实验说明。
-2. 启用 `autodiff` feature，新增一个测试比较普通设备与
+
+<details>
+<summary>提示</summary>
+
+回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+2. 【基础】启用 `autodiff` feature，新增一个测试比较普通设备与
    `device.autodiff()` 的 `is_autodiff()`，但不要在本章实现反向传播。
-3. 在有合适设备的机器上新建独立实验，对比 Flex 与另一后端的 Device
+
+<details>
+<summary>提示</summary>
+
+用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+
+</details>
+
+3. 【进阶】在有合适设备的机器上新建独立实验，对比 Flex 与另一后端的 Device
    输出和同步行为。记录环境，不要把硬件特定结果写成通用结论。
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
 
 ## 延伸阅读
 
@@ -86,7 +203,7 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 
 本章没有复用 OpenMLSys 的 `framework-architecture.png` 和
 `system-ecosystem.png` 图面；文本架构图是基于通用分层思想重新设计，并与
-第 2、4 章及 `docs/TERM_GLOSSARY.md` 使用同一套层名。
+第 2、4 章与[术语表](../glossary.md)使用同一套层名。
 
 未迁入：原书以 Python/MindSpore/Ascend 为默认栈的图示与生态叙述。
 

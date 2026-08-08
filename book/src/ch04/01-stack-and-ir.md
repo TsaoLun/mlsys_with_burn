@@ -53,18 +53,9 @@ graph capture 又服务于命令重放，不等于求导或融合图。
 
 ## 4. 编译器与运行时的交界
 
-可把流水线抽象为（与 `docs/TERM_GLOSSARY.md` 编译栈地图一致）：
+可把流水线抽象为：
 
-```text
-capture/register
-    → analysis
-    → transformation / selection
-    → lowering
-    → code generation
-    → compile/cache
-    → allocate/schedule/launch
-    → read / Device::sync   （完成边界；flush 只是提交/推进）
-```
+![编译器与运行时流水线（左→右）：capture/register、analysis、transform、lowering、codegen 偏编译器侧，compile/cache、allocate/schedule/launch、read/sync 偏运行时侧](../img/ch04-compiler-pipeline.svg)
 
 前五步偏编译器，后三步偏运行时，但边界会移动。JIT 在运行时拿到真实
 shape 和设备后编译；autotune 通过真实执行反过来影响选择；缓存同时属于

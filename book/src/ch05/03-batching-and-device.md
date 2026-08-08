@@ -60,9 +60,11 @@ let loader = DataLoaderBuilder::new(batcher)
 - `set_device` 只决定 Batcher 收到的目标 Device，不改变 Dataset 的存储。
 
 `FixBatchStrategy` 在数据量不是 batch size 的整数倍时，会在迭代末尾
-强制发出一个不完整 batch。训练代码若要求固定形状，必须在 Batcher 中
-padding，或明确丢弃/补齐最后一批；不能从 `batch_size` 配置本身推断
-这个策略。
+强制发出一个不完整 batch。例如 1000 个样本、`batch_size = 32` 时，
+迭代会发出 $31$ 个完整 batch 和 $1$ 个只有 $8$ 个样本的末尾 batch
+（$1000 = 31 \times 32 + 8$）。训练代码若要求固定形状，必须在
+Batcher 中 padding，或明确丢弃/补齐最后一批；不能从 `batch_size`
+配置本身推断这个策略。
 
 ## 失败传播
 

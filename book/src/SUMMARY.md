@@ -3,8 +3,7 @@
 [首页](README.md)
 [前言](preface.md)
 [许可、来源与独立性声明](attribution.md)
-[综合实验：数据到推理](capstone-p1.md)
-[OpenMLSys 核心主题比较卡](comparison-cards.md)
+[如何运行本书示例](running-examples.md)
 
 # 基础篇
 
@@ -95,4 +94,14 @@
   - [故障、检查点与可观测性](ch09/06-faults-checkpoints-and-observability.md)
   - [实验：CPU 集群调度与故障模拟器](ch09/07-cpu-cluster-simulator-lab.md)
   - [练习、延伸阅读与来源](ch09/08-exercises-and-sources.md)
+
+# 贯穿实验与对照
+
+- [综合实验：数据到推理](capstone.md)
+- [OpenMLSys 核心主题比较卡](comparison-cards.md)
+- [逐文件对照矩阵导读](crosswalk-guide.md)
+
+# 附录
+
+- [术语表](glossary.md)
 

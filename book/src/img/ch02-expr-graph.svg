@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 260" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <rect width="560" height="260" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <text x="280" y="28" text-anchor="middle" font-size="14" fill="#374151">z = (x + y) × y</text>
+  <!-- nodes -->
+  <g font-size="14" text-anchor="middle">
+    <rect x="40" y="50" width="70" height="36" fill="#dbeafe" stroke="#3b82f6" rx="4"/><text x="75" y="73" fill="#1e3a8a">x</text>
+    <rect x="40" y="140" width="70" height="36" fill="#dbeafe" stroke="#3b82f6" rx="4"/><text x="75" y="163" fill="#1e3a8a">y</text>
+    <rect x="200" y="95" width="80" height="36" fill="#e0e7ff" stroke="#6366f1" rx="4"/><text x="240" y="118" fill="#312e81">add → a</text>
+    <rect x="380" y="95" width="80" height="36" fill="#ffedd5" stroke="#f97316" rx="4"/><text x="420" y="118" fill="#7c2d12">mul → z</text>
+  </g>
+  <!-- edges -->
+  <g stroke="#6b7280" stroke-width="1.5" fill="#6b7280">
+    <path d="M110 68 L198 108"/><polygon points="198,108 190,104 192,112"/>
+    <path d="M110 158 L198 122"/><polygon points="198,122 190,124 194,114"/>
+    <path d="M280 113 L378 113"/><polygon points="378,113 370,109 370,117"/>
+    <path d="M75 176 L75 210 L420 210 L420 131"/><polygon points="420,131 416,139 424,139"/>
+  </g>
+  <text x="250" y="230" text-anchor="middle" font-size="12" fill="#6b7280">y 被 add 与 mul 共享：前向复用同一输入，反向需累加两条伴随路径</text>
+</svg>

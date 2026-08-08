@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 240" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <rect width="720" height="240" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <!-- time axis -->
+  <text x="60" y="30" font-size="13" fill="#6b7280">time →</text>
+  <g font-size="12" fill="#6b7280" text-anchor="middle">
+    <text x="130" y="30">0</text><text x="200" y="30">1</text><text x="270" y="30">2</text>
+    <text x="340" y="30">3</text><text x="410" y="30">4</text><text x="480" y="30">5</text>
+    <text x="550" y="30">6</text><text x="620" y="30">7</text>
+  </g>
+  <!-- grid: 3 stages x 8 slots, cell 70x44 -->
+  <g font-size="14" text-anchor="middle">
+    <text x="60" y="70" font-size="14" fill="#1f2937">S0</text>
+    <text x="60" y="118" font-size="14" fill="#1f2937">S1</text>
+    <text x="60" y="166" font-size="14" fill="#1f2937">S2</text>
+    <!-- S0: F0 F1 F2 B0 B1 B2 - - -->
+    <rect x="95"  y="42" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="130" y="70" fill="#1e3a8a">F0</text>
+    <rect x="165" y="42" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="200" y="70" fill="#1e3a8a">F1</text>
+    <rect x="235" y="42" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="270" y="70" fill="#1e3a8a">F2</text>
+    <rect x="305" y="42" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="340" y="70" fill="#7c2d12">B0</text>
+    <rect x="375" y="42" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="410" y="70" fill="#7c2d12">B1</text>
+    <rect x="445" y="42" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="480" y="70" fill="#7c2d12">B2</text>
+    <rect x="515" y="42" width="70" height="44" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="4 3"/><text x="550" y="70" fill="#9ca3af">·</text>
+    <rect x="585" y="42" width="70" height="44" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="4 3"/><text x="620" y="70" fill="#9ca3af">·</text>
+    <!-- S1: - F0 F1 B0 F2 B1 B2 - -->
+    <rect x="95"  y="90" width="70" height="44" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="4 3"/><text x="130" y="118" fill="#9ca3af">·</text>
+    <rect x="165" y="90" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="200" y="118" fill="#1e3a8a">F0</text>
+    <rect x="235" y="90" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="270" y="118" fill="#1e3a8a">F1</text>
+    <rect x="305" y="90" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="340" y="118" fill="#7c2d12">B0</text>
+    <rect x="375" y="90" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="410" y="118" fill="#1e3a8a">F2</text>
+    <rect x="445" y="90" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="480" y="118" fill="#7c2d12">B1</text>
+    <rect x="515" y="90" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="550" y="118" fill="#7c2d12">B2</text>
+    <rect x="585" y="90" width="70" height="44" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="4 3"/><text x="620" y="118" fill="#9ca3af">·</text>
+    <!-- S2: - - F0 B0 F1 B1 F2 B2 -->
+    <rect x="95"  y="138" width="70" height="44" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="4 3"/><text x="130" y="166" fill="#9ca3af">·</text>
+    <rect x="165" y="138" width="70" height="44" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="4 3"/><text x="200" y="166" fill="#9ca3af">·</text>
+    <rect x="235" y="138" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="270" y="166" fill="#1e3a8a">F0</text>
+    <rect x="305" y="138" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="340" y="166" fill="#7c2d12">B0</text>
+    <rect x="375" y="138" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="410" y="166" fill="#1e3a8a">F1</text>
+    <rect x="445" y="138" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="480" y="166" fill="#7c2d12">B1</text>
+    <rect x="515" y="138" width="70" height="44" fill="#dbeafe" stroke="#3b82f6"/><text x="550" y="166" fill="#1e3a8a">F2</text>
+    <rect x="585" y="138" width="70" height="44" fill="#ffedd5" stroke="#f97316"/><text x="620" y="166" fill="#7c2d12">B2</text>
+  </g>
+  <!-- legend -->
+  <g font-size="13" fill="#1f2937">
+    <rect x="200" y="204" width="16" height="16" fill="#dbeafe" stroke="#3b82f6"/><text x="222" y="217">F：前向（micro-batch i）</text>
+    <rect x="380" y="204" width="16" height="16" fill="#ffedd5" stroke="#f97316"/><text x="402" y="217">B：反向</text>
+    <rect x="480" y="204" width="16" height="16" fill="#f3f4f6" stroke="#d1d5db" stroke-dasharray="4 3"/><text x="502" y="217">空泡（bubble）</text>
+  </g>
+</svg>

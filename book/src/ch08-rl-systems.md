@@ -35,20 +35,7 @@ trait、关联类型、`Clone`/`Send`、随机采样和基本概率；不要求�
 
 ## 本章路线
 
-```text
-Environment
-    │ state / observation
-    ▼
-Policy ── action ──► Environment::step
-    │                         │
-    │                  next_state, reward,
-    │                  done, truncated
-    ▼                         │
- rollout / trajectory ────────┘
-    │
-    ├── on-policy recent batch ──► learner
-    └── replay buffer ───────────► sample ──► learner / evaluation
-```
+![强化学习数据环路：Environment 与 Policy 交互产生 rollout/trajectory，再经 on-policy batch 或 replay sample 进入 learner/evaluation](img/ch08-rl-loop.svg)
 
 先从框架无关的 MDP 和数据生命周期开始，再阅读 `burn-rl` 的环境、策略和
 回放抽象，最后进入 `burn-train` 的多环境 off-policy 编排。实验刻意使用
@@ -79,15 +66,18 @@ inference、replay、训练、评估和 checkpoint，但这不等于已经提供
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：Environment、Policy 组合、done/truncated、replay
   shape 和表格 TD update；
-- `固定源码核验`：`burn-rl` 的 Environment/Policy/TransitionBuffer 与
+- `源码核验`：`burn-rl` 的 Environment/Policy/TransitionBuffer 与
   `burn-train` 的 rollout/evaluation/checkpoint 边界；
-- `框架无关模型/协议模拟`：policy freshness、behavior/target metadata、
+- `协议/成本模型`：policy freshness、behavior/target metadata、
   双智能体 action/reward vector 和 credit assignment；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 simulator、
-  神经网络 DQN、Actor–Learner 和 MARL 集群；
-- `明确未覆盖`：把抽象组合 API 描述成完整 DQN/PPO/SAC/MARL runtime。
+- `可选平台实验`：真实 simulator、神经网络 DQN、Actor–Learner 和
+  MARL 集群；
+- `未覆盖`：把抽象组合 API 描述成完整 DQN/PPO/SAC/MARL runtime。
 
 对应 policy freshness 和 joint transition 协议见[核心主题比较卡](comparison-cards.md#第-8-章强化学习)。
 

@@ -1,4 +1,4 @@
-# 8.4 Rollout 吞吐、异步环境与推理队列
+# Rollout 吞吐、异步环境与推理队列
 
 ## 采样系统的瓶颈
 
@@ -17,9 +17,16 @@ $$
 \frac{1}{T\_{\text{env}}+T\_{\text{policy}}+T\_{\text{transfer}}}.
 $$
 
-创建 $N$ 个环境并行采样后，理想上可以接近
-$N/T\_{\text{env}}$，但实际吞吐受 CPU 核数、锁、内存带宽、policy batch
-上限、queue wait 和设备传输限制。多环境不是免费加速器。
+代入数字看瓶颈如何移动：设 $T\_{\text{env}} = 2$ ms、
+$T\_{\text{policy}} = 5$ ms、传输与记录共 $1$ ms。单环境吞吐为
+$1/8\ \text{ms} = 125$ steps/s。创建 $N = 8$ 个环境后，环境侧理想
+产能为 $8 / 2\ \text{ms} = 4000$ steps/s，但 policy 一次最多合批
+8 个观察、耗时 5 ms，即 inference 上限 $8 / 5\ \text{ms} = 1600$
+steps/s——瓶颈从环境移到了 policy。继续加环境到 $N = 64$ 也不会超过
+这个上限，反而排队更长。此时该优化的是 policy 合批或 inference 设备，
+而不是再开环境。多环境不是免费加速器：实际吞吐还受 CPU 核数、锁、
+内存带宽、policy batch 上限、queue wait 和设备传输限制，理想上界是
+$N/T\_{\text{env}}$，但任何一项都可能先成为瓶颈。
 
 ## 固定 Burn 的三种 runner
 

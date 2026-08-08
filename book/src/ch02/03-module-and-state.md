@@ -25,6 +25,13 @@ Burn 用 `Module` 统一这些操作。
 `Module` 提供参数遍历、`num_params`、设备迁移和状态转换等操作。宏生成的
 实现减少样板代码，但结构和字段所有权仍是普通 Rust 语义。
 
+参数统计可以直接口算验证。`Linear(d_in, d_out)` 含权重
+$d\_{in} \times d\_{out}$ 和偏置 $d\_{out}$；一个 784→128→10 的两层
+MLP 共有 $(784 \times 128 + 128) + (128 \times 10 + 10) = 101770$
+个参数，按 `f32` 计约 $398\ \text{KiB}$。本章实验中的
+`num_params` 断言的就是这类递归求和；当统计结果与预期不符时，通常
+意味着某个字段被错误地声明（或漏声明）为 `Param`。
+
 ## Param 与普通 Tensor
 
 可训练张量通常包在 `Param<Tensor<D>>` 中。Param 让 Module visitor 识别

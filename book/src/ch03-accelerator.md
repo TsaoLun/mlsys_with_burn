@@ -39,12 +39,14 @@ CubeCL IR；这能验证语义和边界，但不被当作 GPU 性能实验。更
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：CubeCL CPU Kernel、host reference 和 tile load 模型；
-- `固定源码核验`：CubeCL/CubeK 的拓扑、buffer、算子与 backend 入口；
-- `框架无关模型/协议模拟`：GEMM、算术强度和 Roofline 方向；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：共享内存、真实 GPU
-  GEMM、autotune 性能和厂商设备比较；
-- `明确未覆盖`：用 CPU 正确性结果替代 GPU 带宽、吞吐或 launch 结论。
+- `源码核验`：CubeCL/CubeK 的拓扑、buffer、算子与 backend 入口；
+- `协议/成本模型`：GEMM、算术强度和 Roofline 方向；
+- `可选平台实验`：共享内存、真实 GPU GEMM、autotune 性能和厂商设备比较；
+- `未覆盖`：用 CPU 正确性结果替代 GPU 带宽、吞吐或 launch 结论。
 
 对应协议与不可比较条件见[核心主题比较卡](comparison-cards.md#第-3-章gemm-与加速器)。
 

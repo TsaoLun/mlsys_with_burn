@@ -1,4 +1,4 @@
-# 7.2 ONNX、图转换与 Burn Rust 代码生成
+# ONNX、图转换与 Burn Rust 代码生成
 
 ## ONNX 解决什么问题
 

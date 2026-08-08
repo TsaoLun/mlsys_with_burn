@@ -72,15 +72,18 @@ CubeCL `ComputeClient` 只作为训练数据面和设备运行时的固定源码
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：队列、gang admission、拓扑放置、通信成本、故障
   retry、checkpoint replay 和资源归还；
-- `固定源码核验`：Burn/CubeCL 的设备、stream、memory、collective 和
+- `源码核验`：Burn/CubeCL 的设备、stream、memory、collective 和
   training data-plane 入口；
-- `框架无关模型/协议模拟`：控制面、故障域、队列公平、链路热点和
+- `协议/成本模型`：控制面、故障域、队列公平、链路热点和
   machine-readable trace；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 GPU 集群、NCCL/
-  RDMA、网络拥塞、多租户 runtime 和弹性 membership；
-- `明确未覆盖`：把模拟器虚拟时间、放置结果或通信 penalty 当作 GPU
+- `可选平台实验`：真实 GPU 集群、NCCL/RDMA、网络拥塞、多租户 runtime
+  和弹性 membership；
+- `未覆盖`：把模拟器虚拟时间、放置结果或通信 penalty 当作 GPU
   benchmark。
 
 对应 trace schema、队列指标和控制面边界见[核心主题比较卡](comparison-cards.md#第-9-章gpu-集群与控制面)。

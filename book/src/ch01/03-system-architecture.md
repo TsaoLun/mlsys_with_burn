@@ -4,27 +4,9 @@
 边界并不总与下图完全一致，但这张地图能帮助我们判断一个问题应在哪一层
 解决。
 
-```text
-模型与训练程序
-  │  编程接口、Module、Tensor、优化器
-  ▼
-张量执行与 autodiff tape
-  │  Device、dtype、eager 前向、反向依赖
-  ▼
-Burn IR / Fusion 计划
-  │  分析、融合、布局和算子选择
-  ▼
-CubeCL / CubeK Kernel
-  │  Scope → KernelDefinition → JIT / 自动调优
-  ▼
-设备 Runtime（CPU / GPU / WebGPU / 远程）
+![从编程接口到硬件的系统分层：模型与训练程序、张量执行与 autodiff tape、Burn IR / Fusion 计划、CubeCL / CubeK Kernel、设备 Runtime，以及横跨各层的数据管道、训练执行、部署与通信](../img/ch01-system-layers.svg)
 
-数据管道 ─────► 训练执行 ─────► 状态与模型部署
-                     │
-                通信与集群系统
-```
-
-术语与三张地图的固定叫法见仓库 `docs/TERM_GLOSSARY.md`。
+关键术语的固定叫法见书末[术语表](../glossary.md)。
 
 ## 编程接口
 

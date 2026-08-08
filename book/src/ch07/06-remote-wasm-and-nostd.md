@@ -1,4 +1,4 @@
-# 7.6 Remote、WASM/no_std 与部署边界
+# Remote、WASM/no_std 与部署边界
 
 ## Remote 执行的真正含义
 

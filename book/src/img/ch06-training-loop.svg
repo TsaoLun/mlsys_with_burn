@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 260" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <rect width="720" height="260" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <g font-size="13" text-anchor="middle">
+    <rect x="30" y="90" width="130" height="50" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="95" y="112" fill="#1e3a8a">Dataset</text>
+    <text x="95" y="130" fill="#3b5bdb" font-size="11">DataLoader batch</text>
+    <rect x="200" y="40" width="130" height="50" fill="#dcfce7" stroke="#16a34a" rx="4"/>
+    <text x="265" y="62" fill="#14532d">forward</text>
+    <text x="265" y="80" fill="#15803d" font-size="11">→ loss</text>
+    <rect x="200" y="140" width="130" height="50" fill="#e0e7ff" stroke="#6366f1" rx="4"/>
+    <text x="265" y="162" fill="#312e81">backward</text>
+    <text x="265" y="180" fill="#4f46e5" font-size="11">autodiff tape</text>
+    <rect x="380" y="90" width="140" height="50" fill="#ffedd5" stroke="#f97316" rx="4"/>
+    <text x="450" y="112" fill="#7c2d12">GradientsParams</text>
+    <text x="450" y="130" fill="#c2410c" font-size="11">metrics ←→</text>
+    <rect x="560" y="40" width="130" height="50" fill="#fee2e2" stroke="#dc2626" rx="4"/>
+    <text x="625" y="62" fill="#7f1d1d">optimizer</text>
+    <text x="625" y="80" fill="#b91c1c" font-size="11">+ scheduler</text>
+    <rect x="560" y="140" width="130" height="50" fill="#fef3c7" stroke="#d97706" rx="4"/>
+    <text x="625" y="162" fill="#78350f">checkpoint</text>
+    <text x="625" y="180" fill="#92400e" font-size="11">validation / sync</text>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" fill="#6b7280">
+    <path d="M160 115 L198 65"/><polygon points="198,65 190,64 194,72"/>
+    <path d="M160 115 L198 160"/><polygon points="198,160 190,156 194,166"/>
+    <path d="M330 65 L380 105"/><polygon points="380,105 372,100 374,110"/>
+    <path d="M330 165 L380 125"/><polygon points="380,125 372,128 376,118"/>
+    <path d="M520 105 L558 65"/><polygon points="558,65 550,64 554,72"/>
+    <path d="M520 125 L558 160"/><polygon points="558,160 550,156 554,166"/>
+  </g>
+  <text x="360" y="235" text-anchor="middle" font-size="12" fill="#374151">单设备是最小闭环；本机多设备与 DDP 有不同的状态、故障与通信边界</text>
+</svg>

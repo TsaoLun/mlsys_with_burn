@@ -1,4 +1,4 @@
-# 7.7 实验：CPU 模型状态往返保存与恢复
+# 实验：CPU 模型状态往返保存与恢复
 
 ## 实验目标与边界
 
@@ -91,6 +91,6 @@ record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
 ## 5. 接到第 5–6 章
 
 若要从真实数据和训练状态进入 artifact，而不是手工初始化 Linear，请运行
-[综合实验：数据到推理](../capstone-p1.md)。它在本实验的
+[综合实验：数据到推理](../capstone.md)。它在本实验的
 `ModuleRecord` 往返保存与恢复之前加入 Dataset split、SGD 更新和
 `model.valid()`，并用错误 topology 验证加载失败语义。

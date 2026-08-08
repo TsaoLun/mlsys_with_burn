@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 280" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <rect width="680" height="280" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <rect x="30" y="30" width="160" height="50" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+  <text x="110" y="60" text-anchor="middle" font-size="14" fill="#1e3a8a">Autodiff Device</text>
+  <g font-size="13" text-anchor="middle">
+    <rect x="260" y="24" width="160" height="44" fill="#dcfce7" stroke="#16a34a" rx="4"/>
+    <text x="340" y="42" fill="#14532d">eager forward</text>
+    <text x="340" y="58" fill="#15803d" font-size="11">Flex 数值结果</text>
+    <rect x="260" y="90" width="160" height="44" fill="#e0e7ff" stroke="#6366f1" rx="4"/>
+    <text x="340" y="108" fill="#312e81">register Step</text>
+    <text x="340" y="124" fill="#4f46e5" font-size="11">写入 autodiff tape</text>
+    <rect x="500" y="90" width="150" height="44" fill="#ede9fe" stroke="#8b5cf6" rx="4"/>
+    <text x="575" y="108" fill="#4c1d95">autodiff tape</text>
+    <text x="575" y="124" fill="#7c3aed" font-size="11">易失：一次前向/反向</text>
+    <rect x="500" y="180" width="150" height="44" fill="#ffedd5" stroke="#f97316" rx="4"/>
+    <text x="575" y="206" fill="#7c2d12">Gradients</text>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" fill="#6b7280">
+    <path d="M190 45 L258 45"/><polygon points="258,45 250,41 250,49"/>
+    <path d="M190 55 L258 108"/><polygon points="258,108 250,104 252,112"/>
+    <path d="M420 112 L498 112"/><polygon points="498,112 490,108 490,116"/>
+    <path d="M575 134 L575 178"/><polygon points="575,178 571,170 579,170"/>
+  </g>
+  <text x="340" y="200" text-anchor="middle" font-size="12" fill="#6b7280">backward(self) 消费输出</text>
+  <text x="340" y="220" text-anchor="middle" font-size="12" fill="#6b7280">并 remove tape 上的 Step</text>
+  <text x="340" y="255" text-anchor="middle" font-size="12" fill="#374151">tape 位于 burn-autodiff；启用 autodiff 不会自动进入 Fusion</text>
+</svg>

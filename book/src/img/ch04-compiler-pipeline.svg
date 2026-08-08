@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 220" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <rect width="900" height="220" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <text x="30" y="28" font-size="13" fill="#2563eb">编译器侧重</text>
+  <text x="520" y="28" font-size="13" fill="#ea580c">运行时侧重</text>
+  <g font-size="11" text-anchor="middle">
+    <rect x="20" y="44" width="100" height="48" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="70" y="64" fill="#1e3a8a">capture</text>
+    <text x="70" y="80" fill="#3b5bdb">register</text>
+    <rect x="130" y="44" width="90" height="48" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="175" y="64" fill="#1e3a8a">analysis</text>
+    <text x="175" y="80" fill="#3b5bdb">静态信息</text>
+    <rect x="230" y="44" width="110" height="48" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="285" y="64" fill="#1e3a8a">transform</text>
+    <text x="285" y="80" fill="#3b5bdb">选择 / 融合</text>
+    <rect x="350" y="44" width="90" height="48" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="395" y="64" fill="#1e3a8a">lowering</text>
+    <text x="395" y="80" fill="#3b5bdb">Kernel IR</text>
+    <rect x="450" y="44" width="100" height="48" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="500" y="64" fill="#1e3a8a">codegen</text>
+    <text x="500" y="80" fill="#3b5bdb">目标源码</text>
+    <rect x="580" y="44" width="100" height="48" fill="#ffedd5" stroke="#f97316" rx="4"/>
+    <text x="630" y="64" fill="#7c2d12">compile</text>
+    <text x="630" y="80" fill="#c2410c">cache / JIT</text>
+    <rect x="690" y="44" width="110" height="48" fill="#ffedd5" stroke="#f97316" rx="4"/>
+    <text x="745" y="64" fill="#7c2d12">allocate</text>
+    <text x="745" y="80" fill="#c2410c">schedule/launch</text>
+    <rect x="810" y="44" width="80" height="48" fill="#ffedd5" stroke="#f97316" rx="4"/>
+    <text x="850" y="64" fill="#7c2d12">read</text>
+    <text x="850" y="80" fill="#c2410c">sync</text>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" fill="#6b7280">
+    <line x1="120" y1="68" x2="128" y2="68"/><polygon points="130,68 124,64 124,72"/>
+    <line x1="220" y1="68" x2="228" y2="68"/><polygon points="230,68 224,64 224,72"/>
+    <line x1="340" y1="68" x2="348" y2="68"/><polygon points="350,68 344,64 344,72"/>
+    <line x1="440" y1="68" x2="448" y2="68"/><polygon points="450,68 444,64 444,72"/>
+    <line x1="550" y1="68" x2="578" y2="68"/><polygon points="580,68 574,64 574,72"/>
+    <line x1="680" y1="68" x2="688" y2="68"/><polygon points="690,68 684,64 684,72"/>
+    <line x1="800" y1="68" x2="808" y2="68"/><polygon points="810,68 804,64 804,72"/>
+  </g>
+  <line x1="565" y1="100" x2="565" y2="140" stroke="#9ca3af" stroke-dasharray="4 3"/>
+  <text x="565" y="158" text-anchor="middle" font-size="12" fill="#6b7280">边界会移动</text>
+  <text x="450" y="195" text-anchor="middle" font-size="12" fill="#374151">JIT 在运行时编译；autotune 通过真实执行反过来影响选择；flush 只是提交，read/sync 才是完成边界</text>
+</svg>

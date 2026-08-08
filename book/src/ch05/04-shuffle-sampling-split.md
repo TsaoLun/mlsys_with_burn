@@ -5,7 +5,11 @@
 `ShuffledDataset` 并不复制或改写底层 item。它先建立
 `0..dataset.len()` 的索引，再用 `StdRng` 打乱索引；`get(i)` 通过索引
 表访问底层 Dataset。这样 shuffle 的成本主要是索引 vector 和随机排列，
-而不是样本本身的复制。
+而不是样本本身的复制。对 100 万样本，索引表是
+$10^6 \times 8\ \text{B} = 8\ \text{MiB}$ 的 `usize` vector 加一次
+$O(N)$ 排列；若改为复制样本本身（比如每条 1 KiB 的文本），则要移动
+约 $1\ \text{GiB}$。索引重排把 shuffle 的内存开销与样本大小解耦，
+这也是它能作用于任意存储后端（包括 SQLite）的原因。
 
 `RngSource` 支持三种来源：
 

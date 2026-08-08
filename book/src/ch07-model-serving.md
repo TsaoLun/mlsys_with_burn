@@ -36,19 +36,7 @@ CUDA、浏览器或部署集群。
 
 先把部署问题放到框架无关的边界上，再进入固定源码：
 
-```text
-训练状态
-   │  model + parameters + metadata
-   ▼
-artifact ──► convert/validate/optimize ──► runtime model
-                                               │ input
-                                               ▼
-                                      pre-process → forward
-                                               │
-                                    post-process / response
-                                               │
-                          batch / queue / metrics / auth
-```
+![部署主路径：训练状态 → artifact → convert/validate/optimize → runtime model，再经 pre/post 与 batch/queue 服务边界](img/ch07-serving-pipeline.svg)
 
 `ModuleRecord` 适合验证“参数能否恢复到一个 Burn module”；`burn-onnx` 负责
 把 ONNX 图生成成 Burn Rust source，并为生成模型安排 Burnpack 权重加载；
@@ -78,15 +66,18 @@ GPU 性能结论。
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：当前 workspace 的 `ModuleRecord`/Burnpack 参数往返保存与恢复，
   以及恢复后的 inference；
-- `固定源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
+- `源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
   WASM/no_std 和当前 workspace 的 artifact 入口；
-- `框架无关模型/协议模拟`：manifest、checksum、版本、rollback、batch/
-  queue 和安全威胁模型；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 ONNX fixture、
-  服务治理、浏览器/Remote 部署和设备性能；
-- `明确未覆盖`：burn-onnx 旧 revision 与当前 workspace Burn 的端到端混用。
+- `协议/成本模型`：manifest、checksum、版本、rollback、batch/queue
+  和安全威胁模型；
+- `可选平台实验`：真实 ONNX fixture、服务治理、浏览器/Remote 部署和
+  设备性能；
+- `未覆盖`：burn-onnx 旧 revision 与当前 workspace Burn 的端到端混用。
 
 对应 artifact manifest、rollback 和动态 batching 见[核心主题比较卡](comparison-cards.md#第-7-章模型部署)。
 

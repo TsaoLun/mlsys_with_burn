@@ -1,4 +1,4 @@
-# 7.5 推理 runtime、批处理与服务接口
+# 推理 runtime、批处理与服务接口
 
 ## 前处理和后处理属于模型契约
 
@@ -111,6 +111,18 @@ Burn 提供 Tensor、Module、Device、backend 和部分 Remote server/client
 把这些逻辑直接塞进 `forward` 会让模型不可复用，也难以测试。更好的边界
 是让 service adapter 负责请求生命周期，让 model runner 只消费已经校验
 的 typed batch，并返回 typed output。
+
+## 与大模型服务的边界
+
+生成式 LLM 服务在上述问题之外还有一层自回归（autoregressive）特有的
+系统问题：逐 token 解码使 KV cache 成为主要内存对象，请求长度差异
+极大，需要 continuous batching、paged KV 管理和前缀缓存（prefix
+caching）才能维持吞吐。本书首版不展开这些机制：固定 Burn 主线快照
+没有现成的 paged attention 或 continuous batching **服务** runtime；
+`burn-onnx` 中 Attention 节点对 `past_k`/`past_v` 张量的图转换，也不
+等于服务端的分页 KV 管理或连续批处理。把它们写成“Burn 能力”会越过
+本书的证据纪律。本节的 artifact、batching、队列和 worker 边界仍然是
+LLM 服务的基础层；KV cache 专题属于规划中的后续版本。
 
 ## 正确性与性能测试
 

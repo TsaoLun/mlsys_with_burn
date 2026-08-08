@@ -1,4 +1,4 @@
-# 8.3 Transition、回放与采样
+# Transition、回放与采样
 
 ## Transition 是训练数据协议
 
@@ -62,6 +62,12 @@ $$
 真实值还要加上 backend storage、alignment、autodiff 或 device copy 的
 开销。增大 capacity 可能改善样本多样性，却会增加内存和旧 policy 数据
 的比例；它不是无条件的算法改进。
+
+容量还直接决定数据有多“旧”：写入速率为 $w$ 步/秒、容量为 $C$ 时，
+buffer 里最老的样本大约来自 $C/w$ 秒之前。$C = 10^5$、
+$w = 10^3$ 步/秒意味着 learner 正在用 100 秒前的行为策略产生的数据
+训练——在 policy 快速更新的阶段，这等价于一个不小的 behavior/target
+版本差。replay 容量因此同时是内存预算和**新鲜度预算**。
 
 ## `SliceAccess` 与 Rust 泛型
 

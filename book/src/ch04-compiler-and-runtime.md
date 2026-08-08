@@ -47,13 +47,15 @@ Tensor 操作
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：FusionInspector 的计划结构、数值等价和同步边界；
-- `固定源码核验`：OperationIr、Fusion stream、CubeCL Scope、编译和
+- `源码核验`：OperationIr、Fusion stream、CubeCL Scope、编译和
   HandleContainer 的生命周期入口；
-- `框架无关模型/协议模拟`：Pass、lowering、cache 和 launch/read 因果链；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：真实 kernel launch、
-  硬件 graph capture 和设备性能；
-- `明确未覆盖`：将 Fusion block 数、cache hit、kernel launch count 和
+- `协议/成本模型`：Pass、lowering、cache 和 launch/read 因果链；
+- `可选平台实验`：真实 kernel launch、硬件 graph capture 和设备性能；
+- `未覆盖`：将 Fusion block 数、cache hit、kernel launch count 和
   wall-clock time 当成同一个指标。
 
 对应对象级协议与指标边界见[核心主题比较卡](comparison-cards.md#第-4-章irfusioncache-与-launch)。

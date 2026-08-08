@@ -69,16 +69,17 @@ inference。这里保留 workflow 的状态转移，但把实现重写为 Rust �
 Dataset/Batcher、所有权、`AutodiffModule::valid` 和 `ModuleRecord`。
 因此本实验是“协议和最小实现的可比较证据”，不是对原作 Python 框架或
 硬件平台的性能对等性（parity）。逐主题的证据等级见[OpenMLSys 核心主题比较卡](comparison-cards.md)；
-逐文件对照矩阵仍以 `planning/comparison/openmlsys-v1-crosswalk.md` 为准。
+逐文件对照关系仍以仓库中的对照矩阵为准（入口见
+[逐文件对照矩阵导读](crosswalk-guide.md)）。
 
-## 证据标签
+## 证据状态
 
-以下是本书自定义的证据分类，不是 Burn 官方能力等级：
+以下标签是本书的阅读证据分类，不是 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
 
 - `CPU 可运行验证`：固定命令运行数据分片、训练、record 和 inference；
-- `固定源码核验`：Burn `PartialDataset`、DataLoader、autodiff、SGD 和
+- `源码核验`：Burn `PartialDataset`、DataLoader、autodiff、SGD 和
   `ModuleRecord`；
-- `框架无关模型/协议模拟`：数据契约、错误 topology 和 artifact 验证；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：GPU、分布式训练、ONNX
-  fixture 和服务治理；
-- `明确未覆盖`：把二维回归或 CPU elapsed time 外推成生产性能。
+- `协议/成本模型`：数据契约、错误 topology 和 artifact 验证；
+- `可选平台实验`：GPU、分布式训练、ONNX fixture 和服务治理；
+- `未覆盖`：把二维回归或 CPU elapsed time 外推成生产性能。

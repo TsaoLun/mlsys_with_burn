@@ -1,4 +1,4 @@
-# 8.7 实验：CPU 确定性 rollout 与 replay
+# 实验：CPU 确定性 rollout 与 replay
 
 ## 实验目标与边界
 

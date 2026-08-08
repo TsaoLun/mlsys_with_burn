@@ -44,7 +44,7 @@
 ## 证据和边界
 
 - `CPU 可运行验证`：workspace 中的 crate test 和 `cargo run`；
-- `固定源码核验`：主线 Burn 固定 revision 的 Dataset、DataLoader、
+- `源码核验`：主线 Burn 固定 revision 的 Dataset、DataLoader、
   AutodiffModule、optimizer 和 ModuleRecord；
 - `协议/成本模型`：workflow 状态、数据契约和错误 topology；
 - `可选平台实验`：真实 GPU、NCCL/DDP、ONNX fixture、网络服务；

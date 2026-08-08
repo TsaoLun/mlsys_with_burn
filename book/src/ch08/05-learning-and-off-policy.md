@@ -1,4 +1,4 @@
-# 8.5 TD 更新、off-policy 与训练编排
+# TD 更新、off-policy 与训练编排
 
 ## 从 transition 到 TD target
 

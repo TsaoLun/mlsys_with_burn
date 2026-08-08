@@ -42,11 +42,13 @@
 
 ## 证据状态
 
+以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
+[逐文件对照矩阵导读](crosswalk-guide.md)。
+
 - `CPU 可运行验证`：Tensor、Module、autodiff 和分支 tape 实验；
-- `固定源码核验`：`Tensor`/`Device`/`Module`、参数状态与一阶 autodiff；
-- `框架无关模型/协议模拟`：workflow 输入/输出/状态/错误契约；
-- `需要 CUDA/NCCL/网络/旧 revision 的可选扩展`：完整静态图 runtime、
-  device graph capture 与跨设备训练；
-- `明确未覆盖`：把 autodiff tape、Fusion IR 和 device graph capture
+- `源码核验`：`Tensor`/`Device`/`Module`、参数状态与一阶 autodiff；
+- `协议/成本模型`：workflow 输入/输出/状态/错误契约；
+- `可选平台实验`：完整静态图 runtime、device graph capture 与跨设备训练；
+- `未覆盖`：把 autodiff tape、Fusion IR 和 device graph capture
   当作同一实现的结论。
 

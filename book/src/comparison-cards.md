@@ -7,8 +7,8 @@
 证据标签统一为：`源码核验`、`CPU 可运行验证`、`协议/成本模型`、
 `可选平台实验`、`未覆盖`。标签是本书的证据层级，不是平台能力对等
 （parity）承诺。
-本页是面向读者的横向摘要，不替代
-`planning/comparison/openmlsys-v1-crosswalk.md` 的逐文件对照矩阵；第 1–2 章的
+本页是面向读者的横向摘要，不替代逐文件对照矩阵（入口见
+[逐文件对照矩阵导读](crosswalk-guide.md)）；第 1–2 章的
 接口、计算图和编程模型对照仍以对应章节和逐文件对照矩阵为准。本页聚焦第
 3–9 章中最容易把“概念、源码入口、协议模型”误读成“完整运行时”的主题。
 
@@ -21,7 +21,8 @@
   host reference 的测量协议；算术强度只用来解释复用方向。
 - **固定入口**：`cubecl/crates/cubecl-core/src/`、
   `cubecl/crates/cubecl-runtime/src/`、`cubek/crates/cubek-matmul/src/`。
-- **可运行观察**：`ch03-cubecl-kernel` 验证 CPU Kernel 正确性；
+- **可运行观察**：`ch03-cubecl-kernel` 验证 CPU Kernel 正确性（有图形
+  驱动的环境可用 `--features wgpu` 对照同一 Kernel 的 WGPU 运行结果）；
   `ch03-tile-loads` 验证 tile load/intensity 计数。
 - **不可直接比较**：CPU correctness 不能替代 GPU shared memory、带宽、
   autotune 或厂商 GEMM benchmark。标签为 `源码核验 + CPU 可运行验证 +
@@ -139,7 +140,7 @@
 
 ## 如何使用这些卡片
 
-先读对应章节的框架无关模型，再运行卡片列出的 CPU 示例，最后回到
-`planning/comparison/openmlsys-v1-crosswalk.md` 这份逐文件对照矩阵检查原作逐文件范围和
+先读对应章节的框架无关模型，再运行卡片列出的 CPU 示例，最后按
+[逐文件对照矩阵导读](crosswalk-guide.md)回到仓库中的对照矩阵，检查原作逐文件范围和
 固定 revision。若一个结论没有同时标出证据标签、硬件前提和未覆盖边界，
 它就不能作为本书的发布级比较结论。

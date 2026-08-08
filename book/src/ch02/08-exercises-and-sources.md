@@ -15,47 +15,204 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 
 ## 练习
 
+
+练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
+（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
+`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+
 ### 概念题
 
-1. 为什么 `Tensor<2>` 不能保证两个 Tensor 可以相加？列出编译期和运行时
+1. 【基础】为什么 `Tensor<2>` 不能保证两个 Tensor 可以相加？列出编译期和运行时
    分别能发现的错误。
-2. Cargo feature 与 Device 在后端选择中分别承担什么职责？
-3. 为什么 ModuleRecord 不能单独恢复一个任意模型？
-4. 对表达式 $z=(x+y)\times y$，画出前向依赖，并推导
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+2. 【基础】Cargo feature 与 Device 在后端选择中分别承担什么职责？
+
+<details>
+<summary>提示</summary>
+
+用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+
+</details>
+
+3. 【基础】为什么 ModuleRecord 不能单独恢复一个任意模型？
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+
+</details>
+
+4. 【基础】对表达式 $z=(x+y)\times y$，画出前向依赖，并推导
    $\partial z/\partial x$ 和 $\partial z/\partial y$。
-5. 比较 autodiff tape 与 Fusion IR 的节点生命周期和目标。
-6. 为什么向量输出直接调用 backward 等价于使用全 1 根梯度？训练损失通常
+
+<details>
+<summary>提示</summary>
+
+回看第 2 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+5. 【进阶】比较 autodiff tape 与 Fusion IR 的节点生命周期和目标。
+
+<details>
+<summary>提示</summary>
+
+见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+
+</details>
+
+6. 【进阶】为什么向量输出直接调用 backward 等价于使用全 1 根梯度？训练损失通常
    为什么先归约为标量？
+
+<details>
+<summary>提示</summary>
+
+见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+
+</details>
+
 
 ### Rust 与 API 题
 
-1. 修改广播实验，把输入 shape 改成 `[2, 1, 3]` 与 `[1, 4, 1]`。写出
+1. 【基础】修改广播实验，把输入 shape 改成 `[2, 1, 3]` 与 `[1, 4, 1]`。写出
    Tensor 秩和预期结果 shape，再用测试验证。
-2. 在一个需要重复使用 Tensor 的表达式中移除 clone，观察编译器错误。
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+2. 【基础】在一个需要重复使用 Tensor 的表达式中移除 clone，观察编译器错误。
    解释移动发生在哪里。
-3. 为 TinyModel 增加第二个 Linear 层，手工计算并断言参数量。
-4. 令 `detached_right = right.detach()` 后再做乘法。验证原 `right`
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+3. 【进阶】为 TinyModel 增加第二个 Linear 层，手工计算并断言参数量。
+
+<details>
+<summary>提示</summary>
+
+回看第 2 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+4. 【进阶】令 `detached_right = right.detach()` 后再做乘法。验证原 `right`
    没有梯度，而 `detached_right` 因保留 require-grad 意图成为新的可求导
    叶子；再尝试 `set_require_grad(false)` 比较结果。
-5. 比较 `Device::flex()`、`.autodiff()` 和 `.inner()` 的
+
+<details>
+<summary>提示</summary>
+
+回看第 2 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+
+</details>
+
+5. 【进阶】比较 `Device::flex()`、`.autodiff()` 和 `.inner()` 的
    `is_autodiff()`。
-6. 调用 `branch_gradient(false)`，断言输出与梯度，并解释为何未执行的
+
+<details>
+<summary>提示</summary>
+
+见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+
+</details>
+
+6. 【进阶】调用 `branch_gradient(false)`，断言输出与梯度，并解释为何未执行的
    `* 2` 分支不会出现在 tape 中。
-7. 把一个训练函数按 Load/Map、Batch、Model、Loss、Autodiff、
+
+<details>
+<summary>提示</summary>
+
+见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+
+</details>
+
+7. 【进阶】把一个训练函数按 Load/Map、Batch、Model、Loss、Autodiff、
    Optimizer、Evaluate/Save 七个阶段标注输入、输出和可恢复状态；指出
    哪些状态不应只放进 ModuleRecord。
 
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+
+</details>
+
+
 ### 源码题
 
-1. 在 `DispatchDevice` 中找出哪些变体受 Cargo feature 控制。
-2. 找到 Flex 的默认 float/int dtype，并与第一章 stack probe 输出比较。
-3. 找到 `require_grad` 对非叶子 Tensor 的限制及错误位置。
-4. 找到 Module visitor 如何统计 Param，而普通 Tensor 为何不会自动成为
+1. 【进阶】在 `DispatchDevice` 中找出哪些变体受 Cargo feature 控制。
+
+<details>
+<summary>提示</summary>
+
+用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+
+</details>
+
+2. 【进阶】找到 Flex 的默认 float/int dtype，并与第一章 stack probe 输出比较。
+
+<details>
+<summary>提示</summary>
+
+在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+
+</details>
+
+3. 【进阶】找到 `require_grad` 对非叶子 Tensor 的限制及错误位置。
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+4. 【进阶】找到 Module visitor 如何统计 Param，而普通 Tensor 为何不会自动成为
    参数。
-5. 在 `burn-backend-tests/tests/autodiff/` 中选择一个广播操作，解释它的
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
+5. 【进阶】在 `burn-backend-tests/tests/autodiff/` 中选择一个广播操作，解释它的
    梯度为何需要归约。
-6. 找到 Module visitor 对 `Param` 和普通字段的处理，说明新增一个字段时
+
+<details>
+<summary>提示</summary>
+
+见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+
+</details>
+
+6. 【进阶】找到 Module visitor 对 `Param` 和普通字段的处理，说明新增一个字段时
    如何判断它应进入 optimizer、ModuleRecord 或 Config。
+
+<details>
+<summary>提示</summary>
+
+见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+
+</details>
+
 
 ## 延伸阅读
 
@@ -101,7 +258,7 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 本章保留图表示、依赖、控制流、静动态图与拓扑调度思想，删除 TensorFlow 1
 和 MindSpore 专用 API，并把数据流水线、模型并行后移。补全时增加了拓扑序
 小例子、图外控制流与循环展开/循环依赖区分，以及两分支 autodiff 实验；
-统一用语见 `docs/TERM_GLOSSARY.md`。
+统一用语见[术语表](../glossary.md)。
 
 未迁入：原书长控制流教程、`tf.cond`/`while_loop` API 走读和框架专用训练
 代码；完整训练工作流已用输入/输出/状态契约建立地图，数据与训练执行仍
@@ -118,6 +275,6 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 Rust 类型分工和全部可运行示例。
 
 本章没有复制 OpenMLSys 图面。完整逐文件映射见
-`planning/chapter-sources/ch02.md`。OpenMLSys 原作和本章改编正文采用
+[`planning/chapter-sources/ch02.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch02.md)。OpenMLSys 原作和本章改编正文采用
 CC BY-NC-SA 4.0，原创 Rust 示例采用 MIT OR Apache-2.0。
 

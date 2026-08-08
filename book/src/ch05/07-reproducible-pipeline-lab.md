@@ -88,6 +88,6 @@ epoch，并打印墙钟时间和 items/s。这里有意不在测试中断言时�
 ## 7. 接到第 6–7 章
 
 如果希望继续观察样本如何进入真实训练和 artifact，可运行
-[综合实验：数据到推理](../capstone-p1.md)。它使用相同的
+[综合实验：数据到推理](../capstone.md)。它使用相同的
 `PartialDataset`/`MapperDataset` 思路，但把 host batch 替换为 Tensor，
 再连接 autodiff、SGD、`ModuleRecord` 和恢复后 inference。

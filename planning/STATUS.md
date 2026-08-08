@@ -1,6 +1,6 @@
 # 实时状态
 
-更新日期：2026-08-02
+更新日期：2026-08-08
 
 ## 当前里程碑
 
@@ -164,8 +164,151 @@ GitHub Pages 可读。
 - [x] 新增 GitHub Pages 部署：`.github/workflows/deploy-pages.yml`、
   `book.toml` 的 `site-url`、D016、`release.toml` pages 元数据和中英文
   README 在线阅读链接；不提交 `book/book/`，不改默认 CPU gate。
+- [x] 读者视角 P0 修订（D018）：第 7–9 章小节标题去编号前缀；
+  综合实验与比较卡移至书末“贯穿实验与对照”；`capstone-p1.md` 改名
+  `capstone.md`；新增 `crosswalk-guide.md` 作为对照矩阵读者入口；
+  全书证据标签统一为五类规范措辞；正文裸 `planning/` 引用改为
+  GitHub 链接或导读页链接；首页删除审计语言。
+- [x] 读者基础设施 P1：新增 `running-examples.md`（环境、首次构建、
+  示例-章节对照表、已知 tracel-llvm 边界）和 `glossary.md`（按主题
+  分组的中英术语表）；前言加入术语表/搜索说明；SUMMARY 增加
+  “附录”部分；首页链接两个新页面。
+- [x] WGPU 可选实验路径：`ch03-cubecl-kernel` 主程序在
+  `--features wgpu` 下依次运行 CPU 与 WGPU Runtime 并对照 host
+  reference（本机实测输出 `wgpu<wgsl>` 一致）；第 3 章实验节、
+  运行指南和比较卡同步记录命令与边界；默认 CPU gate 不变。
+- [x] 全书首批自制 SVG 图：`img/ch03-roofline.svg`、
+  `img/ch06-pipeline-1f1b.svg`（替换原 ASCII 时间线）、
+  `img/ch09-network-topology.svg`，浏览器目视核验通过。
+- [x] 全书九章深度加厚（grok 复核后由 k3 执行）：每章补定量推演与
+  worked example——ch01 预算实例；ch02 autodiff 重写（反向成本分析、
+  带数字反向推演、tape 生命周期、激活内存预算、源码导读）+
+  广播梯度/参数统计/拓扑序演算；ch03 算术强度双演算、合并访存、
+  tile 计数推导；ch04 融合流量定量、浮点非法变换反例；ch05 队列
+  消化/尾批/shuffle 内存演算；ch06 straggler、1F1B 空泡公式、环形
+  AllReduce 流量推导；ch07 PTQ 带数字校准演算；ch08 折扣因子视野、
+  replay 新鲜度、rollout 瓶颈演算；ch09 队首阻塞、α+β 数值、
+  Young checkpoint 间隔公式。九章来源映射均补加厚记录。
+- [x] 第二批配图与 LLM 边界：新增 `img/ch01-system-layers.svg`、
+  `img/ch04-compiler-pipeline.svg`、`img/ch05-fpg-backpressure.svg`
+  并替换对应 ASCII 图；第 1 章新增“关于大模型时代的主题”小节、
+  第 7 章推理节新增“与大模型服务的边界”，明确 KV cache、
+  continuous batching、MoE、RLHF 等为首版未覆盖的专题；正文
+  `docs/TERM_GLOSSARY.md` 引用全部切换到书内术语表页。
+- [x] 结构配图第二轮 + 练习体例：新增/重画 8 张 SVG（计算图、拓扑
+  内存、autodiff tape、Cube 层次、训练闭环、部署路径、RL 环路；
+  编译流水线改为左→右）；九章练习统一【基础】/【进阶】/【挑战】
+  与折叠提示；`docs/AUTHORING.md` 补充练习体例。
 
 ## 本次交接
+
+- 已完成（2026-08-08 第六批）：结构配图与练习完善。新增
+  `ch02-expr-graph.svg`、`ch02-topo-memory.svg`、
+  `ch02-autodiff-tape.svg`、`ch03-cube-hierarchy.svg`、
+  `ch06-training-loop.svg`、`ch07-serving-pipeline.svg`、
+  `ch08-rl-loop.svg`，重画 `ch04-compiler-pipeline.svg`；九章练习
+  页加难度标签与 `<details>` 提示（无完整答案）；更新 AUTHORING、
+  chapter-sources 与 session log。
+- 验证：13 张 SVG XML 校验通过；图片相对路径均可解析；
+  `mdbook build book` 通过；`check_release.py --require-built-book`
+  `errors=[]`、`warnings=[]`；`git diff --check` 通过；完整
+  `make check` 退出码 0。
+- 偏差：无。
+- 下一步：提交全部修订并推送 main；确认 Pages 配图与折叠提示可渲染；
+  后续候选为第二轮段落级加厚或更多结构图。
+
+## 前次交接（2026-08-08 第五批）
+
+- 已完成（2026-08-08 第五批）：全书九章内容深度加厚。方法：按
+  “动机→推导→机制→源码导读→可观察→边界”配方逐节补缺口，以定量
+  推演（worked example）为主；所有新事实按固定 revision 源码或示例
+  测试核验，未引入未核验断言。逐章明细见九份
+  `planning/chapter-sources/chNN.md` 的“2026-08-08 深度加厚记录”。
+- 验证：每章 `mdbook build book` + `check_release.py
+  --require-built-book`（`errors=[]`）；收尾完整 `make check`
+  退出码 0、`git diff --check` 通过。
+- 偏差：本地 `burn/` 镜像 HEAD 超前于 pin（pin 是祖先），
+  `make check-local-sources` 会失败；源码核验均以
+  `git show <pin>:<path>` 进行，不受影响。
+- 下一步：当时为练习提示与第 2/8 章配图；现已由第六批完成。
+
+## 前次交接（2026-08-08 grok 事实复核）
+
+- 已完成（2026-08-08 事实复核）：对暂存读者修订做口径与事实核验。
+  同步 `docs/TERM_GLOSSARY.md` 证据分类与正文五类标签；修正
+  `planning/chapter-sources`、`planning/capstone-p1.md`、D012/D014/
+  D018 中的旧标签；收紧第 7 章 LLM 边界（区分服务 runtime 与
+  burn-onnx Attention 的 past KV 图转换）；术语表 Flex 表述改为
+  “默认路径不走 Fusion/CubeCL”；`crosswalk-guide.md` 的 C/S/R/L/E
+  字段说明与对照矩阵对齐。
+- 验证：OpenMLSys/工具链/11 示例 crate/图片相对路径/GitHub blob
+  路径/九章+综合实验证据标签集合均通过脚本核对；本地镜像确认
+  `burn-flex` 无 `burn-fusion` 依赖、CubeCL 存在 `wgpu` feature 与
+  `WgpuRuntime`/`CpuRuntime` 导出；六张 SVG XML 此前已校验。
+- 偏差：先前交接称读者术语表与作者术语表“定义保持一致”不准确——
+  证据分类行曾滞后，现已修正。
+- 下一步：提交全部读者修订（含本复核）并推送 main；后续候选为
+  练习提示/难度标注、第 2 章计算图配图和更多原理段落加厚。
+
+## 前次交接（2026-08-08 第四批）
+
+- 已完成（2026-08-08 第四批）：第二批配图（第 1/4/5 章分层、编译
+  流水线、F/P/G 背压模型，替换 ASCII）、LLM 时代主题断层说明
+  （第 1.5 节与第 7.5 节各一段，标记为首版未覆盖专题）、正文
+  `docs/TERM_GLOSSARY.md` 七处引用切换到书内 `glossary.md`。
+- 验证：三张新 SVG 经 XML 校验与浏览器截图目视核验；`mdbook build
+  book`、release audit `errors=[]`、完整 `make check` 退出码 0、
+  `git diff --check` 通过。
+- 偏差：无（证据分类口径同步见上一条交接）。
+- 下一步：当时为提交四批修订；现已并入事实复核。
+
+## 前次交接（2026-08-08 第三批）
+
+- 已完成（2026-08-08 第三批）：WGPU 可选实验路径与三张 SVG 图。
+  修改 `examples/ch03-cubecl-kernel/src/main.rs`（feature 门控的 GPU
+  对照运行）、第 3 章实验节、`running-examples.md`、比较卡；新增
+  `book/src/img/` 三张图并接入第 3/6/9 章正文。
+- 验证：`cargo run/test/clippy -p ch03-cubecl-kernel`（默认与
+  `--features wgpu` 两种组合，均 `--locked`）通过；WGPU 实测输出与
+  host reference 一致；三张 SVG 经 XML 校验与浏览器截图目视核验；
+  完整 `make check` 退出码 0，release audit `errors=[]`。
+- 偏差：修复了一处 lint 回归（`scale_reference` 导入需随 feature
+  门控）；写入 `.svg` 时专用文件工具损坏了多字节字符，改用 Python
+  写盘后通过 XML 校验——后续新增 SVG 应先跑 XML 解析校验。
+- 下一步：提交三批修订并推送 main，确认 Pages 导航与图片可访问；
+  后续候选为第 1/7 章 LLM 主题断层说明、更多章节配图、练习提示。
+
+## 前次交接（2026-08-08 第二批）
+
+- 已完成（2026-08-08 第二批）：读者基础设施 P1。新增
+  `book/src/running-examples.md` 与 `book/src/glossary.md`；前言、首页、
+  SUMMARY 同步更新；新增“附录”导航部分。
+- 验证：`mdbook build book`、`check_release.py --require-built-book`
+  （`errors=[]`、`warnings=[]`）、`git diff --check`、完整
+  `make check` 均通过，退出码 0。
+- 偏差：无；术语表为读者版（定义 + 章节链接），作者版用语约束仍以
+  `docs/TERM_GLOSSARY.md` 为准，二者定义保持一致。
+- 下一步：提交两批修订并推送 main，确认 Pages 导航；后续候选为
+  WGPU 可选实验路径、关键图示（GPU 拓扑/roofline/流水线）和 LLM
+  专题规划声明。
+
+## 前次交接（2026-08-08 第一批）
+
+- 已完成：读者视角 P0 修订（D018）。修改 `book/src/` 下 SUMMARY、
+  首页、9 个章节着陆页、综合实验页（改名 `capstone.md`）、比较卡、
+  新增 `crosswalk-guide.md`，以及第 1–9 章共 33 个小节文件；规划侧
+  更新 `planning/chapter-sources/ch05.md`。
+- 验证：`mdbook build book`、`tools/check_release.py
+  --require-built-book`（`errors=[]`、`warnings=[]`）、
+  `git diff --check`、完整 `make check`（含 offline gate 与 release
+  audit）均通过，最终退出码 0。
+- 偏差：无；`check_release.py` 的 include 白名单（仅 `examples/`）
+  保持不变，对照矩阵以导读页 + GitHub 链接发布而非内嵌。
+- 下一步：提交本批修订并推送 main，确认 Pages 部署后导航与新增
+  页面可访问；P1 候选为书内术语表页、“如何运行示例”页和 WGPU
+  可选实验路径。
+
+## 前次交接（2026-08-02）
 
 - 已完成：为九章候选版增加 GitHub Pages 静态发布（D016）。独立 deploy
   workflow 使用固定 `mdbook 0.4.51` 与 pinned Pages actions；`book.toml`

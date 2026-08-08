@@ -1,4 +1,4 @@
-# 7.3 ModuleRecord、Burnpack 与权重格式
+# ModuleRecord、Burnpack 与权重格式
 
 ## 参数状态与模型定义
 
