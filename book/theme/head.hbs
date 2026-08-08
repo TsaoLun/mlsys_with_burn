@@ -1,0 +1,19 @@
+{{!--
+  mdBook 0.4.x 开启 mathjax-support 后会注入 MathJax 2，但默认
+  TeX-AMS-MML_HTMLorMML 只识别 \(...\) / \[...\]，不识别教材源码中的
+  $...$ / $$...$$。本片段必须出现在 MathJax.js 之前（mdBook 的 Custom
+  HTML head 位置满足该约束），否则线上页会原样显示美元符。
+--}}
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [["$", "$"], ["\\(", "\\)"]],
+      displayMath: [["$$", "$$"], ["\\[", "\\]"]],
+      processEscapes: true,
+      processEnvironments: true
+    },
+    "HTML-CSS": {
+      availableFonts: ["TeX"]
+    }
+  });
+</script>

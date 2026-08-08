@@ -48,10 +48,10 @@ checkpoint 间隔本身是一个可优化的成本权衡。设每步耗时 $t$�
 checkpoint 花费 $W$、平均故障间隔为 $M$：间隔 $C$ 越长，写入开销
 $W/C$ 越小，但故障后的期望重做量越大。经典结果（Young 近似）给出
 较优间隔 $C^* \approx \sqrt{2WM}$。代入 $W = 60\ \text{s}$、
-$M = 4\ \text{h}$：$C^* \approx \sqrt{2 \times 60 \times 14400}
-\approx 1315\ \text{s} \approx 22\ \text{min}$。这个公式解释了为什么
-“每一步都存”和“从来只存最后”都不是好策略；它也再次说明 checkpoint
-间隔是成本模型决策，而不是配置文件的随手一项。
+$M = 4\ \text{h}$：
+$C^* \approx \sqrt{2 \times 60 \times 14400} \approx 1315\ \text{s} \approx 22\ \text{min}$。
+这个公式解释了为什么“每一步都存”和“从来只存最后”都不是好策略；它也再次
+说明 checkpoint 间隔是成本模型决策，而不是配置文件的随手一项。
 
 ## Burn 固定快照的边界
 

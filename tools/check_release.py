@@ -354,6 +354,7 @@ class ReleaseAudit:
             display_open = False
             display_lines: list[str] = []
             inline_dollars = 0
+            inline_open_line: int | None = None
             for line_number, line in enumerate(
                 source.read_text(encoding="utf-8").splitlines(), start=1
             ):
@@ -363,6 +364,11 @@ class ReleaseAudit:
                 if in_fence:
                     continue
                 if "$$" in line:
+                    if inline_open_line is not None:
+                        formula_errors.append(
+                            f"{source.relative_to(ROOT)}:{inline_open_line} 行内 $ 与 $$ 交错"
+                        )
+                        inline_open_line = None
                     pieces = line.split("$$")
                     for index in range(0, len(pieces) - 1):
                         if not display_open:
@@ -382,11 +388,27 @@ class ReleaseAudit:
                 if display_open:
                     display_lines.append(line)
                     continue
-                inline = re.sub(r"\\\$", "", line).replace("$$", "")
-                inline_dollars += inline.count("$")
+                # Strip escaped dollars and inline code before counting $ pairs.
+                stripped = re.sub(r"`[^`]*`", "", line)
+                stripped = re.sub(r"\\\$", "", stripped).replace("$$", "")
+                dollar_count = stripped.count("$")
+                inline_dollars += dollar_count
+                if dollar_count % 2 == 1:
+                    if inline_open_line is None:
+                        inline_open_line = line_number
+                    else:
+                        formula_errors.append(
+                            f"{source.relative_to(ROOT)}:{inline_open_line}-{line_number} "
+                            "行内公式跨行；请合并到一行或改用 $$...$$"
+                        )
+                        inline_open_line = None
             self.require(
                 not display_open,
                 f"{source.relative_to(ROOT)} 的 $$ display math 未闭合",
+            )
+            self.require(
+                inline_open_line is None,
+                f"{source.relative_to(ROOT)}:{inline_open_line} 行内 $ math 未闭合",
             )
             self.require(
                 inline_dollars % 2 == 0,
@@ -434,9 +456,19 @@ class ReleaseAudit:
             return
         book_toml = (ROOT / "book/book.toml").read_text(encoding="utf-8")
         self.require("mathjax-support = true" in book_toml, "book.toml 未开启 MathJax")
+        self.require('theme = "theme"' in book_toml, "book.toml 未启用自定义 theme")
+        head_hbs = ROOT / "book/theme/head.hbs"
+        self.require(head_hbs.is_file(), "缺少 book/theme/head.hbs（MathJax $ 分隔符配置）")
+        head_text = head_hbs.read_text(encoding="utf-8")
+        self.require(
+            'inlineMath: [["$", "$"]' in head_text or "inlineMath: [['$', '$']" in head_text,
+            "theme/head.hbs 未配置 MathJax inlineMath 美元分隔符",
+        )
         html_files = sorted(BOOK_OUTPUT.rglob("*.html"))
         self.require(bool(html_files), "book/book 没有 HTML 输出")
         polluted: list[str] = []
+        missing_mathjax_config: list[str] = []
+        pages_with_math = 0
         for path in html_files:
             content = html.unescape(path.read_text(encoding="utf-8"))
             for match in re.finditer(
@@ -447,9 +479,24 @@ class ReleaseAudit:
                 body = match.group(1)
                 if re.search(r"<(?:em|ul|ol)\b", body):
                     polluted.append(str(path.relative_to(ROOT)))
-            if ("\\(" in content or "\\[" in content) and "MathJax" not in content:
-                polluted.append(f"{path.relative_to(ROOT)} (缺少 MathJax)")
+            has_dollar_math = bool(
+                re.search(r"(?<!\$)\$(?!\$).+?(?<!\$)\$(?!\$)", content, flags=re.S)
+            ) or "$$" in content
+            has_paren_math = "\\(" in content or "\\[" in content
+            if has_dollar_math or has_paren_math:
+                pages_with_math += 1
+                if "MathJax" not in content:
+                    polluted.append(f"{path.relative_to(ROOT)} (缺少 MathJax)")
+                # Custom head must land before MathJax.js and enable $.
+                if "inlineMath" not in content or '"$"' not in content:
+                    missing_mathjax_config.append(str(path.relative_to(ROOT)))
         self.require(not polluted, f"生成 HTML 数学结构污染: {sorted(set(polluted))}")
+        self.require(
+            not missing_mathjax_config,
+            "生成 HTML 缺少 MathJax $ 分隔符配置: "
+            f"{sorted(set(missing_mathjax_config))[:8]}",
+        )
+        self.require(pages_with_math > 0, "生成 HTML 中没有发现公式页面")
 
     def validate_repository_hygiene(self) -> None:
         forbidden = ("target/", "book/book/", ".mdbook/", "burn/", "burn-onnx/", "cubecl/", "cubek/", "openmlsys/")

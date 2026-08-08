@@ -64,7 +64,7 @@ unsafe block 只覆盖必须证明的 raw 边界。`input_handle` 由同一个 i
 {{#include ../../../examples/ch03-tile-loads/src/lib.rs:tile_loads}}
 ```
 
-对 $16\times16\times16$、tile $=8$ 的理想化模型：
+对 $16\times16\times16$、tile 边长为 $8$ 的理想化模型：
 
 ```text
 naive_loads = 8192
