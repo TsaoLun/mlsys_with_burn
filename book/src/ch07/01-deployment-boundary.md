@@ -1,5 +1,25 @@
 # 部署边界、artifact 与服务成本
 
+## 主线闭环：从训练态到服务边界
+
+本章主线按一条可测试的闭环阅读（默认实验钉在 CPU Record/Burnpack）：
+
+![训练态 → Artifact → 校验 → 推理 Device → 服务边界（batch/队列/版本）](../img/ch07-deploy-loop.svg)
+
+```text
+Module（训练态）
+  → ModuleRecord / Burnpack（artifact）
+  → 校验 path/shape/dtype + reference 数值
+  → 选择推理 Device（CPU / WGPU / CUDA…）
+  → forward（无训练 tape）
+  → batch / 队列 / 版本与回滚（服务边界）
+```
+
+**Device 选择不改写 artifact 字节**：同一份 Burnpack 可以加载到不同
+backend，只要 path/shape/dtype 与拓扑匹配。ONNX→Rust codegen→加载是
+独立对照轨（见下一节），不进入本书默认示例的依赖图，也不与主线
+Record 实验混跑。
+
 ## 先把“部署模型”拆开
 
 “模型”在不同阶段不是同一个东西。训练期间的模型通常包括可更新的
@@ -91,11 +111,11 @@ backend、dtype、校准集摘要和 schema version 写入发布元数据。
 
 ## Burn 的位置
 
-根 workspace 的固定版本 Burn `ModuleRecord` 记录 module 参数和 `ParamId`，可以用
-内存 Burnpack bytes 恢复到一个新 module。它是一个很小、可测试的 artifact
-边界，不等于完整部署 manifest。更丰富的 `burn-store` 再提供
-`ModuleSnapshot`、SafeTensors/PyTorch adapter、过滤和 remap，但这些能力
-要按 feature 启用并单独验证。
+本书示例使用的固定版本 Burn 中，`ModuleRecord` 记录 module 参数和
+`ParamId`，可以用内存 Burnpack bytes 恢复到一个新 module。它是一个很小、
+可测试的 artifact 边界，不等于完整部署 manifest。更丰富的 `burn-store`
+再提供 `ModuleSnapshot`、SafeTensors/PyTorch adapter、过滤和 remap，但
+这些能力要按 feature 启用并单独验证。
 
 下一节转向更大的转换边界：ONNX 图如何变成 Burn 的 Rust source，以及
 为什么固定 `burn-onnx` 的依赖 revision 必须先对齐。

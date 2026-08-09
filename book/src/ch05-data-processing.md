@@ -17,7 +17,7 @@
 
 1. 用 Load、Shuffle、Map、Batch 和 Send 描述数据处理路径；
 2. 用生产速率、变换速率和消费速率定位数据管道的瓶颈；
-3. 阅读 Burn 固定快照中的 `Dataset`、`MapperDataset`、`Batcher` 和
+3. 阅读 本书所用的 Burn 版本中的 `Dataset`、`MapperDataset`、`Batcher` 和
    `DataLoader` 边界；
 4. 区分 `InMemDataset` 的全内存模型、惰性变换和基于 SQLite 的按索引读取；
 5. 解释固定 seed、每个 epoch 的 shuffle，以及 `SamplerDataset` 的替换语义；
@@ -44,7 +44,7 @@ trait、`Iterator`、`Send`/`Sync` 和基本线程通信；不要求先学习 SQ
 ```
 
 第 4 章的 Fusion 计划优化的是 Tensor 操作；本章的数据变换仍由 Dataset
-和 Batcher 的 Rust 代码执行。固定快照没有把一般 Dataset map 自动 lower
+和 Batcher 的 Rust 代码执行。本版没有把一般 Dataset map 自动 lower
 成 CubeCL Kernel，因此不能把两种“流水”混成同一套编译图。
 
 ## 小节
@@ -57,20 +57,3 @@ trait、`Iterator`、`Send`/`Sync` 和基本线程通信；不要求先学习 SQ
 6. [存储、缓存与扩展路径](ch05/06-storage-and-scaling.md)
 7. [实验：可复现数据管道](ch05/07-reproducible-pipeline-lab.md)
 8. [练习、延伸阅读与来源](ch05/08-exercises-and-sources.md)
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：Dataset、Mapper、Batcher、DataLoader、固定 seed
-  和多 worker 数据守恒；
-- `源码核验`：内存 Dataset、SQLite、采样、worker 和 Device 边界；
-- `协议/成本模型`：文件索引、背压、retry、epoch commit 和
-  reorder buffer；
-- `可选平台实验`：真实存储吞吐、pinned memory、跨节点 sampler 和
-  设备数据通道；
-- `未覆盖`：把数据守恒或一次 CPU 测量描述成全局保序/真实吞吐。
-
-对应 `F/P/G`、分片和提交协议见[核心主题比较卡](comparison-cards.md#第-5-章数据处理)。
-

@@ -18,11 +18,12 @@ explosion；若特化太少，又可能保留低效的动态逻辑。
 - Runtime 编译产物与设备 graph。
 
 本章只需记住：Kernel 不是直接把 Rust 源码交给 GPU，而是经过宏展开、IR
-构建、Runtime 编译和 launch。
+构建、Runtime 编译和 launch。对 GPU 读者还要多记一步：**编译产物与
+tune key 绑定设备与 Runtime**；CPU 上的缓存命中不能直接搬到另一张卡。
 
 ## 2. Autotune 不是静态规则表
 
-固定快照中，CubeCL 提供全局 autotune level 与缓存配置；burn-cubecl
+本版中，CubeCL 提供全局 autotune level 与缓存配置；burn-cubecl
 使用 `LocalTuner` 为 matmul、conv、reduce 和 attention 等注册候选。
 典型流程是：
 
@@ -52,7 +53,7 @@ OpenMLSys 介绍 TVM、Ansor、MLIR、TBE 和 AKG，核心问题仍然成立：
 - 如何搜索 tile、向量化、内存层次与并行映射；
 - 如何在多种硬件上 lowering 并验证正确性。
 
-本项目选择 CubeCL/CubeK 作为连续实现栈，不表示其他系统已过时。TVM 与
+本书选择 CubeCL/CubeK 作为连续实现栈，不表示其他系统已过时。TVM 与
 MLIR 的深入比较放到第 4 章；厂商专用 TBE/AKG 只作为生态历史边界。
 
 ## 4. CUDA、Triton 与 CUTLASS 对照
@@ -69,11 +70,18 @@ OpenMLSys v2 将 CUDA、Triton 和 CUTLASS 列入第 3 章，但固定 v2 快照
 它们解决的问题有重叠，但类型系统、后端范围、成熟度和性能路径不同。不能
 仅凭 API 相似就宣称语义或性能等价。本书不引入前三者为构建依赖。
 
+| 本书 / CubeCL | 常见产业说法 | 对齐点 | 不要外推 |
+|---|---|---|---|
+| Cube / Unit / Plane | block / thread / warp | 并行层次心智模型 | 非 ABI；plane 宽度非常数 |
+| `CpuRuntime` / `WgpuRuntime` / `CudaRuntime` | CPU / 图形 API / CUDA runtime | 同一 IR 多后端 | 源码有类型 ≠ 默认已测吞吐 |
+| comptime + JIT/cache | 特化 Kernel + 编译缓存 | 特化键影响重编译 | CPU 缓存不能直接搬到 GPU |
+| CubeK matmul 策略 | CUTLASS / 厂商库策略 | 可组合高性能路径 | 本章默认实验不跑真机 GEMM |
+
 ## 5. 测试、Benchmark 与性能声明
 
 CubeK 使用 host reference、近似数值断言、CPU 测试和可选 GPU benchmark。
-CPU CI 能发现大量索引、布局和数值错误，却不能覆盖 CMMA/TMA 等硬件路径。
-一个可信性能声明还应满足：
+默认 CPU 测试能发现大量索引、布局和数值错误，却不能覆盖 CMMA/TMA 等
+硬件路径。一个可信性能声明还应满足：
 
 1. correctness test 与 benchmark 分离；
 2. 结果包含环境和固定 commit；

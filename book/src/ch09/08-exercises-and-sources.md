@@ -16,8 +16,8 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 ## 练习
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
 ## 概念题
@@ -171,7 +171,7 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -269,7 +269,7 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -279,7 +279,7 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -307,7 +307,7 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 
 ## OpenMLSys v1 来源
 
-本章逐文件参考固定 revision
+本章逐文件参考本书固定版本
 `9c289782ccbb165ac8ad7c960ecffc12942a5560`：
 
 - `openmlsys/v1/zh_chapters/chapter_distributed_training/index.md`：
@@ -349,11 +349,15 @@ CubeCL revision 是 `be278a1e76aed881e2cc6b165414ee6103ca4634`：
 拓扑感知放置、多租户 quota、跨节点 rendezvous、elastic membership、
 自动重试、分布式 checkpoint 共识或统一集群遥测。
 
+## 本章系统结论
+
+1. 集群控制面负责作业、资源与故障；训练数据面负责 rank 间通信——两层不能混称。
+2. gang scheduling、拓扑放置与 $\alpha+\beta$ 通信成本共同决定 makespan。
+3. CPU 模拟器验证了队列、成组准入、故障重放与确定性 trace，不测量真实 GPU/NCCL。
+4. GPU 阅读时应把第 6 章一次 AllReduce 的字节量放进机柜/链路模型重算成本。
+5. Burn/CubeCL 源码可定位设备与 collective 数据面入口，但不提供作业队列实现。
+6. 不能把虚拟时间或放置结果当成 GPU benchmark。
+
 ## 来源与改编说明
 
-本章保留 OpenMLSys 的分布式训练、拓扑、集合通信、参数服务器和故障
-问题，重写为“workload card → control plane → collective data plane →
-device runtime”的路线。Burn 部分改为固定源码证据和限制清单；没有把
-`ExecutionStrategy`、`DistributedContext` 或 `ComputeClient` 称为集群
-调度器。实验和新增 Rust 代码采用 MIT OR Apache-2.0；正文采用
-CC BY-NC-SA 4.0。
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-9-章)。

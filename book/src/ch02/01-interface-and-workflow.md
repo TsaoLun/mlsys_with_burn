@@ -10,31 +10,44 @@
 
 数据管道和优化器会在第 5、6 章展开，本章关心这条路径如何被程序表达。
 
-## 一条完整工作流需要哪些契约
+## 接口简史：为什么会分成高层与低层
+
+早期框架往往把“定义网络”和“调用某块加速器 Kernel”写在同一层：改设备
+就要改模型代码，换后端也要换调用习惯。随后出现几条反复出现的边界：
+
+| 阶段（概念） | 用户看到什么 | 系统隐藏什么 |
+|---|---|---|
+| 算子库时代 | 显式调用卷积/矩阵乘 | 设备指针与 Kernel 细节仍常泄漏 |
+| 高层 Module API | 层、参数、`forward` | 分派、内存与同步 |
+| 动态图 / tape | 命令式控制流 + 自动求导 | 记录哪些依赖、何时释放中间值 |
+| 编译 / Fusion | 同一表达式可被改写 | Pass、IR、缓存与 Runtime |
+| 部署 artifact | 权重与拓扑快照 | 服务队列、版本与设备选择 |
+
+Burn 站在这条演进线上：用户侧是 `Tensor` / `Module` / `Device`；执行侧
+经 dispatch 到达 Flex 或 CubeCL 系后端；真正的 GPU Kernel 还要再经过
+第 3、4 章的 Runtime 与 launch。读 API 时先问“这一层替你挡住了什么”，
+再问“错误会在哪一层才暴露”。
+
+## 一条完整工作流有哪些阶段
 
 原作把机器学习工作流拆成数据、模型、损失、优化器、训练、测试和调试。
-用 Rust/Burn 重写时，不能把它们压成一个 `train()` 调用；每个阶段都要
-定义输入、输出和状态：
+用 Rust/Burn 重写时，不宜压成一个笼统的 `train()`：每个阶段都携带自己的
+数据、状态和常见出错点。
 
-1. **Load/Map**：输入是文件、记录或环境样本，输出 typed item；失败可能
-   来自解码、版本或缺失字段。
-2. **Batch**：输入 item 集合和 Device，输出 batch tensor；失败可能来自
-   shape、dtype 和 padding。
-3. **Model**：输入 batch 和 Module state，输出 prediction；失败可能来自
-   参数、设备或不支持的算子。
-4. **Loss**：输入 prediction 和 target，输出标量或可归约 loss；失败可能
-   来自 reduction 和标签语义不一致。
-5. **Autodiff**：输入 loss 和 tape，输出 gradients；失败可能来自未跟踪
-   参数、分支或中间值内存。
-6. **Optimizer**：输入 gradients 和 optimizer state，输出新参数与更新
-   状态；失败可能来自 ParamId、学习率或设备归属。
-7. **Evaluate/Save**：输入验证数据和 model state，输出 metric 或
-   ModuleRecord；失败可能来自 train/eval 模式、格式或恢复协议。
+| 阶段 | 接收什么 | 产生什么 | 常见卡点 |
+|---|---|---|---|
+| Load/Map | 文件、记录或环境样本 | 类型化的样本 item | 解码、版本、缺失字段 |
+| Batch | item 集合与 Device | batch tensor | shape、dtype、padding |
+| Model | batch 与 Module 状态 | prediction | 参数、设备、不支持的算子 |
+| Loss | prediction 与 target | 标量或可归约 loss | reduction、标签语义 |
+| Autodiff | loss 与 tape | gradients | 未跟踪参数、分支、中间值内存 |
+| Optimizer | gradients 与优化器状态 | 新参数与更新状态 | ParamId、学习率、设备归属 |
+| Evaluate/Save | 验证数据与模型状态 | metric 或 ModuleRecord | train/eval 模式、格式、恢复协议 |
 
-这组契约中的“输出/状态”非常重要。一个函数即使返回了正确形状的 Tensor，
-也可能没有把参数注册为 `Param`；一个 loss 即使数值下降，也可能因
-reduction 不一致而不能与多设备训练比较；一个 ModuleRecord 即使能够
-反序列化，也不等于 optimizer 和 sampler 已经恢复。
+“产生什么”里往往还带着**可恢复状态**，这一点比“函数返回了正确形状”
+更重要：Tensor 形状对了，参数也可能没注册为 `Param`；loss 数值下降了，
+reduction 不一致时仍不能和多设备训练比较；ModuleRecord 能反序列化，
+也不等于 optimizer 和 sampler 已经恢复。
 
 因此，本书把工作流分到后续章节，而不是在本章复制一个完整框架教程：
 第 5 章处理 Load/Map/Batch，第 6 章处理 Autodiff/Optimizer/训练状态，
@@ -103,7 +116,7 @@ Burn 通过 `Module` 与 `Param` 表达这些能力。
 ### 评估与推理
 
 评估复用模型前向，但不需要记录梯度，某些层的行为也会变化，例如 Dropout。
-在固定快照中，这类训练/验证差异主要通过输入 Device 是否启用 autodiff
+在本版中，这类训练/验证差异主要通过输入 Device 是否启用 autodiff
 表达，而不是 Module 内一个通用布尔开关。部署还要恢复权重、选择设备并
 处理请求。本章只介绍其边界，完整训练与部署分别留到第 6、7 章。
 
@@ -116,4 +129,32 @@ Burn 的当前用户路径是命令式（imperative）eager 执行：Rust 语句
 这不表示系统没有图或 IR。自动微分 tape、融合优化和设备 graph capture
 会出于不同目的记录程序的一部分。重要的是先问“记录是为了什么”，再讨论
 它采用哪种表示。
+
+## 从 Module API 到 GPU Kernel 隔着哪些层
+
+一次 `module.forward(x)` 在语义上是张量表达式；在 GPU 上真正跑起来，
+中间至少隔着：
+
+```text
+Module / Tensor API
+      → Device 选择与 burn-dispatch
+      → Backend op（Flex 或 CubeCL 桥）
+      → （可选）Fusion 计划 / CubeCL IR
+      → CubeCL Runtime（CPU / WGPU / CUDA / HIP…）
+      → Kernel launch → 设备完成 → host read/sync
+```
+
+本章实验钉在 Flex CPU 上，是为了把类型、广播、Module 状态和 tape 语义
+看清楚。设备与 Runtime 地图见第 1 章；拓扑与多 Runtime 见第 3 章；Pass
+与 stream 见第 4 章。不要把“Tensor API 写对了”读成“已经测过某张 GPU
+的吞吐”。
+
+## 产业对照（概念对齐，不是性能对等）
+
+| 本书 / Burn·CubeCL | 常见产业说法 | 对齐点 | 不要外推 |
+|---|---|---|---|
+| `Tensor` + `Device` | PyTorch Tensor + device | 统一用户 API、运行时选设备 | API 相似 ≠ 算子集/性能相同 |
+| autodiff tape | autograd tape | 按实际路径记依赖 | 不是静态整图 |
+| Fusion / CubeCL IR | TorchInductor / XLA 等编译栈（概念） | 表达式可被改写再执行 | 不能直接比墙钟 |
+| CubeCL Runtime | CUDA runtime / 图形 API | launch、buffer、同步 | 完成边界因栈而异 |
 

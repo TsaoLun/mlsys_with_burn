@@ -9,7 +9,7 @@
 `burn-train` runner 提供单进程多环境、自动 batching、off-policy
 编排、评估和 checkpoint 入口。
 
-固定快照没有因此自动提供 DQN、PPO、SAC、prioritized replay、分布式
+本版没有因此自动提供 DQN、PPO、SAC、prioritized replay、分布式
 Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 探索策略、版本协议和故障恢复仍由应用实现。第 8 章实验用确定性 CPU
 环境和表格 TD 更新验证这些边界；固定的 DQN example 可作为进一步阅读，
@@ -18,8 +18,8 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 ## 练习
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
 ## 概念题
@@ -186,7 +186,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -208,7 +208,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -252,7 +252,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -332,7 +332,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 
 ## 延伸阅读与固定源码入口
 
-Burn 固定快照：
+本书所用的 Burn 版本：
 
 - `burn/crates/burn-rl/src/environment/base.rs`
 - `burn/crates/burn-rl/src/policy/base.rs`
@@ -358,30 +358,14 @@ OpenMLSys v1：
 - `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/marl_sys.md`
 - `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/summary.md`
 
+## 本章系统结论
+
+1. RL 系统把“环境交互”接进与监督学习不同的数据与状态边界（done/truncated、轨迹）。
+2. replay、policy 版本与 off-policy 元数据决定样本能否安全用于更新。
+3. CPU 上你观察到确定性 rollout、circular replay 与表格 TD 更新。
+4. GPU 阅读线索：大批量 replay 与策略网络 forward 的设备放置、以及 Actor–Learner 间的版本延迟。
+5. 不能把组合 API 或小型 TD 实验当成完整 DQN/PPO/MARL runtime。
+
 ## 来源与改编说明
 
-本章改编并重组 OpenMLSys v1 的
-`chapter_reinforcement_learning/`：
-
-- `index.md`：保留基础、单节点/分布式和多智能体的学习地图，改成
-  本章的环境→采样→更新→系统边界路线；
-- `rl_introduction.md`：保留 Agent/Environment、state/observation、
-  action/reward、MDP、Markov property 和 discounted return，改用 Rust
-  `Environment`/`StepResult` 与 `done`/`truncated` 解释；
-- `single_node_rl.md`：保留 policy/value、adapter、learner、replay、
-  online/offline 和多环境采样，改为 `burn-rl` traits、`TransitionBuffer`
-  和 `burn-train` off-policy pipeline；
-- `marl.md`：保留联合动作、奖励向量、合作/竞争/self-play 与非平稳性，
-  明确固定 Burn 当前没有通用 MARL API；
-- `marl_sys.md`：保留 Actor/Learner、league、模型评估/选择和 inference
-  server 的系统问题，改为能力边界与未来协议，而不是现成 Burn runtime；
-- `summary.md`：重写为采样吞吐、设备协同、checkpoint 和可复现性的核验
-  清单。
-
-没有复制 OpenMLSys 的图、框架专用代码、外部 simulator 或硬件性能数字。
-[`planning/chapter-sources/ch08.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch08.md) 记录逐文件来源、固定 Burn 路径和
-实验范围；项目决策记录
-[D011](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/DECISIONS.md) 记录
-确定性环境 + replay/TD 实验与完整 DQN/MARL 的隔离。
-OpenMLSys 改编正文采用 CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT
-OR Apache-2.0。
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-8-章)。

@@ -85,28 +85,27 @@ capture/register、analysis、lowering 和 device sync 仍然适用于部署推�
 因此“生成了 Rust model”与“权重已经在设备上”是两个事件：后者发生在
 loader 应用 snapshot 时，还可能触发 dtype 转换、设备分配和 backend copy。
 
-## 为什么本项目不直接接入固定 `burn-onnx`
+## 为什么本书默认示例不直接依赖固定 `burn-onnx`
 
-根 workspace 的 Burn revision 是 `976aa9...`，而固定 `burn-onnx` 的
-workspace manifest 把 `burn`、`burn-flex` 和 `burn-store` 指向
-`78f10a...`。依赖图中即使出现相同的 package name，Rust 也会把不同
-revision 的类型视为不同类型；例如旧 `burn::Tensor` 不能自动传给根 workspace 的
-`burn::Tensor`。
+本书示例使用的 Burn revision 是 `976aa9...`，而固定 `burn-onnx` 的
+manifest 把 `burn`、`burn-flex` 和 `burn-store` 指向 `78f10a...`。依赖图中
+即使出现相同的 package name，Rust 也会把不同 revision 的类型视为不同
+类型；例如旧 `burn::Tensor` 不能自动传给当前示例里的 `burn::Tensor`。
 
-所以本章采用两条证据线：
+所以本章分两条阅读线：
 
-1. 读取固定 `burn-onnx` 源码，核验 ONNX graph、codegen、Burnpack 和
+1. 读取固定 `burn-onnx` 源码，对照 ONNX graph、codegen、Burnpack 和
    `LoadStrategy` 的行为；
-2. 用根 workspace 的 Burn `ModuleRecord` 运行 CPU 往返保存与恢复，
-   核验当前实验使用的参数状态 API。
+2. 用本书示例里的 Burn `ModuleRecord` 做 CPU 往返保存与恢复，观察当前
+   参数状态 API。
 
-未来如果更新 `burn-onnx` pin，使其 manifest 与根 workspace 的 Burn 对齐，再增加一个
-小型 ONNX fixture，应该同时比较 ONNX Runtime reference、生成 model 的
-输出和不同 backend 的输出，而不是只把 crate 加进 workspace。
+若将来 `burn-onnx` 与本书示例的 Burn 对齐，再增加小型 ONNX fixture 时，
+应同时比较 ONNX Runtime reference、生成 model 的输出和不同 backend 的
+输出，而不是只把 crate 塞进同一依赖图。
 
-## 验证转换的最小协议
+## 验证转换时建议记下什么
 
-导入一个模型时，建议把以下内容作为可审计记录：
+导入一个模型时，建议至少记下：
 
 ```text
 source model checksum

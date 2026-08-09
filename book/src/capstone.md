@@ -14,9 +14,9 @@
   └─ 恢复后的 CPU inference
 ```
 
-## 验收协议
+## 你需要核对什么
 
-实验必须同时检查：
+跑通后请同时核对这些语义字段：
 
 1. train/validation 的排序后样本 ID 分别严格等于 `0..15` 和 `16..19`，
    因而没有重复、重叠或遗漏；
@@ -36,8 +36,7 @@ autodiff tape。这让“训练时需要梯度”和“评估/推理不需要 ta
 
 ## 示例入口
 
-主程序只输出稳定语义字段，不输出墙钟耗时，因此默认运行可以作为
-工作区快速验证（smoke test）：
+主程序只输出稳定语义字段，不输出墙钟耗时，便于你快速对照结果：
 
 ```rust,ignore
 {{#include ../../examples/ch05-ch07-capstone/src/main.rs:capstone_main}}
@@ -67,19 +66,5 @@ OpenMLSys v1 的 `chapter_programming_interface/ml_workflow.md` 提供完整
 机器学习 workflow 的问题框架；模型部署部分进一步讨论转换、artifact 和
 inference。这里保留 workflow 的状态转移，但把实现重写为 Rust 的
 Dataset/Batcher、所有权、`AutodiffModule::valid` 和 `ModuleRecord`。
-因此本实验是“协议和最小实现的可比较证据”，不是对原作 Python 框架或
-硬件平台的性能对等性（parity）。逐主题的证据等级见[OpenMLSys 核心主题比较卡](comparison-cards.md)；
-逐文件对照关系仍以仓库中的对照矩阵为准（入口见
-[逐文件对照矩阵导读](crosswalk-guide.md)）。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不是 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：固定命令运行数据分片、训练、record 和 inference；
-- `源码核验`：Burn `PartialDataset`、DataLoader、autodiff、SGD 和
-  `ModuleRecord`；
-- `协议/成本模型`：数据契约、错误 topology 和 artifact 验证；
-- `可选平台实验`：GPU、分布式训练、ONNX fixture 和服务治理；
-- `未覆盖`：把二维回归或 CPU elapsed time 外推成生产性能。
+因此本实验是可运行的最小 workflow，不是对原作 Python 框架或硬件平台的
+性能对等。若需对照 OpenMLSys 原作映射，见[范围、证据与对照附录](appendix-scope-and-evidence.md)。

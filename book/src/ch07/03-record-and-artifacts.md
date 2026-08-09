@@ -114,6 +114,6 @@ SafeTensors 这类纯 tensor 数据格式可以避免加载时执行任意模型
 互相替代。固定 Burn `ModuleRecord`、Remote endpoint 或
 `PeerAuthorizer` 只提供可组合接口，不能单独构成上述安全产品。
 
-本章实验刻意只覆盖最小边界：根 workspace 的 Burn Linear module 经过
+本章实验刻意只覆盖最小边界：本书示例中的 Burn Linear module 经过
 `ModuleRecord → Burnpack bytes → ModuleRecord → module` 后，CPU forward
 输出保持一致。下一节再讨论压缩和图优化为什么必须用精度/性能数据证明。

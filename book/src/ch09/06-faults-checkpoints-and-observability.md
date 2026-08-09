@@ -53,7 +53,7 @@ $C^* \approx \sqrt{2 \times 60 \times 14400} \approx 1315\ \text{s} \approx 22\ 
 这个公式解释了为什么“每一步都存”和“从来只存最后”都不是好策略；它也再次
 说明 checkpoint 间隔是成本模型决策，而不是配置文件的随手一项。
 
-## Burn 固定快照的边界
+## 本版 Burn 覆盖到哪里
 
 固定 Burn 的 `LearningCheckpointer`、文件 checkpoint 和异步 checkpointer
 可以保存 learner 的训练状态。它们没有实现：
@@ -127,5 +127,5 @@ admit as a gang → replay missing steps → complete
 ## 本节小结
 
 可恢复集群需要故障域、版本化 checkpoint、幂等重试和跨层遥测。Burn
-固定快照覆盖训练状态和本地 runtime 的部分接口，但 failure detector、
+本版覆盖训练状态和本地 runtime 的部分接口，但 failure detector、
 重启、弹性 membership 和集群级观测仍属于外部系统。

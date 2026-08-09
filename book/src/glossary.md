@@ -64,8 +64,3 @@
 | 集群遥测 | cluster telemetry | 跨作业、rank、设备和链路的 metrics/tracing | [第 9 章](ch09-gpu-cluster.md) |
 | 机器可读轨迹 | machine-readable trace | 带 `schema_version` 的结构化事件流 | [第 9 章](ch09-gpu-cluster.md) |
 | 队列等待 | queue wait | 从提交/重新排队到成组准入的时间 | [第 9 章](ch09-gpu-cluster.md) |
-
-## 本书的阅读证据标签
-
-`CPU 可运行验证`、`源码核验`、`协议/成本模型`、`可选平台实验`、
-`未覆盖` 的定义见[逐文件对照矩阵导读](crosswalk-guide.md)。

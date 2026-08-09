@@ -41,7 +41,7 @@ CubeCL / CubeK Kernel → 设备 Runtime
 3. 画出从用户接口、张量执行、IR、Kernel 到异构设备的分层路径；
 4. 区分 Burn、CubeCL、CubeK 与 burn-onnx 的职责；
 5. 理解 Burn 0.22 中 `Tensor`、`Device` 和后端分派的基本关系；
-6. 使用 `pins.toml` 和第一章实验核对教材所依赖的真实源码快照。
+6. 通过第一章实验确认自己跑通的执行栈与本书正文描述的版本一致。
 
 ## 先修知识
 
@@ -54,15 +54,3 @@ GPU 编程或分布式系统也没有关系：本章先建立地图，后续章�
 把这套框架无关架构映射到固定版本的 Burn 技术栈，最后通过一个 CPU 实验
 验证“源码快照 → Cargo feature → Device → Backend → Tensor 执行”的
 最短路径。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：`ch01-stack-probe` 验证固定 Device/Backend/Tensor 路径；
-- `源码核验`：Burn、CubeCL、CubeK 和 burn-onnx 的职责与 revision；
-- `协议/成本模型`：workload card、系统分层和成本预算；
-- `可选平台实验`：真实 GPU 性能、DDP、ONNX 端到端和集群控制面；
-- `未覆盖`：OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人及附录。
-

@@ -40,6 +40,28 @@ $$
 排队项。一个教学模拟器可以把 Reduce+Bcast 近似为 `2(p-1)` 个逻辑轮，
 再对跨机柜 pair 加 penalty；它不能替代 NCCL 的真实 ring/tree 算法测量。
 
+## 把第 6 章一次 AllReduce 放进机柜模型
+
+第 6 章环 AllReduce 给出每设备流量约 $2S$（$S$ 为梯度字节）。现在只
+改放置，不改算法：
+
+取教学数：$p=4$，$S=256\ \mathrm{MB}$，机柜内有效
+$\beta_{\mathrm{in}}=0.25\ \mu\mathrm{s}/\mathrm{KB}$，跨机柜有效
+$\beta_{\mathrm{x}}=1\ \mu\mathrm{s}/\mathrm{KB}$，并忽略 $\alpha$
+轮次差以便突出字节项。则每设备字节项近似 $2S\cdot\beta$：
+
+| 放置 | 主导链路 | 近似字节项（每设备） |
+|---|---|---|
+| 四卡同一机柜 | 机柜内 | $2\times 256\times 10^3 \times 0.25\ \mu\mathrm{s} \approx 128\ \mathrm{ms}$ |
+| 两两跨两个机柜 | 含上行 | 按更慢的 $\beta_{\mathrm{x}}$ 估 $\approx 512\ \mathrm{ms}$ |
+
+数字只说明：**同一份 $S$ 的集合通信，拓扑可以把通信时间差出一个数量级
+直觉**；真实 NCCL 还有树/环切换、聚合与争用。控制面决定你能不能拿到
+“同机柜四卡”；数据面（第 6 章 `DistributedOps`）决定拿到之后如何归约。
+二者见图：
+
+![控制面负责队列与放置，数据面负责 rank 间 collective；设备 Runtime 另层](../img/ch06-ch09-control-data-planes.svg)
+
 ## 为什么放置会改变训练时间
 
 假设一个作业需要 4 个 rank：

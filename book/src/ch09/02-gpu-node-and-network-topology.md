@@ -77,7 +77,7 @@ stream scheduler 负责本地 stream 的 interleave/sequential 策略。
 - `ComputeClient::launch`、`flush`、`sync` 解释设备内任务的提交和完成；
 - 外部调度器必须决定哪个 `ComputeClient` 所在的设备属于哪个作业；
 - external placement 还要把 rank 到设备、节点和网络域的映射传给训练
-  进程，固定快照没有一个统一的集群 rendezvous 接口。
+  进程，本版没有一个统一的集群 rendezvous 接口。
 
 ## 迁移到真实集群时要记录什么
 

@@ -104,7 +104,6 @@ metric processor 观察 `TrainingModelOutput` 和 `InferenceModelOutput`，把
 Tensor / autodiff / GradientsParams / SGD
 ```
 
-如果一开始引入 renderer、metric、文件 checkpoint 和多个 worker，失败可能
-来自训练装配而不是梯度。读者在完成实验后，可以把相同的模型输入实现
-为 `TrainStep`，再交给 `Learner`；这一步是 API 装配练习，不应被误解为
-两套不同的优化数学。
+如果一开始就引入 renderer、metric、文件 checkpoint 和多个 worker，出错时
+很难分清是装配问题还是梯度问题。完成实验后，可以把相同模型接到
+`TrainStep` 再交给 `Learner`；那是 API 装配练习，不是另一套优化数学。

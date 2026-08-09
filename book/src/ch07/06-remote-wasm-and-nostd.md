@@ -65,7 +65,7 @@ Remote 也可以和 Fusion feature 组合，把重复的 operation group 在 ser
 固定 Burn 仓库的 `remote-inference-web` 示例展示了这种架构：浏览器侧
 持有 model definition/weights，tensor operations 发送给 Iroh compute
 peer。它需要 native peer、浏览器构建工具、网络/relay 配置和匹配的 topic，
-不能作为本项目默认 CPU 示例。
+不能当作本书默认 CPU 示例。
 
 ## `no_std` 的范围
 

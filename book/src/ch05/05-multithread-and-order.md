@@ -2,7 +2,7 @@
 
 ## Burn 的 worker 路径
 
-当 `num_workers > 0` 时，固定快照构造 `MultiThreadDataLoader`。从源码可以
+当 `num_workers > 0` 时，固定版本构造 `MultiThreadDataLoader`。从源码可以
 追踪出如下路径：
 
 ```text

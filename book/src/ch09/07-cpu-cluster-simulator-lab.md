@@ -1,23 +1,23 @@
 # 实验：CPU 集群调度与故障模拟器
 
-## 实验目标与边界
+## 你会学到什么
 
-实验位于 `examples/ch09-cluster-simulator`，使用纯 Rust 标准库建立一个
-离散事件模拟器。它有四张逻辑 GPU，分属两个 rack；作业需要成组 GPU、
-显存、计算 step、梯度字节数和 checkpoint 周期。模拟时间是虚拟整数，
-不是 `sleep` 得到的墙钟时间。
+示例在 `examples/ch09-cluster-simulator`：用纯 Rust 标准库做离散事件
+模拟——四张逻辑 GPU 分属两个 rack；作业需要成组 GPU、显存、计算
+step、梯度字节数和 checkpoint 周期。时间是虚拟整数，不是 `sleep`
+得到的墙钟时间。
 
-实验验证：
+你会观察到：
 
-- FIFO 与 topology-aware placement 的资源选择；
+- FIFO 与 topology-aware placement 如何选资源；
 - gang admission 不会把作业拆成部分 rank 启动；
-- `alpha + beta * bytes` 的通信成本随消息大小增加；
-- 跨机柜 pair 会增加虚拟通信成本和 bytes；
-- failure 后释放资源，从最近 checkpoint 恢复并记录 replay steps；
-- 相同输入产生相同 trace、makespan 和指标。
+- `alpha + beta * bytes` 的通信成本随消息变大；
+- 跨机柜 pair 会推高虚拟通信成本；
+- 失败后释放资源，从最近 checkpoint 恢复并记录 replay steps；
+- 相同输入得到相同 trace、makespan 和指标。
 
-实验不验证真实 GPU kernel、NCCL、RDMA、网络拥塞、节点故障率、租户安全
-或 Burn DDP。它把第 9 章的控制面协议抽象成可测试的 Rust 数据结构。
+本实验刻意不做真实 GPU kernel、NCCL、RDMA、网络拥塞或租户安全测量；
+它把第 9 章的控制面想法收成可运行的数据结构。
 
 ## 1. 集群与作业模型
 

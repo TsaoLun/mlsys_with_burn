@@ -80,7 +80,7 @@ Module
 
 ## ModuleRecord
 
-固定快照使用非泛型 `ModuleRecord` 保存 Module 状态。典型流程是：
+固定版本使用非泛型 `ModuleRecord` 保存 Module 状态。典型流程是：
 
 ```text
 Module
@@ -100,7 +100,7 @@ Config；加载时仍需要兼容的 Module。dtype 策略可以选择遵循记�
 
 Module 的有效训练/验证模式、参数值和自动微分 tape 是三类不同状态：
 
-- 固定快照中 `train()` / `valid()` 主要通过 autodiff Device 与 inner
+- 本版中 `train()` / `valid()` 主要通过 autodiff Device 与 inner
   Device 转换有效模式，Dropout 等层据输入 Device 能力改变 forward，而非
   读取一个全局 Module 布尔标志；
 - 参数值由优化器更新并由 ModuleRecord 保存；

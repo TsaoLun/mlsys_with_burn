@@ -77,13 +77,15 @@ autodiff tape：宿主循环展开为多次算子调用，每次调用产生新�
 
 ## 三种表示，不是一张“Burn 计算图”
 
-在固定快照中至少要区分（与第 1、4 章地图同一套名字）：
+在本版中至少要区分（与第 1、4 章地图同一套名字）：
 
 ```text
 autodiff tape          反向依赖与中间值     ← 本章
 Burn IR / Fusion 计划  子图搜索与执行块     ← 第 4 章
 device graph capture   设备命令重放         ← 第 4 章（按 Runtime）
 ```
+
+![autodiff tape 与 Fusion IR：目的、节点与生命周期不同，不能混称一张「Burn 计算图」](../img/ch02-tape-vs-fusion.svg)
 
 | 表示 | 目的 | 本书位置 |
 |---|---|---|
@@ -93,6 +95,11 @@ device graph capture   设备命令重放         ← 第 4 章（按 Runtime）
 
 它们可能描述相似操作，却拥有不同节点、生命周期和正确性约束。将三者统称为
 “Burn 计算图”会掩盖真实实现。统一用语见[术语表](../glossary.md)。
+
+静动态图也要放进同一张地图读：Flex eager + tape 偏动态；Fusion 对局部
+算子流做延迟与改写；部署侧的静态 artifact（第 7 章）冻结的是拓扑与权重，
+不是把 autodiff tape 整包导出。调度直觉（谁先执行、何时 sync）见下一节
+与第 4 章。
 
 ## 生命周期与内存
 

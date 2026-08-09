@@ -45,7 +45,7 @@ logical index
 
 ## 缓存与预取的边界
 
-固定快照的 `Dataset`/`DataLoader` 核心 API 没有一个通用的
+固定版本的 `Dataset`/`DataLoader` 核心 API 没有一个通用的
 `prefetch(n)` 或跨 Dataset 的缓存协议。多 worker 通道会产生并发生产和
 有限背压，但不能据此声称存在可配置的磁盘预取、Pinned Host Memory、
 零拷贝设备传输或数据变换自动融合。

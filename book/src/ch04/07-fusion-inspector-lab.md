@@ -1,6 +1,6 @@
 # 实验：观察 Fusion 执行计划
 
-实验位于 `examples/ch04-fusion-inspector`。根 workspace 为 Burn 启用
+实验位于 `examples/ch04-fusion-inspector`。本书示例工程为 Burn 启用
 `cpu` 与 `fusion`，并直接依赖带 `test-util` feature 的 `burn-fusion`。
 后者提供 `FusionInspector`，用来捕获固定 Runtime 的执行报告。
 
@@ -53,7 +53,7 @@ $$
 cargo run -p ch04-fusion-inspector
 ```
 
-固定快照上的一种输出为：
+本版上的一种输出为：
 
 ```text
 连续表达式：1 个报告，[BlockSummary { fuser: Some("ElementWise"), operations: 2 }]
@@ -73,16 +73,16 @@ cargo run -p ch04-fusion-inspector
 cargo test -p ch04-fusion-inspector
 ```
 
-测试断言：
+你会观察到：
 
 - 连续路径存在两操作 ElementWise block；
 - 同步路径不存在这样的 block；
-- 两条路径都实际观察到 add 和 exp，报告数非零；
+- 两条路径都实际看到 add 和 exp，报告数非零；
 - 两条路径输出完全相同；
 - 数值在容差内等于 $e^2$。
 
-“计划不同但语义相同”正是编译优化需要满足的条件。若只断言输出，Fusion
-完全回退也会通过；若只断言计划，不验证输出，又可能忽略错误变换。
+“计划不同但语义相同”正是编译优化要满足的条件。若只看输出，Fusion
+完全回退也会“看起来正确”；若只看计划、不比输出，又可能漏掉错误变换。
 
 ## 5. 为什么不用 Flex 对照
 
@@ -99,9 +99,9 @@ cargo test -p ch04-fusion-inspector
 BURN_FUSION_LOG=full cargo run -p ch04-fusion-inspector
 ```
 
-日志级别和环境变量属于固定 Burn 配置接口。Full 日志可显示 stream、fuser、
-plan 与 explorer 信息，输出量较大；不要在自动测试中依赖完整日志文本，
-其格式比结构化断言更容易演进。
+日志级别和环境变量属于本书所用 Burn 版本的配置接口。Full 日志可显示
+stream、fuser、plan 与 explorer 信息，输出量较大；更适合本地阅读，不宜
+把完整日志文本当成稳定的比对对象。
 
 ## 7. 三操作 ElementWise 块
 
@@ -111,26 +111,26 @@ plan 与 explorer 信息，输出量较大；不要在自动测试中依赖完�
 {{#include ../../../examples/ch04-fusion-inspector/src/lib.rs:inspect_triple}}
 ```
 
-连续 `((left + right) * scale).exp()` 在固定快照上可落入同一个三操作
-`ElementWise` block；数值仍为 $e^2$（因为 `scale` 为全 1）。这把练习中的
-扩写题收敛为已交付断言，而不改变主实验对同步切分的关注。
+连续 `((left + right) * scale).exp()` 在本版 Burn 上可落入同一个三操作
+`ElementWise` block；数值仍为 $e^2$（因为 `scale` 为全 1）。这给练习中的
+扩写题一个可对照的结果，主实验仍聚焦同步切分。
 
 ## 8. 重复计划与缓存日志
 
 `inspect_add_mul_exp_twice` 在相同 shape、dtype、CPU Fusion device 和
 stream 上重复 `add → mul → exp`，比较两次的 `reports`、block 结构和
-输出值。测试只断言计划/输出一致，不断言第二次更快，也不读取私有 cache
-key：
+输出值。请确认计划与输出一致；不要据此声称第二次更快，也不要去读
+私有 cache key：
 
 ```bash
 cargo run -p ch04-fusion-inspector --locked --offline
 BURN_FUSION_LOG=full cargo run -p ch04-fusion-inspector --locked --offline
 ```
 
-主程序的 `cache_log_enabled=true` 只表示请求了可选日志，不表示发生了
-cache hit。Fusion block 数、cache hit、kernel launch count 和 wall-clock
-time 是四种不同指标；固定快照没有提供稳定的公开 cache-key 读取接口，
-因此正文保留日志/源码核验边界。
+`cache_log_enabled=true` 只表示打开了可选日志，不等于已经发生 cache
+hit。Fusion block 数、cache hit、kernel 启动次数和墙钟时间是四种不同
+指标；本版没有稳定的公开 cache-key 读取接口，因此这里只读日志含义，
+不做性能外推。
 
 ## 9. 可继续观察的边界
 

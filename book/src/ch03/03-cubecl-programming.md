@@ -37,6 +37,28 @@ CPU、WGPU、CUDA 和 HIP/ROCm 路径是否可用取决于 feature 与平台。�
 Kernel IR 可以由不同 Runtime 编译，并不意味着各 Runtime 的能力集合相同。
 代码应查询 device properties，而不是把高性能 GPU 特性当成基础语言语义。
 
+### 2.1 多 Runtime：同一 IR，不同完成边界
+
+按本书固定版本，CubeCL 至少暴露这些 Runtime 类型（路径相对 `cubecl/`）：
+
+| Runtime | 源码位置（示意） | 典型目标 | 本书默认 |
+|---|---|---|---|
+| `CpuRuntime` | `crates/cubecl-cpu/src/runtime.rs` | LLVM/MLIR CPU | 默认实验 |
+| `WgpuRuntime` | `crates/cubecl-wgpu/src/runtime.rs` | WGSL 等图形栈 | 可选 `--features wgpu` |
+| `CudaRuntime` | `crates/cubecl-cuda/src/runtime.rs` | NVIDIA GPU | 源码导读；非默认示例 |
+| `HipRuntime` | `crates/cubecl-hip/src/runtime.rs` | AMD GPU | 源码导读；非默认示例 |
+
+阅读顺序建议：
+
+1. 先把 Kernel 语义在 `CpuRuntime` 上钉死（本章实验）；
+2. 有图形驱动时，用同一 Kernel 走 `WgpuRuntime`，核对数值；
+3. 再打开 `CudaRuntime` / `HipRuntime` 源码，看 client、编译与同步入口
+   如何对应 GPU 完成边界——不必本机装齐驱动也能读懂契约。
+
+Burn 侧通过 `burn-cubecl` / `burn-wgpu` / `burn-cuda` 把 `Device` 接到这些
+Runtime；Flex **不**走这条桥。因此“Tensor API 统一”不等于“默认已经测过
+所有 GPU 后端”。
+
 ## 3. 边界检查与安全责任
 
 Kernel 常用以下保护：
@@ -49,7 +71,7 @@ if ABSOLUTE_POS < input.len() {
 
 `#[cube(launch)]` 使用 checked execution mode；`launch_unchecked`
 允许跳过一部分检查以减少开销。二者都不能证明 host 提供的 raw buffer
-长度真实。固定快照中的 `BufferArg::from_raw_parts` 是 `unsafe fn`：
+长度真实。本版中的 `BufferArg::from_raw_parts` 是 `unsafe fn`：
 调用者若声明错误长度，Kernel 可能越界访问。
 
 因此本章示例把 `unsafe` 限定在一个小块内，并写出两项不变量：
@@ -59,7 +81,7 @@ if ABSOLUTE_POS < input.len() {
 
 这不是“用 Rust 就自动没有设备内存错误”。Rust 类型系统保护 host 代码的
 普通引用；跨 Runtime 的 raw allocation 描述仍需要人工证明。教学 crate
-也因此对 `unsafe_code = "forbid"` 做了局部、可审计的例外。
+也因此对 `unsafe_code = "forbid"` 做了局部、有注释可复核的例外。
 
 ## 4. Slice、Vector 与 Tensor 参数
 
@@ -67,7 +89,7 @@ if ABSOLUTE_POS < input.len() {
 - `Vector<F, N>` 表达连续的 N 个元素，供向量化使用；
 - CubeCL Tensor 参数还携带 shape 与 stride，适合多维寻址。
 
-当前固定快照使用 `Vector`，不是旧资料中的 `Line` 类型名。向量宽度必须与
+当前固定版本使用 `Vector`，不是旧资料中的 `Line` 类型名。向量宽度必须与
 buffer 布局、元素总数和 Runtime 能力一致。多维 Tensor 的 raw shape 和
 stride 同样属于 unsafe 合约的一部分。
 

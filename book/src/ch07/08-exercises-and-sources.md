@@ -11,7 +11,7 @@ feature 开启后增加 snapshot、Burnpack/SafeTensors/PyTorch store、过滤�
 固定 `burn-onnx` 的 `ModelGen` 将 ONNX graph 解析成 Burn graph，生成 Rust
 source，并收集 Burnpack 权重。`File`、`Embedded`、`Bytes` 和 `None`
 决定权重从哪里进入生成的 model。由于该固定仓库的 manifest 仍依赖旧
-Burn revision，本章源码核验与当前 workspace 的 Record 实验保持分离。
+Burn revision，本章对 ONNX 的源码对照与本书 Record 实验保持分离。
 
 Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 需要异步事件循环；no_std 只缩小标准库依赖，不自动提供文件、网络、线程
@@ -21,8 +21,8 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 ## 练习
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
 ## 概念题
@@ -183,7 +183,7 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -193,7 +193,7 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -215,17 +215,17 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
-7. 【进阶】对照 `pins.toml`、`burn-onnx/Cargo.toml` 和根 `Cargo.toml`，解释为什么
+7. 【进阶】对照仓库版本钉扎、`burn-onnx/Cargo.toml` 和根 `Cargo.toml`，解释为什么
    两个 Burn revision 不能直接共用 `Tensor`/`Module` 类型。
 
 <details>
 <summary>提示</summary>
 
-用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+按章节末「源码入口」打开本书固定版本的对应路径。
 
 </details>
 
@@ -326,7 +326,7 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 
 ## 延伸阅读与固定源码入口
 
-根 workspace 的 Burn：
+本书示例使用的 Burn：
 
 - `burn/crates/burn-core/src/store/mod.rs`
 - `burn/crates/burn-core/src/module/base.rs`
@@ -362,28 +362,15 @@ OpenMLSys v1：
 - `openmlsys/v1/zh_chapters/chapter_model_deployment/model_security.md`
 - `openmlsys/v1/zh_chapters/chapter_model_deployment/summary.md`
 
+## 本章系统结论
+
+1. 部署闭环是：训练态 → artifact → 校验 → 推理入口 → 服务侧 batch/队列/版本。
+2. `ModuleRecord`/Burnpack 管参数状态；ONNX/codegen 管图转换，二者版本不能混用。
+3. 推理选用哪个 Device（CPU/WGPU/CUDA）与 artifact 格式正交，但影响延迟与批处理。
+4. CPU 上你验证了 Linear 参数往返保存/恢复与输出误差边界。
+5. GPU 阅读线索：同一 record 加载到加速 Device 后的同步与 batch 合并；LLM 服务专题见正文边界段。
+6. 不能把本地 load 成功当成完整服务上线或 ONNX 端到端已在同一依赖图验证。
+
 ## 来源与改编说明
 
-本章改编并重组 OpenMLSys v1 的 `chapter_model_deployment/`：
-
-- `index.md`：保留训练到部署的主问题和学习目标，改为 artifact/runtime/
-  service/policy 四层路线；
-- `model_deployment_introduction.md`：保留转换、常量折叠、融合、数据
-  排布和安全的系统动机，删除未经固定 Burn 验证的厂商实现结论；
-- `model_converter_and_optimizer.md`：保留 ONNX 图/算子映射和离线优化，
-  以 `ModelGen`、`BurnGraph`、Rust codegen 和 Burnpack 重写；
-- `model_compression.md`：保留 PTQ/QAT、稀疏、剪枝和蒸馏的原理，明确
-  Burn 固定快照中的 QAT 与通用量化流水线边界；
-- `model_inference.md`：保留前/后处理、并行、访存和延迟问题，改为
-  Burn Device/runtime 与应用 batcher 的边界；
-- `model_security.md`：保留静态/动态保护和威胁模型，区分 artifact、
-  transport、Remote authorization 与 TEE/混淆；
-- `summary.md`：重写为固定源码证据和本章实验边界。
-
-没有复制 OpenMLSys 的 MindSpore/PyTorch/ARM 汇编代码、图片或 Mate30
-性能数字。完整 revision 关系、逐文件核验和不作出的能力承诺见
-[`planning/chapter-sources/ch07.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch07.md)；项目决策记录
-[D010](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/DECISIONS.md) 记录
-`burn-onnx` 与根 workspace 的 Burn
-revision 隔离的决定。OpenMLSys 改编正文采用 CC BY-NC-SA 4.0；新增 Rust
-示例采用 MIT OR Apache-2.0。
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-7-章)。

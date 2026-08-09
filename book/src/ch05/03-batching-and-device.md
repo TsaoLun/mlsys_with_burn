@@ -42,7 +42,7 @@ item 计数，即使当前输出是 batch，也不应把 `items_total` 误读成
 
 ## `DataLoaderBuilder`
 
-固定快照中的 builder 主要配置以下参数：
+本版中的 builder 主要配置以下参数：
 
 ```rust,ignore
 let loader = DataLoaderBuilder::new(batcher)

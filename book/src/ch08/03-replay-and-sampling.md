@@ -78,7 +78,7 @@ $w = 10^3$ 步/秒意味着 learner 正在用 100 秒前的行为策略产生的
 - `select`：按 indices 选 batch；
 - `slice_assign_inplace`：把一个样本写入第 0 维的某一行。
 
-固定快照为 `Tensor<2>` 提供了实现；上游 DQN example 则为自己的
+固定版本为 `Tensor<2>` 提供了实现；上游 DQN example 则为自己的
 `ObservationTensor<2>` 和 `DiscreteActionTensor<2>` 实现同一接口，并在
 写入时处理 autodiff/device 的 inner tensor。这展示了 Rust 泛型的价值：
 replay 只知道“可批量切片”，而不需要知道具体网络的字段。

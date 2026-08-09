@@ -12,27 +12,28 @@ Rust crate，默认路径只需要 CPU，不需要 GPU 驱动、不下载数据�
   切换到正确工具链；
 - **mdBook 0.4.51**：只在本地构建本书站点时需要（`cargo install
   mdbook --version 0.4.51 --locked`）；只运行示例则不需要；
-- **Python 3.11+**：只在运行项目级校验脚本时需要，普通阅读不需要。
+- **Python 3.11+**：维护仓库脚本时才需要，普通阅读与跑示例不需要。
 
 ## 第一次构建
 
-Burn、CubeCL 等依赖按 `pins.toml` 记录的 GitHub 固定 revision 解析，
-因此**首次构建需要网络**下载和编译依赖，耗时较长：
+依赖按仓库锁定的 GitHub 版本解析，因此**首次构建需要网络**下载和编译，
+耗时较长：
 
 ```bash
 cargo fetch --locked
 cargo test -p ch01-stack-probe --locked
 ```
 
-`--locked` 保证使用 `Cargo.lock` 锁定的依赖版本。首次 fetch 之后可以
-离线复核：
+`--locked` 使用 `Cargo.lock` 锁定的依赖版本。首次 fetch 之后可以离线
+再跑同一条测试：
 
 ```bash
 cargo test -p ch01-stack-probe --locked --offline
 ```
 
 > 已知边界：CubeCL CPU 路径依赖 `tracel-llvm` 的 LLVM 资产，个别平台
-> 或缓存环境下首次构建可能受影响；若本机构建失败，以 CI 结果为参照。
+> 或缓存环境下首次构建可能较慢或失败；可换机器重试，或先跑不依赖
+> CubeCL 的第 1、2 章示例。
 
 ## 示例与章节对照
 
@@ -59,23 +60,30 @@ cargo test -p ch06-training-loop --locked
 cargo run  -p ch06-training-loop --locked
 ```
 
-各章“实验”小节会给出该章示例的具体命令和输出解读。示例的测试断言
-语义字段（shape、数值误差、守恒性），不断言墙钟时间，因此 CPU 上的
-一次运行不是性能结论。
+各章“实验”小节会给出该章示例的具体命令和输出解读。示例关注 shape、
+数值误差、守恒性等语义字段，不把墙钟时间当成性能结论。
 
-## 可选 GPU 路径
+## 可选跑通（有环境再跑）
 
-所有默认示例都只要求 CPU。第 3 章的 `ch03-cubecl-kernel` 额外提供一个
-可选 `wgpu` feature：系统存在 Metal/Vulkan/DX12 等图形驱动时，可以用
-同一个 CubeCL Kernel 在 WGPU Runtime 上运行并与 host reference 对照：
+主线正文已同步讲解 GPU 拓扑、CubeCL 多 Runtime、部署 Device 选择与
+集合通信数据面；**默认示例仍只要求 CPU**。有额外硬件或要对齐 ONNX 时，
+可按下面几条路径自行尝试（更细的说明见仓库 `docs/OPTIONAL_PROFILES.md`）：
+
+| 路径 | 何时用 | 入口命令（摘要） |
+|---|---|---|
+| `wgpu` | 有图形驱动，巩固第 3 章同一 Kernel | `cargo test -p ch03-cubecl-kernel --features wgpu --locked` |
+| ONNX 对照 | 阅读 burn-onnx 边界（依赖版本与本书示例不同） | 独立环境；不要混进本书默认示例依赖 |
+| CUDA / 集合通信 | 本机驱动与固定源码均允许时 | 先读第 3/6/9 章源码入口，再自建实验 |
+
+`wgpu` 最小命令：
 
 ```bash
 cargo run  -p ch03-cubecl-kernel --features wgpu --locked
 cargo test -p ch03-cubecl-kernel --features wgpu --locked
 ```
 
-没有 GPU 的环境直接跳过该 feature，不影响任何默认验证；该路径的正确性
-对照也不能外推为 GPU 性能结论。详见第 3 章实验小节。
+没有对应环境就跳过，不影响九章主线。可选路径若只证明语义或可加载性，
+请单独记下设备和软件版本，不要写成默认示例的性能结论。
 
 ## 本地构建本书站点
 
@@ -87,12 +95,8 @@ mdbook serve book   # 本地预览
 浏览器中的公式由 MathJax CDN 渲染，离线打开时公式可能不渲染；Cargo
 依赖的离线可复现不代表浏览器资源离线可用。
 
-## 整体验证（贡献者用）
+## 想一次跑通全书默认示例时
 
-```bash
-make check
-```
-
-该命令依次执行上游快照校验、mdBook 构建与测试、`cargo fmt`、Clippy、
-workspace 测试与 doctest、10 个 CPU 冒烟运行、综合实验冒烟、离线门禁
-和发布结构审计，不需要任何本地上游源码镜像。
+按章学习通常不必全仓库检查。若你在改示例或提交补丁，可在仓库根目录运行
+`make check`：它会构建文档、跑格式与 lint、执行各章默认 CPU 示例，并检查
+依赖锁定是否与正文版本一致。

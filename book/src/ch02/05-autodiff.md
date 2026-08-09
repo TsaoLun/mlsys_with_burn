@@ -28,7 +28,7 @@ AD 不是符号代数系统，也不是有限差分。它对每个基本操作�
 模式（反向传播，backpropagation）的原因。它的代价不在计算而在内存：
 反向需要前向的中间值，必须保存或重算，下文会定量讨论。
 
-Burn 固定快照实现一阶反向模式自动微分，不支持通过嵌套 autodiff 直接
+本书所用的 Burn 版本实现一阶反向模式自动微分，不支持通过嵌套 autodiff 直接
 求高阶导。
 
 ## 一个带数字的反向传播推演
@@ -121,7 +121,7 @@ require-grad 叶子不符合当前 API 约束。
 
 ## `detach` 与 `inner`
 
-- `tensor.detach()` 切断旧图并形成新叶子；固定快照会保留原来的
+- `tensor.detach()` 切断旧图并形成新叶子；固定版本会保留原来的
   require-grad 意图；
 - autodiff Tensor 的 `inner()` 去除自动微分元数据，返回底层数值 Tensor；
 - `device.inner()` 去除 Device 的 autodiff 包装。
@@ -147,7 +147,7 @@ autodiff tape ──backward──► Gradients
 
 ## 固定源码导读
 
-想亲自核对本节描述，建议按以下顺序阅读固定 revision 的
+想亲自核对本节描述，建议按以下顺序阅读本书固定版本的
 `burn/crates/burn-autodiff/src/`：
 
 1. `graph/base.rs`：`Step` trait——反向步的契约（消费自身、父节点、

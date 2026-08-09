@@ -88,7 +88,7 @@ $$
 
 代入 $M=N=K=16$、$T\_M=T\_N=T\_K=8$：朴素 $2 \times 16^3 = 8192$ 次，
 tiled $2 \times 2 \times 2 \times (64+64) = 1024$ 次——与
-`tile_load_counts` 的测试断言一致。强度从
+`tile_load_counts` 的计数一致。强度从
 $2MNK/L\_{\text{naive}} = 1$ 提高到 $8$：直觉上，A 的每个元素在一
 个输出 tile 内被复用 $T\_N$ 次，B 的每个元素被复用 $T\_M$ 次，
 tile 越大复用越多。

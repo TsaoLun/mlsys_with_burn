@@ -15,7 +15,6 @@
   - [生命周期、生态与阅读路径](ch01/05-lifecycle-and-ecosystem.md)
   - [实验：探测执行栈](ch01/06-stack-probe-lab.md)
   - [练习、延伸阅读与来源](ch01/07-exercises-and-sources.md)
-  - [对照、证据与范围边界](ch01/08-comparison-and-sources.md)
 - [第 2 章 编程接口与计算图](ch02-programming-and-graph.md)
   - [从工作流到编程接口](ch02/01-interface-and-workflow.md)
   - [Tensor、Device 与运行时后端](ch02/02-tensor-device-backend.md)
@@ -95,13 +94,12 @@
   - [实验：CPU 集群调度与故障模拟器](ch09/07-cpu-cluster-simulator-lab.md)
   - [练习、延伸阅读与来源](ch09/08-exercises-and-sources.md)
 
-# 贯穿实验与对照
+# 贯穿实验
 
 - [综合实验：数据到推理](capstone.md)
-- [OpenMLSys 核心主题比较卡](comparison-cards.md)
-- [逐文件对照矩阵导读](crosswalk-guide.md)
 
 # 附录
 
 - [术语表](glossary.md)
-
+- [范围、证据与对照](appendix-scope-and-evidence.md)
+- [来源与改编总录](appendix-sources.md)

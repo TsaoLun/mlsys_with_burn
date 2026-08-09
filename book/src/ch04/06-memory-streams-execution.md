@@ -80,6 +80,16 @@ ComputeClient 将 Kernel 提交到 stream；host 返回不表示设备已完成�
 报告。CPU 的 flush 实现可能表现为等待，但这不是所有 GPU Runtime 的统一
 完成语义。
 
+在 GPU/图形 Runtime 上阅读时，把下列问题当作检查清单：
+
+1. 这次 `read`/`sync` 等到的是哪条 stream？
+2. HtoD / DtoH 是否与计算重叠，还是被多余同步切开？
+3. Fusion 计划减少的是中间读写，还是只在 CPU Fusion 路径上可见？
+4. 设备 graph capture（若该 Runtime 支持）复用的是命令序列，不是 autodiff tape。
+
+默认实验仍在 CPU Fusion 上观察计划切分；有 WGPU/CUDA 环境时，用同一清单
+核对完成边界，不要把 CPU 上的 flush 习惯直接抄到 GPU。
+
 ## 5. 多 Stream 与依赖
 
 同一 stream 通常保持提交顺序，不同 stream 可能并行。跨 stream 使用同一

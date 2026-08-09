@@ -17,8 +17,8 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 ### 概念题
 
@@ -37,7 +37,7 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+按章节末「源码入口」打开本书固定版本的对应路径。
 
 </details>
 
@@ -161,7 +161,7 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+按章节末「源码入口」打开本书固定版本的对应路径。
 
 </details>
 
@@ -170,7 +170,7 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -228,53 +228,18 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 - `burn/crates/burn-autodiff/src/runtime/`
 - `burn/crates/burn-backend-tests/tests/autodiff/`
 
-固定快照附带的 Burn Book 仍有不少 `Tensor<B, D>` 和泛型 Module 示例。
+本版附带的 Burn Book 仍有不少 `Tensor<B, D>` 和泛型 Module 示例。
 它可用于理解设计动机，但代码签名必须用以上源码和可编译测试核对。
+
+## 本章系统结论
+
+1. 工作流各阶段携带各自的数据、状态与出错点，不能压成一个模糊的 `train()`。
+2. `Tensor` 的编译期秩/类别与运行时 shape、dtype、Device 必须分开看。
+3. Module/`Param` 管理可训练状态；autodiff tape 记录实际执行路径上的一阶反向。
+4. CPU 上你应观察到广播、参数统计与分支 tape 的梯度行为。
+5. GPU 阅读线索：同一 Module API 最终要落到某个 Backend/CubeCL Kernel；中间还隔着 dispatch 与（可选）Fusion。
+6. 不能把 autodiff tape、Fusion IR 与 device graph capture 当成同一层实现。
 
 ## 来源与改编说明
 
-本章改编并重组 OpenMLSys v1：
-
-### 编程接口
-
-- `chapter_programming_interface/index.md`
-- `chapter_programming_interface/development_history.md`
-- `chapter_programming_interface/ml_workflow.md`
-- `chapter_programming_interface/neural_network_layer.md`
-- `chapter_programming_interface/ml_programming_paradigm.md`
-
-`c_python_interaction.md` 提供“高层接口与底层实现存在边界”的背景。本章
-保留这一系统问题，改用 Rust trait、Device dispatch、CubeCL Kernel 和
-显式错误/所有权边界解释扩展路径；没有复用其 Pybind11、MindSpore 或 CUDA
-示例。自定义 Kernel 的 launch、lowering 和 Runtime 细节放到第 3、4 章。
-
-### 计算图
-
-- `chapter_computational_graph/background_and_functionality.md`
-- `chapter_computational_graph/components_of_computational_graph.md`
-- `chapter_computational_graph/generation_of_computational_graph.md`
-- `chapter_computational_graph/schedule_of_computational_graph.md`
-
-本章保留图表示、依赖、控制流、静动态图与拓扑调度思想，删除 TensorFlow 1
-和 MindSpore 专用 API，并把数据流水线、模型并行后移。补全时增加了拓扑序
-小例子、图外控制流与循环展开/循环依赖区分，以及两分支 autodiff 实验；
-统一用语见[术语表](../glossary.md)。
-
-未迁入：原书长控制流教程、`tf.cond`/`while_loop` API 走读和框架专用训练
-代码；完整训练工作流已用输入/输出/状态契约建立地图，数据与训练执行仍
-分别后移第 5/6 章。
-
-### 自动微分、类型与 IR
-
-- `chapter_frontend_and_ir/ad.md`
-- `chapter_frontend_and_ir/intermediate_representation.md`
-- `chapter_frontend_and_ir/type_system_and_static_analysis.md`
-
-本章保留求导方法、前向/反向模式和 IR 的通用定义；MindIR、框架前端 pass
-和 MLIR 深入内容后移第 4 章。新增 Burn 0.22 Device/autodiff 动态 tape、
-Rust 类型分工和全部可运行示例。
-
-本章没有复制 OpenMLSys 图面。完整逐文件映射见
-[`planning/chapter-sources/ch02.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch02.md)。OpenMLSys 原作和本章改编正文采用
-CC BY-NC-SA 4.0，原创 Rust 示例采用 MIT OR Apache-2.0。
-
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-2-章)。

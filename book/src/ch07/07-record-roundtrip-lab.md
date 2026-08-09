@@ -1,13 +1,12 @@
 # 实验：CPU 模型状态往返保存与恢复
 
-## 实验目标与边界
+## 你会学到什么
 
-实验位于 `examples/ch07-record-roundtrip`。它创建一个小型 `Linear` module，
-把参数转换为内存 Burnpack bytes，再加载到一个新 module，最后比较两次
-forward 的输出。
+示例在 `examples/ch07-record-roundtrip`：创建一个小型 `Linear`，把参数
+写成内存里的 Burnpack bytes，再加载到新 module，比较两次 forward。
 
 ```text
-根 workspace 的 Burn Linear
+本书示例中的 Burn Linear
       │
       ├── reference forward
       ├── Module::into_record
@@ -18,10 +17,9 @@ forward 的输出。
               restored forward
 ```
 
-本实验验证的是参数 artifact 的保存、加载、shape 和数值等价性。它不验证
-ONNX parser/codegen、HTTP/gRPC、Remote、WASM、SafeTensors、量化或 GPU
-性能。把这些范围写出来，是为了避免把一个成功的本地 load 当成完整服务
-上线证明。
+你会观察参数保存、加载、shape 和数值是否一致。本实验刻意不做 ONNX
+导入、HTTP/gRPC、Remote、WASM、SafeTensors、量化或 GPU 性能——本地
+load 成功不等于服务已经上线。
 
 ## 1. 创建目标 module 和 reference
 
@@ -46,7 +44,7 @@ module，再调用 `try_load_record`。
 或不匹配的 artifact 变成可报告的错误。固定源码中的 validation 会检查
 shape 和缺失 tensor；生产系统还应在加载前验证 checksum 和版本 metadata。
 
-## 3. 测试可观察不变量
+## 3. 运行并观察
 
 在项目根目录运行：
 
@@ -55,9 +53,9 @@ cargo test -p ch07-record-roundtrip
 cargo run -p ch07-record-roundtrip
 ```
 
-测试断言：
+你应能观察到：
 
-1. 记录包含两个参数 tensor，即 Linear 的 weight 和 bias；
+1. 记录包含两个参数 tensor（Linear 的 weight 和 bias）；
 2. 恢复后的输出 shape 为 `[3, 1]`；
 3. reference 与 restored output 的最大绝对误差小于 `1e-6`。
 
@@ -67,8 +65,8 @@ cargo run -p ch07-record-roundtrip
 record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
 ```
 
-小数形式可能随 backend 或上游实现变化，但“参数数目、shape 和误差边界”
-是本例的可观察协议。实验没有把 bytes 长度写成跨平台性能结论。
+小数形式可能随 backend 变化；请抓住“参数数目、shape 和误差边界”，
+不要把 bytes 长度当成性能结论。
 
 ## 4. 从实验走向部署
 
@@ -79,14 +77,14 @@ record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
 3. 引入 `burn-store` 的 SafeTensorsStore，并记录路径 remap 和
    `ApplyResult`；
 4. 为模型加一个版本 metadata 和固定 reference 输入；
-5. 在 host 上用 `burn-onnx::ModelGen` 生成一个 fixture，并对齐它与
-   当前 workspace 的 Burn revision 后再加入 workspace；
+5. 在 host 上用 `burn-onnx::ModelGen` 生成一个 fixture，并先对齐它与
+   本书示例使用的 Burn revision，再单独组织依赖；
 6. 把已加载的 model 放到服务 runner，单独测 queue、pre/post 和
    p95/p99；
 7. 具备匹配网络和 backend 后，再尝试 Remote 或浏览器客户端。
 
-第 5 步不能跳过：固定仓库的 `burn-onnx` 仍 pin 到较早 Burn revision，
-本章没有把两个 revision 的 generated model 类型混进当前 workspace。
+第 5 步不能跳过：固定仓库的 `burn-onnx` 仍指向较早 Burn revision，
+本章没有把两个 revision 的 generated model 类型混进同一依赖图。
 
 ## 5. 接到第 5–6 章
 

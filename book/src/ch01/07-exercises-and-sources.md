@@ -16,8 +16,8 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 ### 概念题
 
@@ -108,7 +108,7 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+按章节末「源码入口」打开本书固定版本的对应路径。
 
 </details>
 
@@ -117,17 +117,17 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
-4. 【进阶】比较根 `pins.toml` 的 Burn revision 与 `burn-onnx/Cargo.toml` 使用的
+4. 【进阶】比较仓库根目录版本钉扎与 `burn-onnx/Cargo.toml` 使用的
    revision。只有版本号相同，为什么仍不足以断言 API 兼容？
 
 <details>
 <summary>提示</summary>
 
-用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+按章节末「源码入口」打开本书固定版本的对应路径。
 
 </details>
 
@@ -150,7 +150,7 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-用 `pins.toml` 固定 revision 打开对应 Cargo/源码路径。
+按章节末「源码入口」打开本书固定版本的对应路径。
 
 </details>
 
@@ -177,36 +177,33 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 - `cubek/README.md`：CubeK 算法范围；
 - `burn-onnx/SUPPORTED-ONNX-OPS.md`：固定导入器的算子边界。
 
-在线 Burn Book 可以辅助理解设计动机，但遇到 API 差异时，以 `pins.toml`
-固定的源码为准。
+在线 Burn Book 可以辅助理解设计动机，但遇到 API 差异时，以本书固定版本
+的源码与示例为准。
+
+
+### 综合小练习
+
+1. 【进阶】为一个在线推荐模型填写训练、离线推理、在线服务和故障恢复四张
+   workload card。每张卡写出输入、输出、状态、吞吐/延迟目标、设备约束和
+   恢复点，并指出它会进入本书的哪一章。最后列出一个需要真实 GPU、网络或
+   外部系统才能验证的字段。
+
+<details>
+<summary>提示</summary>
+
+回看第 1 章应用与负载小节；范围边界见[范围、证据与对照附录](../appendix-scope-and-evidence.md)。
+
+</details>
+
+## 本章系统结论
+
+1. 机器学习系统要把应用负载拆成计算、数据、硬件与生命周期约束，而不是只谈模型结构。
+2. 现代框架需要分层：用户接口 → 执行/微分 → IR/融合 → Kernel → Runtime。
+3. Burn 0.22 用 `Tensor<D,K>` + `Device` 选择后端；Flex 是默认 CPU 路径，不经过 CubeCL。
+4. CPU 上你应已跑通 `ch01-stack-probe`：选中 Flex、同步并读回结果。
+5. GPU/多后端阅读时对照：`Device::wgpu` / `Device::cuda`、dispatch 变体，以及后文 CubeCL Runtime。
+6. 不能从一次 CPU probe 推出 GPU 吞吐、分布式或全部后端能力一致。
 
 ## 来源与改编说明
 
-本章改编并重组了 OpenMLSys v1 以下文件：
-
-- `chapter_introduction/index.md`
-- `chapter_introduction/applications.md`
-- `chapter_introduction/design.md`
-- `chapter_introduction/architecture.md`
-- `chapter_introduction/ecosystem.md`
-- `chapter_introduction/readers.md`
-
-保留的核心思想包括机器学习应用分类、框架六类设计目标、从接口到硬件的
-系统分层和框架中心生态。主要修改包括：
-
-- 将应用枚举改写为计算、数据、硬件与生命周期负载分析；
-- 删除以 Python、MindSpore、Ascend 为默认栈的表述；
-- 用 Burn 0.22 的 Device/Dispatch 架构映射框架层次；
-- 增加 CubeCL、CubeK、burn-onnx 的职责与版本边界；
-- 按本书九章重写范围和阅读路径；
-- 新增固定源码快照方法、实验与练习。
-
-本章没有复用 OpenMLSys 的 `framework-architecture.png` 和
-`system-ecosystem.png` 图面；文本架构图是基于通用分层思想重新设计，并与
-第 2、4 章与[术语表](../glossary.md)使用同一套层名。
-
-未迁入：原书以 Python/MindSpore/Ascend 为默认栈的图示与生态叙述。
-
-OpenMLSys 原作及本章改编正文采用 CC BY-NC-SA 4.0。完整署名与许可证见
-本书的“许可、来源与独立性声明”和仓库根目录 `NOTICE.md`。
-
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-1-章)。

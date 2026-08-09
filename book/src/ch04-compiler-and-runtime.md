@@ -41,22 +41,8 @@ Tensor 操作
 ```
 
 这与第 2 章的三种表示一致：本章处理 Fusion 计划与 CubeCL IR，不把它们
-写成 autodiff tape 或 device graph capture。随后讨论 Kernel 选择、内存
-生命周期、stream 和异步边界。实验使用 FusionInspector 观察计划结构与
-同步切分；它是固定快照中的测试 API，不是生产诊断接口。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：FusionInspector 的计划结构、数值等价和同步边界；
-- `源码核验`：OperationIr、Fusion stream、CubeCL Scope、编译和
-  HandleContainer 的生命周期入口；
-- `协议/成本模型`：Pass、lowering、cache 和 launch/read 因果链；
-- `可选平台实验`：真实 kernel launch、硬件 graph capture 和设备性能；
-- `未覆盖`：将 Fusion block 数、cache hit、kernel launch count 和
-  wall-clock time 当成同一个指标。
-
-对应对象级协议与指标边界见[核心主题比较卡](comparison-cards.md#第-4-章irfusioncache-与-launch)。
-
+写成 autodiff tape 或 device graph capture。相对第 3 章多出来的一层是：
+**同一 IR 如何经选择、内存与 JIT 落到不同 Runtime**（含 GPU/图形栈）。
+随后讨论 Kernel 选择、stream 与异步边界。默认实验用 FusionInspector
+在 CPU Fusion 路径上看计划切分；有 GPU 环境时，阅读重点转向 launch/
+同步代价，而不是把 CPU 计划数当成硬件计数器。

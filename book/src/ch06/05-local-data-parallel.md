@@ -67,7 +67,7 @@ DDP 的区别首先在于：这里的策略把 device 列表和 loader 切分放
 - **流水线并行**：模型阶段分片，再用 micro-batch 重叠阶段执行；
 - **混合并行**：组合上述协议，并定义张量重新布局和同步时机。
 
-固定快照的 `ExecutionStrategy` 明确实现了单设备、本机 `MultiDevice` 和
+固定版本的 `ExecutionStrategy` 明确实现了单设备、本机 `MultiDevice` 和
 DDP 路径；它没有因为存在 `MultiDevice` 就自动提供通用模型并行或
 pipeline scheduler。`Learner::grad_sharded()` 是 DDP 相关的梯度同步标记，
 不是任意模型切分 DSL。
@@ -124,5 +124,5 @@ micro-batch 编排或 activation recomputation 协议。这个时间线是框架
 
 这些测试比只比较 `num_devices = 1` 和 `num_devices = 2` 的墙钟时间更有
 解释力。固定 CPU Flex 实验选择单设备路径，因为 Flex 没有可运行的
-collective；本节的 `MultiDevice` API 事实来自源码核验，不把它伪装成本次
-实验结果。
+collective；本节的 `MultiDevice` API 来自固定源码对照，不是本实验的运行
+结果。

@@ -9,7 +9,7 @@
 ## 本章问题
 
 一个训练系统如何组织前向、反向、优化、检查点和跨设备通信，并在规模增长
-时保持正确的状态与可接受的效率？哪些能力属于 Burn 固定快照，哪些仍然
+时保持正确的状态与可接受的效率？哪些能力属于 本书所用的 Burn 版本，哪些仍然
 需要后端、集群或额外协议？
 
 ## 学习目标
@@ -25,8 +25,8 @@
 5. 区分 Burn `MultiDevice` 的本机多设备训练和 DDP 的梯度 collective；
 6. 用延迟/带宽模型分析 AllReduce 为什么会成为同步训练的成本；
 7. 通过 CPU 实验验证一次训练循环确实降低 loss 并改变参数；
-8. 诚实标出固定快照没有验证的参数服务器、流水线并行、集群容错和
-   Flex CPU DDP 能力。
+8. 分清本版已跑通的单设备训练，与尚未覆盖的参数服务器、流水线并行、
+   集群容错和 Flex CPU DDP。
 
 ## 先修知识
 
@@ -41,9 +41,16 @@ trait、所有权、线程和基本概率/梯度概念。不要求先拥有 CUDA
 
 ![训练闭环：Dataset/DataLoader 供给 batch，经 forward/loss 与 backward/autodiff tape 得到 GradientsParams，再进入 optimizer、checkpoint 与 validation](img/ch06-training-loop.svg)
 
+与第 9 章的分工见后文控制面/数据面对照图（[`ch06-ch09-control-data-planes.svg`](img/ch06-ch09-control-data-planes.svg)）：本章落在训练数据面。
+
 单设备训练是最小闭环；本机多设备把数据和梯度放在同一进程内分摊；DDP
 进一步要求后端 collective 和跨节点启动协议。不要把三者都简称为“并行”：
 它们的状态、故障和通信边界不同。
+
+相对第 5 章，本章多出的是**训练状态与梯度同步**。默认实验仍在 Flex CPU
+上观察 loss 下降；正文会同步导读 `DistributedContext` / `all_reduce` 源码
+入口，并说明 GPU 数据面期望什么。真 NCCL/多机跑通不是默认路径，见
+[如何运行本书示例](running-examples.md) 中的可选跑通说明。
 
 ## 小节
 
@@ -57,22 +64,5 @@ trait、所有权、线程和基本概率/梯度概念。不要求先拥有 CUDA
 8. [练习、延伸阅读与来源](ch06/08-exercises-and-sources.md)
 
 示例代码位于 `examples/ch06-training-loop`，正文只通过 mdBook include
-引用其中的训练循环片段。它使用固定快照的 Flex CPU，不下载数据，也不
+引用其中的训练循环片段。它使用本版 Flex CPU，不下载数据，也不
 把一次本地 loss 曲线当成跨设备性能结论。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：forward/backward、SGD、loss 下降、参数变化和
-  checkpoint 基础状态；
-- `源码核验`：`TrainStep`、`Learner`、optimizer、`MultiDevice`、
-  `DistributedContext` 与 collective 入口；
-- `协议/成本模型`：AllReduce、parameter-server、pipeline bubble
-  和 checkpoint version；
-- `可选平台实验`：Flex CPU 之外的 DDP、跨节点网络和真实通信性能；
-- `未覆盖`：把单机训练 loop 当作分布式训练、集群容错或 NCCL 证明。
-
-对应 collective、版本和 pipeline 协议见[核心主题比较卡](comparison-cards.md#第-6-章分布式训练)。
-

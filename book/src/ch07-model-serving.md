@@ -23,7 +23,8 @@
 5. 区分 `burn-onnx` 的 `File`、`Embedded`、`Bytes` 和 `None` 加载策略；
 6. 用 batch、队列和设备读回建立延迟/吞吐的基本模型；
 7. 解释 Burn Remote 的 compute peer 边界，以及 WASM 异步连接的限制；
-8. 识别固定快照中已验证、只完成源码核验和仍需额外工程的能力。
+8. 分清本版已跑通的参数往返、源码中可对照的 ONNX/Remote 路径，以及
+   仍需额外工程的服务能力。
 
 ## 先修知识
 
@@ -43,10 +44,16 @@ CUDA、浏览器或部署集群。
 Remote 把 tensor operation 送到 compute peer；服务端的路由、鉴权、版本、
 限流和故障转移则仍然是应用系统的职责。
 
-本章的固定版本警告很重要：`pins.toml` 中的 `burn-onnx` revision 的
-manifest 仍指向较早的 Burn revision，与根 workspace 使用的 Burn revision 不同。
-因而本章把 ONNX 源码核验和当前 workspace 的 `ModuleRecord` CPU 实验分开，不用一个未对齐
-的依赖图制造“端到端已验证”的印象。
+版本关系需要心里有数：仓库里的 `burn-onnx` 仍指向较早的 Burn，与本书
+示例使用的 Burn 不是同一提交。因此本章把 ONNX 路径对照和
+`ModuleRecord` CPU 实验分开讲——本地 load 成功，不等于 ONNX 端到端已经
+在同一依赖图上验证。
+
+相对训练章，本章多出的是 **artifact 与推理入口**。闭环是：
+`Module → Record/Burnpack → 校验 → 推理 forward →（应用）batch/队列/版本`。
+推理 Device 可选 CPU/WGPU/CUDA，与格式正交；默认实验仍在 CPU 上验证
+往返一致性。有环境时再尝试加速 Device 或独立 ONNX fixture，见
+[如何运行本书示例](running-examples.md)。
 
 ## 小节
 
@@ -63,21 +70,3 @@ manifest 仍指向较早的 Burn revision，与根 workspace 使用的 Burn revi
 revision 的 Flex CPU。它验证的是 Burnpack 参数状态的内存导出/加载和输出
 一致性，不下载 ONNX、不启动网络服务，也不把一次 CPU 测试外推为浏览器或
 GPU 性能结论。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：当前 workspace 的 `ModuleRecord`/Burnpack 参数往返保存与恢复，
-  以及恢复后的 inference；
-- `源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
-  WASM/no_std 和当前 workspace 的 artifact 入口；
-- `协议/成本模型`：manifest、checksum、版本、rollback、batch/queue
-  和安全威胁模型；
-- `可选平台实验`：真实 ONNX fixture、服务治理、浏览器/Remote 部署和
-  设备性能；
-- `未覆盖`：burn-onnx 旧 revision 与当前 workspace Burn 的端到端混用。
-
-对应 artifact manifest、rollback 和动态 batching 见[核心主题比较卡](comparison-cards.md#第-7-章模型部署)。
-

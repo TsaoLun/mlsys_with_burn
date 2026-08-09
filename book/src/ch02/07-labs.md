@@ -1,7 +1,7 @@
 # 实验：张量、Module 与梯度
 
-本章实验位于 `examples/ch02-tensor-basics`，统一使用 GitHub 固定 revision
-的 Burn 和 Flex CPU。根 workspace 启用了 `std`、`flex`、`autodiff`
+本章实验位于 `examples/ch02-tensor-basics`，统一使用 GitHub 本书固定版本
+的 Burn 和 Flex CPU。本书示例工程启用了 `std`、`flex`、`autodiff`
 features。
 
 ## 1. 逐元素运算

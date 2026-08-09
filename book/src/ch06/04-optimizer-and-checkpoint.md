@@ -85,7 +85,7 @@ burnpack record。加载 model 时，参数保留已有 module 的设备；加�
 
 ## 恢复协议
 
-一个可审计的恢复点应至少有：
+一个完整可恢复的检查点应至少有：
 
 ```text
 model record

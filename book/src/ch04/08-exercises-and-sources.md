@@ -12,14 +12,14 @@ CubeCL 内存池支撑生命周期和复用；ComputeClient 的 launch 通常异
 read/sync 才是等待边界。
 
 CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。不同后端
-不共享完全相同的优化管线，固定快照也不能被描述为完整统一 AOT 工具链。
+不共享完全相同的优化管线，本版也不能被描述为完整统一 AOT 工具链。
 
 ## 练习
 
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 ### 概念题
 
@@ -173,7 +173,7 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -294,54 +294,15 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 LLVM、MLIR、Halide、TVM/Ansor 和自动微分文献可用于比较 IR、schedule 与
 搜索设计。在线文档必须记录版本，不能覆盖本书固定源码事实。
 
+## 本章系统结论
+
+1. 编译器做保持语义的变换；运行时把计划落实到分配、调度、launch 与同步。
+2. 前端关注 OperationIr / Pass / autodiff 边界；后端关注选择、内存、stream 与 JIT/cache。
+3. 同一套 Fusion/CubeCL IR 可以落到不同 Runtime；同步/`read` 语义在设备上更昂贵。
+4. CPU 上 FusionInspector 让你看到计划切分与数值等价，不是硬件 launch 计数器。
+5. GPU 阅读时对照：设备 graph capture（若后端支持）、cache/JIT 与真实 launch 指标的区别。
+6. Fusion block 数、cache hit、kernel launch 与墙钟时间不是同一个量。
+
 ## 来源与改编说明
 
-本章重组 OpenMLSys v1 两章内容：
-
-### `chapter_frontend_and_ir/`
-
-- `index.md`
-- `overview_of_frontend.md`
-- `ai_compiler_design_principle.md`
-- `intermediate_representation.md`
-- `ad.md`
-- `type_system_and_static_analysis.md`
-- `common_frontend_optimization_pass.md`
-- `summary.md`
-
-保留 IR 分类、多层编译、静态信息、经典 Pass 与 AD/IR 关系。TensorFlow、
-JAX、MindIR 与 MindSpore 自动微分实现只作为原始范围核对，没有迁移其长
-代码和框架结构图。
-
-### `chapter_backend_and_runtime/`
-
-- `index.md`
-- `overview.md`
-- `graph_optimizer.md`
-- `kernel_selecter.md`
-- `memory_allocator.md`
-- `compute_schedule_and_execute.md`
-- `op_compiler.md`
-- `summary.md`
-
-保留融合、layout/dtype、Kernel 选择、生命周期、内存池、异步调度和
-compute/schedule 思想。MindSpore Graph Kernel、SOMAS、Ascend task 下沉
-及厂商布局约束未映射为 Burn 能力；通信 buffer 内容后移第 6 章。
-
-OpenMLSys v2 固定快照只有第 4 章 TODO，没有可迁移正文。本章没有复制
-OpenMLSys ch04/ch05 图片或 Python/C++ 示例。新增 Burn OperationIr/Fusion、
-CubeCL lowering/JIT/stream 内容，以及常量传播→DCE 手推、生命周期条带图
-与三操作 Fusion 断言。术语见[术语表](../glossary.md)。
-
-未迁入：MindSpore Graph Kernel / SOMAS 实现细节、Ascend task 下沉、长
-TVM schedule 教程（仅延伸阅读对照）。
-
-Rust 实验参考固定 Burn `fusion_shape.rs` 的 add→exp 与同步切分回归模式，
-重新设计了独立 Stream、可传播错误、稳定 summary、教学输出和双重结构/数值
-断言。
-
-完整逐文件和固定源码映射见
-[`planning/chapter-sources/ch04.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch04.md)。
-OpenMLSys 原作和改编正文采用 CC BY-NC-SA 4.0，原创 Rust 示例采用
-MIT OR Apache-2.0。
-
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-4-章)。

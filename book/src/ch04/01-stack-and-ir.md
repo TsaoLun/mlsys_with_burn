@@ -61,6 +61,19 @@ graph capture 又服务于命令重放，不等于求导或融合图。
 shape 和设备后编译；autotune 通过真实执行反过来影响选择；缓存同时属于
 编译产物管理和运行时策略。
 
+把图再按职责拆成两段读：
+
+- **前端**：OperationIr 注册、Pass、与 autodiff tape 的边界——回答“哪些
+  Tensor 操作可以合法变换/融合”。
+- **后端**：Kernel 选择、内存与 stream、CubeCL JIT/cache、launch 与
+  read/sync——回答“计划如何落到某个 Runtime（CPU/WGPU/CUDA/HIP）”。
+
+![Pass → Fusion → CubeCL IR → 多 Runtime launch；默认锚点是 CpuRuntime](../img/ch04-pass-fusion-runtime.svg)
+
+同一套 Fusion/CubeCL IR 可以接到不同设备 Runtime；变的是完成边界与
+资源模型，不是用户 Tensor 表达式本身。CPU Fusion 实验钉计划切分；有
+WGPU/CUDA 时用同一计划核对 launch/read，不要把 CPU flush 习惯抄到 GPU。
+
 ## 5. AOT、JIT 与 Eager
 
 - **Eager**：操作到达后尽快执行，调试直接，但跨操作优化窗口小；

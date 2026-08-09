@@ -28,6 +28,11 @@ CubeCL 将一次 launch 描述为多个 cube，每个 cube 内含三维排列的
 这只是认知映射，不是 ABI 等价关系。Plane 大小不是语言层固定常数，CPU
 Runtime 的 plane 能力也不同于真实 GPU。Kernel 不应凭习惯写死 32。
 
+正文按 **GPU 心智模型**讲述寄存器 / 共享内存 / 全局内存与占用率；CubeCL
+CPU 实验只证明“同一拓扑语言可以在可运行 Runtime 上得到正确结果”，不替代
+共享内存带宽或 SM 占用测量。有 GPU 时，把同一套 Cube/Unit/Plane 对照到
+真实 block/thread/warp，并在读回前确认同步点。
+
 CubeCL 提供多种拓扑内建量：
 
 - `UNIT_POS_X/Y/Z`：unit 在 cube 内的位置；

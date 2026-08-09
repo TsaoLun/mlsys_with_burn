@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420" role="img" aria-label="Device Backend Runtime map">
+  <style>
+    .box { fill:#f7f7f5; stroke:#2c2c2c; stroke-width:1.5; }
+    .box2 { fill:#eef3f8; stroke:#2c2c2c; stroke-width:1.5; }
+    .box3 { fill:#f3efe8; stroke:#2c2c2c; stroke-width:1.5; }
+    .t { font-family: system-ui, sans-serif; font-size:13px; fill:#1a1a1a; }
+    .h { font-family: system-ui, sans-serif; font-size:14px; font-weight:600; fill:#1a1a1a; }
+    .s { font-family: system-ui, sans-serif; font-size:11px; fill:#444; }
+    .arr { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
+    </marker>
+  </defs>
+  <text class="h" x="24" y="28">Tensor / Module API</text>
+  <rect class="box" x="24" y="40" width="200" height="48" rx="4"/>
+  <text class="t" x="36" y="68">Tensor&lt;D,K&gt; · Module · Param</text>
+
+  <path class="arr" d="M124 88 V120"/>
+  <text class="h" x="24" y="140">Device → Dispatch</text>
+  <rect class="box2" x="24" y="152" width="200" height="56" rx="4"/>
+  <text class="t" x="36" y="175">Device::flex / wgpu / cuda …</text>
+  <text class="s" x="36" y="195">burn-dispatch::DispatchDevice</text>
+
+  <path class="arr" d="M224 180 H280"/>
+  <text class="h" x="290" y="140">Burn backends（示例）</text>
+  <rect class="box" x="280" y="152" width="160" height="36" rx="4"/>
+  <text class="t" x="292" y="175">Flex（默认 CPU 实验）</text>
+  <rect class="box2" x="280" y="198" width="160" height="36" rx="4"/>
+  <text class="t" x="292" y="221">burn-wgpu / burn-cuda …</text>
+  <rect class="box3" x="280" y="244" width="160" height="36" rx="4"/>
+  <text class="t" x="292" y="267">burn-cubecl（桥）</text>
+
+  <path class="arr" d="M440 262 H500"/>
+  <text class="h" x="510" y="140">CubeCL Runtime</text>
+  <rect class="box2" x="500" y="152" width="196" height="36" rx="4"/>
+  <text class="t" x="512" y="175">CpuRuntime</text>
+  <rect class="box3" x="500" y="198" width="196" height="36" rx="4"/>
+  <text class="t" x="512" y="221">WgpuRuntime</text>
+  <rect class="box3" x="500" y="244" width="196" height="36" rx="4"/>
+  <text class="t" x="512" y="267">CudaRuntime / HipRuntime</text>
+
+  <path class="arr" d="M598 280 V318"/>
+  <rect class="box" x="500" y="322" width="196" height="56" rx="4"/>
+  <text class="t" x="512" y="348">#[cube] Kernel · launch</text>
+  <text class="s" x="512" y="368">sync / read（设备完成边界）</text>
+
+  <text class="s" x="24" y="400">默认跑 Flex/CPU；正文同步讲 GPU Runtime；有环境再选 WGPU/CUDA 跑通。</text>
+</svg>

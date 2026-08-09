@@ -14,14 +14,14 @@
 CPU 单设备训练循环。
 
 参数服务器、流水线并行、跨节点故障恢复、集群调度和网络性能仍是系统
-设计主题，而不是本固定快照中已经由 `burn-train` 实现并被本章实验验证
+设计主题，而不是本版中已经由 `burn-train` 实现并被本章实验验证
 的功能。
 
 ## 练习
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
 ## 概念题
@@ -228,7 +228,7 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -298,7 +298,7 @@ CPU 单设备训练循环。
 
 ## 延伸阅读与固定源码入口
 
-Burn 固定快照：
+本书所用的 Burn 版本：
 
 - `burn/crates/burn-train/src/learner/train_val.rs`
 - `burn/crates/burn-train/src/learner/base.rs`
@@ -326,27 +326,17 @@ OpenMLSys v1：
 
 可以把 PyTorch DDP、Horovod、NCCL、gPipe、ZeRO 和参数服务器论文作为
 对照阅读，但比较时必须记录版本、通信后端、进程模型、梯度归一化和
-checkpoint 协议；它们的 API 或性能不能自动转化为 Burn 固定快照事实。
+checkpoint 协议；它们的 API 或性能不能自动转化为 本书所用的 Burn 版本事实。
+
+## 本章系统结论
+
+1. 训练系统管理的是可恢复状态：参数、优化器、采样器、步数与检查点。
+2. 数据并行的关键成本在梯度同步；可用 $\alpha+\beta$ 与 bubble/staleness 做数量级估计。
+3. Burn 在源码中提供 `DistributedContext`、`all_reduce` 与 DDP strategy 入口；Flex CPU 没有 collective 实现。
+4. CPU 上你观察到单设备 SGD 使 loss 下降并改变参数。
+5. GPU 阅读时应对照：多 `Device`、collective 后端与拓扑带来的字节×延迟项。
+6. 不能把单机 CPU 训练 loop 当成 NCCL/跨节点 DDP 已经验证。
 
 ## 来源与改编说明
 
-本章改编并重组 OpenMLSys v1 的
-`chapter_distributed_training/`：
-
-- `index.md`：保留动机和并行方法地图，改为本书第 6 章的训练状态路线；
-- `overview.md`：保留算力、内存、分而治之和 time-to-accuracy 问题，删除
-  固定历史硬件数字与原图编号；
-- `methods.md`：保留数据/模型/混合/流水线并行的语义，具体 Burn 只实现
-  已核验的本机多设备和 DDP API；
-- `collective.md`：保留集合通信算子、$\alpha+\beta l$ 成本和梯度平均，
-  以 `DistributedContext`、backend `all_reduce` 和同步边界重写；
-- `parameter_servers.md`：保留同步/异步、straggler、热点和副本一致性，
-  明确固定 Burn 没有对应的 `burn-train` strategy；
-- `cluster.md`：保留通信层次和带宽瓶颈，将调度、遥测、容错后移第 9 章；
-- `summary.md`：重写为经过源码核验的能力清单。
-
-没有复制 OpenMLSys 的 MindSpore、TensorFlow、PyTorch、Gloo、NCCL 代码或
-章节图片；跨系统代码只在解释接口边界时以文字提及。完整逐文件核验、
-Burn 版本定位和未承诺能力见
-[`planning/chapter-sources/ch06.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch06.md)。OpenMLSys 改编正文采用
-CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-6-章)。

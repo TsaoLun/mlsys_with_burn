@@ -1,19 +1,18 @@
 # 实验：CPU 线性回归训练循环
 
-## 实验目标与边界
+## 你会学到什么
 
-实验位于 `examples/ch06-training-loop`，使用固定 Burn revision 的
-`Device::flex().autodiff()` 和一个 `1 → 1` 的 `Linear` module。数据满足
-$y=2x+1$，训练目标是观察 MSE loss 随 SGD 更新下降。
-
-本实验验证的是训练循环的正确性：
+示例在 `examples/ch06-training-loop`：用本书固定版本的
+`Device::flex().autodiff()` 和一个 `1 → 1` 的 `Linear`，在 $y=2x+1$
+数据上看 MSE loss 随 SGD 下降。
 
 ```text
 forward → loss → backward → GradientsParams → SGD → loss
 ```
 
-它不验证 DDP、AllReduce、网络带宽、模型并行或 GPU 性能。固定快照的 Flex
-后端没有 collective 实现，这个限制是实验设计的一部分，而不是遗漏。
+本实验刻意不做 DDP、AllReduce、网络带宽、模型并行或 GPU 性能测量。
+当前 Flex CPU 路径本身也没有 collective 实现，所以把范围收在单设备
+训练循环上。
 
 ## 1. 构造 CPU autodiff model
 
@@ -51,12 +50,12 @@ cargo test -p ch06-training-loop
 cargo run -p ch06-training-loop
 ```
 
-测试断言：
+跑完后，你应能观察到：
 
 1. `losses` 的长度等于 step 数；
 2. 最终 loss 小于初始 loss；
 3. weight 参数的绝对变化量大于零；
-4. 零 step 和非正/非有限 learning rate 返回描述性错误。
+4. 零 step 和非正/非有限 learning rate 会返回描述性错误。
 
 主程序打印每一步的 loss 以及最终参数变化：
 

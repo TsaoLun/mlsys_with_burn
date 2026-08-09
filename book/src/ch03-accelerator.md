@@ -32,21 +32,8 @@
 
 ## 本章路线
 
-我们先建立框架无关的加速器和 GPU 机器模型，再进入 CubeCL 与 CubeK。
-GEMM 把硬件、Kernel 和算子库三层连接起来。最后在 CPU 上运行同一套
-CubeCL IR；这能验证语义和边界，但不被当作 GPU 性能实验。更深入的 IR、
-融合和运行时系统留到第 4 章。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：CubeCL CPU Kernel、host reference 和 tile load 模型；
-- `源码核验`：CubeCL/CubeK 的拓扑、buffer、算子与 backend 入口；
-- `协议/成本模型`：GEMM、算术强度和 Roofline 方向；
-- `可选平台实验`：共享内存、真实 GPU GEMM、autotune 性能和厂商设备比较；
-- `未覆盖`：用 CPU 正确性结果替代 GPU 带宽、吞吐或 launch 结论。
-
-对应协议与不可比较条件见[核心主题比较卡](comparison-cards.md#第-3-章gemm-与加速器)。
-
+我们先按 **GPU 机器模型**建立并行与存储层次，再进入 CubeCL / CubeK。
+正文同步对照 `CpuRuntime`、`WgpuRuntime`、`CudaRuntime`、`HipRuntime`
+等源码入口：同一套 Kernel IR 如何接到不同设备。默认实验仍在 CPU（可选
+`--features wgpu`）上验证语义，不要求本机安装 CUDA。GEMM 把硬件、
+Kernel 与算子库连起来；更深的 Fusion / JIT / stream 留到第 4 章。

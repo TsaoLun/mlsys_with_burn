@@ -46,7 +46,7 @@ $$
 
 ## Burn 的 DDP 分层
 
-固定快照中的 DDP 不是 `burn-train` 自己实现一个网络协议，而是跨越多层：
+本版中的 DDP 不是 `burn-train` 自己实现一个网络协议，而是跨越多层：
 
 ```text
 ExecutionStrategy::ddp
@@ -64,8 +64,24 @@ runtime / device collective implementation
 
 `ExecutionStrategy::ddp(devices, DistributedConfig)` 创建
 `DistributedContext`。context 的生命周期负责启动和关闭该 backend 的
-通信协调器；`DistributedConfig` 在固定快照中至少包含 `Sum` 或 `Mean`
+通信协调器；`DistributedConfig` 在本版中至少包含 `Sum` 或 `Mean`
 这样的 `ReduceOperation` 选择。
+
+### 源码导读顺序（固定版本）
+
+即使默认实验不跑 DDP，也应按下面顺序把“数据面期望什么”读进脑子：
+
+| 步骤 | 相对 `burn/` 的入口（示意） | 读什么 |
+|---|---|---|
+| 1 | `burn-tensor/.../distributed.rs` | `all_reduce` → `CollectiveTensor`；`resolve` / `sync_collective` |
+| 2 | `burn-backend` 的 `DistributedOps` | 注册参数、提交、完成边界契约 |
+| 3 | `burn-train` 的 DDP strategy / worker | 每设备线程、分片 loader、`grad_sharded` |
+| 4 | `burn-flex/.../transaction.rs` | **明确不支持** collective——解释为何 CPU 实验停在单设备 |
+| 5 | `burn-cubecl/.../distributed.rs` 与 CUDA/NCCL 路径 | GPU 数据面如何接到真实 runtime（需驱动；非默认示例） |
+
+GPU 阅读时额外问：梯度字节是否经过 PCIe/NVLink/跨机柜？`sync_collective`
+等到的是哪一组 Device？控制面（谁启动 rank、谁放拓扑）见第 9 章，不要
+和本节数据面入口混称。
 
 ## DDP worker 的生命周期
 
@@ -145,6 +161,15 @@ worker pull parameters
 异步版本允许不同 worker 使用不同参数版本，换来较少等待但增加 stale
 gradient 和收敛分析难度。固定 Burn `burn-train` 源码没有相应的
 parameter-server strategy；本章只把它作为对照协议。
+
+## 产业对照（概念对齐，不是性能对等）
+
+| 本书 / Burn | 常见产业说法 | 对齐点 | 不要外推 |
+|---|---|---|---|
+| `DistributedContext` + `all_reduce` | PyTorch DDP / Horovod 数据面 | 共同调用、归约语义、完成边界 | Flex 无实现 ≠ API 不存在 |
+| CubeCL CUDA + NCCL 入口 | NCCL AllReduce | GPU 集合通信 runtime | 默认示例未跑通；需匹配驱动 |
+| `ExecutionStrategy::ddp` | 多进程/多线程 launcher | 策略与 backend 组合点 | 不含集群调度/弹性成员 |
+| 参数服务器对照 | PS / 异步 SGD 文献 | push/pull、版本与陈旧梯度 | 非固定 `burn-train` strategy |
 
 如果把一次异步更新写成：
 

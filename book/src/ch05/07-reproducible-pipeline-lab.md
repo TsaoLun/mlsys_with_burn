@@ -1,9 +1,8 @@
 # 实验：可复现数据管道
 
-实验位于 `examples/ch05-data-pipeline`，只使用固定 Burn revision 的
-Flex CPU 和 `burn::data`。数据集只有 12 个整数样本，不下载外部文件，
-因此可以在没有专有驱动的环境中测试 Dataset、shuffle、batching、worker
-和进度语义。
+示例在 `examples/ch05-data-pipeline`，只用本书固定版本的 Flex CPU 和
+`burn::data`。数据集只有 12 个整数样本，不下载外部文件，方便你在普通
+机器上观察 Dataset、shuffle、batching、worker 和进度语义。
 
 ## 1. 构造惰性 Dataset
 
@@ -38,7 +37,7 @@ cargo run -p ch05-data-pipeline
 cargo test -p ch05-data-pipeline
 ```
 
-单 worker、batch size 为 3、未 shuffle 时，测试断言：
+单 worker、batch size 为 3、未 shuffle 时，你应看到：
 
 ```text
 batch_sizes = [3, 3, 3, 3]

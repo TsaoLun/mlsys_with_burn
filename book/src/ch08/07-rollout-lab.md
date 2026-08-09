@@ -1,11 +1,10 @@
 # 实验：CPU 确定性 rollout 与 replay
 
-## 实验目标与边界
+## 你会学到什么
 
-实验位于 `examples/ch08-rl-rollout`。它实现一个没有外部 simulator 的
-一维 `CounterEnv`，交替执行右移/左移动作，将环境 step 编码为二维
-observation/action tensor，写入固定 Burn 的 `TransitionBuffer`，再运行
-一个小型表格 TD 更新。
+示例在 `examples/ch08-rl-rollout`：用没有外部 simulator 的一维
+`CounterEnv`，交替右移/左移，把 step 编成二维 observation/action
+tensor，写入 `TransitionBuffer`，再做一次小型表格 TD 更新。
 
 ```text
 CounterEnv
@@ -17,20 +16,14 @@ state/action tensor
 TransitionBuffer(capacity = 4)
    │ random sample(batch = 2)
    ▼
-shape assertions + tabular TD update
+shape 检查 + 表格 TD 更新
 ```
 
-实验验证：
-
-- `done` 与 `truncated` 的 episode 边界；
-- rollout step 数与 circular buffer 的容量上限；
-- replay batch 的 state/action/reward/done shape；
-- terminal transition 不进行 next-state bootstrap；
-- 一个可观察的 Q 值确实被 TD 更新改变。
-
-实验不验证神经网络 forward、autodiff、DQN 收敛、gym 环境、GPU 仿真、
-多环境异步吞吐或多智能体通信。它的目的与第 6 章 CPU 训练实验相同：
-先隔离一个可测的机制，再把机制放回更大的系统。
+你会观察到：`done`/`truncated` 边界、circular buffer 容量、replay
+batch 的 shape、终止转移不做 next-state bootstrap，以及某个 Q 值被
+TD 更新改变。本实验刻意不做神经网络 forward、autodiff、DQN 收敛、
+gym、GPU 仿真、多环境异步或多智能体通信——先把机制看清楚，再放回
+更大系统。
 
 ## 1. 实现环境边界
 
@@ -48,7 +41,7 @@ shape assertions + tabular TD update
 
 示例把 state 编成 `[position, step]`，把 action 编成一列 `-1/1`。这个
 编码只是实验协议，不是通用 observation 设计。`TransitionBuffer` 的
-state/action 类型是 `Tensor<2>`，因此固定快照已经有对应的
+state/action 类型是 `Tensor<2>`，因此固定版本已经有对应的
 `SliceAccess` 实现。
 
 调用 replay 前先验证应用配置：

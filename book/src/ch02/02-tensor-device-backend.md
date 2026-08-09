@@ -2,7 +2,7 @@
 
 ## `Tensor<D, K>` 表达什么
 
-固定快照中的公开张量定义可以简化为：
+本版中的公开张量定义可以简化为：
 
 ```rust,ignore
 pub struct Tensor<const D: usize, K = Float>

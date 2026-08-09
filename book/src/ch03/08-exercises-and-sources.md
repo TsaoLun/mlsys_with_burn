@@ -17,8 +17,8 @@ CubeK。
 
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 ### 概念题
 
@@ -193,7 +193,7 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -220,7 +220,7 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -251,14 +251,14 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-属可选平台实验：记录环境与同步边界，勿外推为默认 CI 结论。
+需要额外 GPU 环境：记录设备与同步边界，勿外推为默认示例的性能结论。
 
 </details>
 
 3. 【挑战】为三个 GEMM shape 比较 Burn 默认策略和固定策略。报告 autotune 是否
    包含在计时内，不以单一 shape 宣布普遍胜负。
 
-以上三题不是本章 CI 交付物；测量必须写明设备、同步边界与是否含编译。
+以上三题超出本章默认示例范围；若自行测量，须写明设备、同步边界与是否含编译。
 
 <details>
 <summary>提示</summary>
@@ -286,34 +286,17 @@ CubeK。
 - `burn/crates/burn-cubecl/src/ops/module.rs`
 
 CUDA、Triton、CUTLASS、TVM 与 MLIR 文档适合做生态对照；使用时应记录版本，
-不能用最新在线签名替代本项目固定源码事实。
+不能用最新在线签名替代本书固定版本的源码事实。
+
+## 本章系统结论
+
+1. 加速器收益来自并行度、算术强度与数据复用，而不是“有 GPU”四个字。
+2. Cube/Unit/Plane 是设备无关拓扑；应对齐 GPU 的 block/thread/warp 心智模型。
+3. CubeCL 用同一套 Kernel IR 对接 `CpuRuntime`、`WgpuRuntime`、`CudaRuntime`、`HipRuntime` 等。
+4. CPU 上你验证了 Kernel 与 host reference 的数值一致；可选 WGPU 对照同一语义。
+5. GPU 阅读时应继续追：共享内存抽象、合并访存、occupancy，以及 CUDA/HIP Runtime 源码入口。
+6. 不能把 CPU/WGPU 正确性结果外推为带宽、吞吐或厂商 GEMM 排名。
 
 ## 来源与改编说明
 
-本章改编并重组 OpenMLSys v1 `chapter_accelerator/`：
-
-- `index.md`
-- `accelerator_introduction.md`
-- `accelerator_architecture.md`
-- `accelerator_programming.md`
-- `accelerator_practise.md`
-- `summary.md`
-
-保留了加速器设计、GPU 存储层次、三级编程抽象、GEMM 公式以及 tiling、
-向量化、共享内存和流水线的通用思想。Volta、Ascend、cuBLAS、WMMA、PTX、
-TBE/AKG 与 RTX 3080 性能结果被压缩为历史或生态边界。
-
-本章没有复制 OpenMLSys CUDA C++ 示例、`openmlsys-cuda` 代码或缺失图片；
-全部实验改为固定 CubeCL revision 上的原创 Rust 代码。新增 CubeCL Runtime、
-unsafe 合约、CubeK 分层、Burn 集成、fallback、autotune，以及 host 侧
-`tile_load_counts` 加载模型（明确非真实共享内存）。术语见
-[术语表](../glossary.md)。
-
-未迁入：完整 CUDA GEMM 阶梯实现、设备榜单式结论、厂商指令内联汇编教程。
-
-OpenMLSys v2 固定快照只列出 GPU/CUDA/Triton/CUTLASS TODO，没有可迁移
-正文。完整逐文件与源码事实映射见
-[`planning/chapter-sources/ch03.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch03.md)。
-OpenMLSys 原作和改编正文采用 CC BY-NC-SA 4.0，原创 Rust 示例采用
-MIT OR Apache-2.0。
-
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-3-章)。

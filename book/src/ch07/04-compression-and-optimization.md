@@ -159,6 +159,6 @@ reference model + fixed inputs
 保存校准集版本或摘要。一个在 CPU Flex 上变快的结果不能自动外推到
 WebGPU、CUDA 或嵌入式目标。
 
-本项目固定快照没有为第 7 章加入量化 benchmark，因为当前要先验证根 workspace 的
-Record artifact 的恢复语义。压缩方案可以作为练习或后续章节扩展，不在
-没有目标 backend 和 reference 数据时写成已完成的部署能力。
+本章默认示例没有量化 benchmark：优先把 Record artifact 的恢复语义钉清楚。
+压缩方案适合作为练习或后续扩展；在缺少目标 backend 和 reference 数据时，
+不要把它写成已经验证的部署能力。

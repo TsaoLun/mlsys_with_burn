@@ -6,7 +6,7 @@ CubeCL 解决“怎样表达和运行 Kernel”，CubeK 解决“怎样组织可
 
 ## 1. 从架构到调用接口
 
-固定快照中的 CubeK Guide 明确提出 Blueprint–Routine 架构和 Autotuner；
+本版中的 CubeK Guide 明确提出 Blueprint–Routine 架构和 Autotuner；
 结合 matmul 等 crate 的源码，还可以观察到 Strategy 与 Launch 接口：
 
 1. **Blueprint**：描述会改变控制流或指令选择的编译期特化；

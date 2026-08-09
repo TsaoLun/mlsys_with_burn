@@ -58,7 +58,7 @@ Burn 自己的 `DatasetIterator` 只保存当前索引和数据集引用，逐�
 ```
 
 `MapperDataset` 的 map 是纯 Rust 逐样本逻辑。它可以表达清洗或特征变换，
-但固定快照没有把任意 `Mapper` 自动编译为 CubeCL Kernel；若变换本身是
+但本版没有把任意 `Mapper` 自动编译为 CubeCL Kernel；若变换本身是
 Tensor 计算，需要由用户在 Batcher 或其他明确的 Tensor 边界中实现。
 
 ## 错误和所有权

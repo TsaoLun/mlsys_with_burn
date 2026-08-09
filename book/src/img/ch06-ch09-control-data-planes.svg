@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" role="img" aria-label="Control plane vs training data plane">
+  <style>
+    .box { fill:#f7f7f5; stroke:#2c2c2c; stroke-width:1.5; }
+    .c { fill:#eef3f8; stroke:#2c2c2c; stroke-width:1.5; }
+    .d { fill:#f3efe8; stroke:#2c2c2c; stroke-width:1.5; }
+    .t { font-family: system-ui, sans-serif; font-size:13px; fill:#1a1a1a; }
+    .h { font-family: system-ui, sans-serif; font-size:14px; font-weight:600; fill:#1a1a1a; }
+    .s { font-family: system-ui, sans-serif; font-size:11px; fill:#444; }
+    .arr { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
+    </marker>
+  </defs>
+  <text class="h" x="40" y="36">控制面（第 9 章）</text>
+  <rect class="c" x="40" y="48" width="280" height="120" rx="4"/>
+  <text class="t" x="56" y="78">队列 · gang admission</text>
+  <text class="t" x="56" y="102">拓扑放置 · 配额</text>
+  <text class="t" x="56" y="126">故障 · checkpoint 策略</text>
+  <text class="s" x="56" y="150">决定“谁何时获得哪些 GPU”</text>
+
+  <text class="h" x="400" y="36">训练数据面（第 6 章）</text>
+  <rect class="d" x="400" y="48" width="280" height="120" rx="4"/>
+  <text class="t" x="416" y="78">DistributedContext</text>
+  <text class="t" x="416" y="102">all_reduce / sync_collective</text>
+  <text class="t" x="416" y="126">stream · 设备内存 · Kernel</text>
+  <text class="s" x="416" y="150">决定“梯度字节如何在 rank 间移动”</text>
+
+  <path class="arr" d="M320 108 H400"/>
+  <text class="s" x="250" y="200">放置结果改变通信域 → α+β×bytes 进入 makespan</text>
+  <rect class="box" x="40" y="220" width="640" height="36" rx="4"/>
+  <text class="t" x="56" y="243">Burn/CubeCL 源码主要落在数据面；作业队列不是 Burn 内置控制面。</text>
+</svg>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="740" height="220" viewBox="0 0 740 220" role="img" aria-label="Pass Fusion CubeCL multi-runtime">
+  <style>
+    .box { fill:#f7f7f5; stroke:#2c2c2c; stroke-width:1.5; }
+    .box2 { fill:#eef3f8; stroke:#2c2c2c; stroke-width:1.5; }
+    .box3 { fill:#f3efe8; stroke:#2c2c2c; stroke-width:1.5; }
+    .t { font-family: system-ui, sans-serif; font-size:12px; fill:#1a1a1a; }
+    .h { font-family: system-ui, sans-serif; font-size:13px; font-weight:600; fill:#1a1a1a; }
+    .s { font-family: system-ui, sans-serif; font-size:11px; fill:#444; }
+    .arr { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
+    </marker>
+  </defs>
+  <rect class="box" x="16" y="60" width="120" height="72" rx="4"/>
+  <text class="h" x="28" y="90">Pass / IR</text>
+  <text class="s" x="28" y="112">êÿb</text>
+
+  <path class="arr" d="M136 96 H168"/>
+  <rect class="box2" x="168" y="60" width="140" height="72" rx="4"/>
+  <text class="h" x="180" y="90">Fusion °</text>
+  <text class="s" x="180" y="112">gLW / stream</text>
+
+  <path class="arr" d="M308 96 H340"/>
+  <rect class="box3" x="340" y="60" width="140" height="72" rx="4"/>
+  <text class="h" x="352" y="90">CubeCL IR</text>
+  <text class="s" x="352" y="112">JIT / cache</text>
+
+  <path class="arr" d="M480 96 H512"/>
+  <rect class="box" x="512" y="24" width="200" height="40" rx="4"/>
+  <text class="t" x="524" y="48">CpuRuntimeÿ§π	</text>
+  <rect class="box2" x="512" y="76" width="200" height="40" rx="4"/>
+  <text class="t" x="524" y="100">WgpuRuntimeÔ		</text>
+  <rect class="box3" x="512" y="128" width="200" height="40" rx="4"/>
+  <text class="t" x="524" y="152">Cuda / Hipê¸˚	</text>
+
+  <path class="arr" d="M612 168 V196"/>
+  <text class="s" x="520" y="210">launch í read / syncåπL‡ Runtime 	</text>
+</svg>

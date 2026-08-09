@@ -15,8 +15,8 @@ map、selection、shuffle、partial 和 window 组合成惰性逻辑。`Batcher`
 ## 练习
 
 练习按难度标注为【基础】【进阶】【挑战】。折叠「提示」只给出方向
-（正文小节、示例 crate 或固定源码路径），不提供完整答案；挑战题常涉及
-`可选平台实验` 或开放设计，不在默认 CPU CI 中验证。
+（正文小节、示例 crate 或书中给出的源码路径），不提供完整答案。
+【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
 ## 概念题
@@ -172,7 +172,7 @@ map、selection、shuffle、partial 和 window 组合成惰性逻辑。`Batcher`
 <details>
 <summary>提示</summary>
 
-在固定 revision 源码中按章节末“源码入口”定位，勿跟 online main。
+按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
 
 </details>
 
@@ -300,30 +300,14 @@ Dataset 和 Arrow/Parquet 可以作为系统对照。比较时要记录版本、
 语义、进程/线程模型和是否包含设备传输，不能把它们的特性自动外推到
 固定 Burn 快照。
 
+## 本章系统结论
+
+1. 数据管道要同时满足正确语义、吞吐与可复现，而不是“越快越好”。
+2. Dataset/Mapper/Batcher/DataLoader 分层：惰性变换、组 batch、设备投放各有边界。
+3. CPU 上你验证了数据守恒、固定 seed 与多 worker 下的顺序/进度语义。
+4. GPU 阅读线索：`to_device` 之后的 HtoD、pinned memory、与训练 step 的流水线重叠。
+5. 不能把一次 CPU loader 测量当成存储系统或跨节点 sampler 的吞吐结论。
+
 ## 来源与改编说明
 
-本章改编并重组 OpenMLSys v1 的
-`chapter_data_processing/`：
-
-- `index.md`：保留数据模块的问题定义和学习目标，改为本书的 Rust/Burn
-  阅读路线；
-- `requirements.md`：保留 Load、Shuffle、Map、Batch、Send 与易用性、
-  高效性、保序性三维框架；
-- `program_model.md`：保留 Dataset 变换和自定义算子抽象，删除
-  MindData、Spark 和长 Python 代码，改写为 `Dataset`、`Mapper`、
-  `Batcher`；
-- `performance.md`：保留 $F/P/G$ 成本模型、随机访问、异步生产消费和
-  流水线/算子并行对照，删除 MindRecord/Unirecord 和厂商性能结论；
-- `data_order.md`：保留保序问题与 Connector 的设计动机，明确其只是
-  Burn 的对照概念，固定快照没有对应的序号等待实现；
-- `extension.md`：保留 CPU 瓶颈、异构和分布式扩展的系统问题，改为
-  边界与未来工作，不宣称 Burn 已提供通用异构数据预处理；
-- `summary.md`：重写为本章的 Dataset/DataLoader 结论与验证边界。
-
-OpenMLSys v2 固定快照的第 5 章仍是 TODO；本章依据 v1 中文文件。原章
-引用的框架专用图片在固定 clone 中没有可复用的图像资源，本章没有复制
-图片或 MindSpore/PyTorch/C++ 示例，结构关系使用原创文本图。
-
-完整逐文件映射、固定 Burn 源码定位和不作出的能力承诺见
-[`planning/chapter-sources/ch05.md`](https://github.com/TsaoLun/mlsys_with_burn/blob/main/planning/chapter-sources/ch05.md)。OpenMLSys 原作和本章改编正文采用
-CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
+OpenMLSys 文件对照与改编说明见[来源与改编总录](../appendix-sources.md#第-5-章)。

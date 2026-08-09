@@ -4,10 +4,10 @@
 路径的上半部分：用户如何表达张量程序，模型如何注册参数，系统又如何记录
 运算依赖并计算梯度。
 
-固定快照中的 Burn 0.22 正在经历一次重要 API 转变。旧版本常将 Backend
+本版中的 Burn 0.22 正在经历一次重要 API 转变。旧版本常将 Backend
 作为 `Tensor<B, D>` 的类型参数；本书使用的源码已经采用
 `Tensor<D, K>`，由 `Device` 在运行时选择后端。这个变化会贯穿本章，
-也说明为什么代码必须以 `pins.toml` 对应源码为准。
+也说明为什么读示例时要以本书固定版本的源码为准，而不是任意在线文档。
 
 ## 本章问题
 
@@ -39,16 +39,3 @@
 我们先从完整工作流抽取编程接口，再依次进入 Tensor/Device、Module、
 计算图和自动微分。类型与 IR 一节只建立边界，融合、编译和运行时优化留到
 第 4 章。最后的 CPU 实验把张量广播、参数注册和梯度计算连接起来。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：Tensor、Module、autodiff 和分支 tape 实验；
-- `源码核验`：`Tensor`/`Device`/`Module`、参数状态与一阶 autodiff；
-- `协议/成本模型`：workflow 输入/输出/状态/错误契约；
-- `可选平台实验`：完整静态图 runtime、device graph capture 与跨设备训练；
-- `未覆盖`：把 autodiff tape、Fusion IR 和 device graph capture
-  当作同一实现的结论。
-

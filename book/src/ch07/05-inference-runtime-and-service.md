@@ -27,12 +27,16 @@ normalization 常量或 label map，会产生“模型执行成功但业务结�
 
 服务启动时通常一次性完成：
 
-1. 选择 backend 和 Device；
+1. 选择 backend 和 Device（`Device::flex()` / `wgpu` / `cuda` 等；与
+   artifact 格式正交）；
 2. 创建 model topology；
 3. 从 file、embedded bytes、内存 bytes 或其他 store 加载参数；
 4. 进行一次 warmup，触发 lazy allocation、编译或 autotune；
 5. 发布 readiness；
 6. 收集 model revision、dtype、shape 和设备信息。
+
+有独显时，把 warmup 后的第一次同步读回算进冷启动，不要只报稳态
+`forward`；无独显时仍读完队列与版本边界——默认实验不依赖 GPU。
 
 请求路径只应使用已经准备好的模型，避免每个请求重新读权重或重新初始化
 runtime。若模型包含 autodiff backend，推理应切换到不建立训练 tape 的
@@ -123,6 +127,15 @@ caching）才能维持吞吐。本书首版不展开这些机制：固定 Burn �
 等于服务端的分页 KV 管理或连续批处理。把它们写成“Burn 能力”会越过
 本书的证据纪律。本节的 artifact、batching、队列和 worker 边界仍然是
 LLM 服务的基础层；KV cache 专题属于规划中的后续版本。
+
+## 产业对照（概念对齐，不是性能对等）
+
+| 本书 / Burn | 常见产业说法 | 对齐点 | 不要外推 |
+|---|---|---|---|
+| `ModuleRecord` / Burnpack | checkpoint / SavedModel 等权重快照 | 拓扑+参数可恢复 | 不是完整服务 manifest |
+| `burn-onnx` codegen | ONNX Runtime / 导出图 | 图→可执行路径 | 旧 Burn revision；非本书默认依赖 |
+| Device 上的 `forward` | 推理 session.run | 无训练 tape 的执行 | 不含鉴权/限流 |
+| batcher + 队列（应用层） | Triton / 自研 serving 批处理 | 延迟/吞吐权衡 | Burn 不提供统一生产线程池 |
 
 ## 正确性与性能测试
 

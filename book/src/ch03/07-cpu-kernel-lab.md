@@ -1,18 +1,18 @@
 # 实验：CPU 上运行 CubeCL Kernel
 
-实验位于 `examples/ch03-cubecl-kernel`。它直接依赖 `pins.toml` 中的
-CubeCL Git revision，并启用 `cpu`、`std` 和 `stdlib` feature。CPU Runtime
-通过 LLVM/MLIR 路径编译 Kernel；首次构建明显慢于前两章，增量运行会快得多。
+示例在 `examples/ch03-cubecl-kernel`，依赖本书固定的 CubeCL 版本，并启用
+`cpu`、`std` 和 `stdlib` feature。CPU Runtime 经 LLVM/MLIR 编译 Kernel；
+首次构建会比前两章慢，增量运行会快得多。
 
-本实验验证编程模型和正确性，不把 CPU 时间当作 GPU 性能数据。
-`examples/ch03-cubecl-kernel` 中的 `scale_kernel` 负责 Runtime 边界；
-`examples/ch03-tile-loads` 中的 `tile_load_counts` 是独立 host 模型，用来
-衔接 GEMM 优化阶梯，**不是**共享内存 Kernel，也不依赖 CubeCL LLVM。
+你会核对编程模型与数值正确性；请勿把 CPU 耗时当成 GPU 性能。
+`scale_kernel` 负责 Runtime 边界；`examples/ch03-tile-loads` 里的
+`tile_load_counts` 是独立的 host 计数模型，用来衔接 GEMM 优化阶梯——
+**不是**共享内存 Kernel，也不依赖 CubeCL LLVM。
 
 ## 1. Host reference
 
-`scale_reference` 用普通 Rust 定义语义：每个输入乘以整数 scale。测试把
-Kernel 输出与它比较，而不是只观察打印内容。
+`scale_reference` 用普通 Rust 定义语义：每个输入乘以整数 scale。把
+Kernel 输出与它对一下，比只看打印更可靠。
 
 scale 使用 `u32`，因为 `#[comptime]` 值会参与 Kernel 特化键，必须满足
 固定宏实现所需的可哈希约束；`f32` 不能直接作为这个特化键。Kernel 内再将
@@ -54,9 +54,9 @@ unsafe block 只覆盖必须证明的 raw 边界。`input_handle` 由同一个 i
 都声明 `input.len()` 个 `f32`，因此长度一致。若只修改其中一个数字，这个
 证明就会失效。
 
-根 workspace 默认禁止 unsafe。本 crate 没有继承该 lint，而是局部设置
+本书示例工程默认禁止 unsafe。本 crate 没有继承该 lint，而是局部设置
 `unsafe_code = "allow"`；这是一处有注释、有测试的 FFI/Runtime 边界，
-不是全项目放宽。
+不是全书放宽。
 
 ## 4. Tiling 加载次数模型
 
@@ -140,10 +140,9 @@ wgpu output matches host reference
 ```
 
 命令只有在系统存在 CubeCL/WGPU 可用 adapter（Metal、Vulkan、DX12 等
-图形驱动）时才能通过；没有 GPU 的环境继续走默认 CPU 路径即可，这不
-影响任何章节的验收。该观察只证明“同一 Kernel 可以在两类 Runtime 上
-得到相同结果”，不包含 GPU 带宽、占用率或 autotune 结论。继续扩展 CUDA
-等路径时应：
+图形驱动）时才能通过；没有 GPU 的环境继续走默认 CPU 路径即可，不影响
+按章学习。该观察只证明“同一 Kernel 可以在两类 Runtime 上得到相同结果”，
+不包含 GPU 带宽、占用率或 autotune 结论。继续扩展 CUDA 等路径时应：
 
 1. 为 crate 增加独立 feature 和对应 CubeCL Runtime；
 2. 保留同一 host reference；

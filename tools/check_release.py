@@ -155,9 +155,10 @@ class ReleaseAudit:
                 match = re.match(r"^\s{2}- \[[^\]]+\]\(([^)]+)\)", line)
                 if match:
                     section_targets.append(match.group(1))
+            expected = 7 if chapter == "ch01" else 8
             self.require(
-                len(section_targets) == 8,
-                f"{chapter} 应有 8 个小节，实际为 {len(section_targets)}",
+                len(section_targets) == expected,
+                f"{chapter} 应有 {expected} 个小节，实际为 {len(section_targets)}",
             )
             self.require(
                 all(target.startswith(f"{chapter}/") for target in section_targets),
@@ -215,10 +216,24 @@ class ReleaseAudit:
         for source_name in SOURCE_FILES:
             path = ROOT / "planning" / "chapter-sources" / source_name
             self.require(path.is_file(), f"章节来源映射缺失: {path}")
-        for number in range(1, 10):
-            entry = BOOK_SRC / CHAPTER_ENTRIES[f"ch{number:02d}"]
-            text = entry.read_text(encoding="utf-8")
-            self.require("证据状态" in text, f"{entry.relative_to(ROOT)} 缺少证据状态")
+        for appendix_name in (
+            "appendix-scope-and-evidence.md",
+            "appendix-sources.md",
+        ):
+            appendix = BOOK_SRC / appendix_name
+            self.require(appendix.is_file(), f"附录缺失: {appendix_name}")
+        scope = (BOOK_SRC / "appendix-scope-and-evidence.md").read_text(
+            encoding="utf-8"
+        )
+        self.require(
+            "结论靠什么支撑" in scope and "固定版本" in scope,
+            "appendix-scope-and-evidence.md 缺少范围/证据栏目",
+        )
+        sources = (BOOK_SRC / "appendix-sources.md").read_text(encoding="utf-8")
+        self.require(
+            all(f"## 第 {n} 章" in sources for n in range(1, 10)),
+            "appendix-sources.md 未覆盖九章来源说明",
+        )
 
         upstream_root = ROOT / "openmlsys" / "v1" / "zh_chapters"
         if upstream_root.is_dir():

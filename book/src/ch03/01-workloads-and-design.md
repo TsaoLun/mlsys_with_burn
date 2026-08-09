@@ -86,7 +86,7 @@ CubeCL Runtime / Compiler
 CPU、WGPU、CUDA、ROCm 等具体 Runtime
 ```
 
-这里的后端集合受 Cargo feature、平台和固定快照限制；“同一种 Kernel
+这里的后端集合受 Cargo feature、平台和固定版本限制；“同一种 Kernel
 语言”不等于“所有设备支持相同指令和性能”。
 
 ## 4. 正确性、可移植性与性能

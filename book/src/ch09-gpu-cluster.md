@@ -41,10 +41,13 @@ device runtime ── stream / memory pool / kernel / sync
 ```
 
 先定义集群作业的资源和完成条件，再从硬件拓扑推导通信成本。之后讨论
-队列、成组调度、拓扑放置、多租户与故障协议，最后将这些框架无关的
-概念放入一个纯 Rust 模拟器。Burn 的 DDP、`DistributedContext` 和
-CubeCL `ComputeClient` 只作为训练数据面和设备运行时的固定源码案例；
-它们不是集群控制面实现。
+队列、成组调度、拓扑放置、多租户与故障协议，最后放入纯 Rust 模拟器。
+相对第 6 章：那里讲清梯度同步**数据面**期望什么；本章把一次 AllReduce
+的字节量放进机柜/链路，看控制面放置如何改变 $\alpha+\beta$ 成本。Burn
+的 DDP / `DistributedContext` 与 CubeCL client 仍是数据面源码案例，不是
+作业队列实现。默认实验用虚拟时间；真集群遥测不在默认路径。
+
+![控制面负责任务与资源，训练数据面负责集合通信与设备执行；放置结果改变通信域从而进入 makespan](img/ch06-ch09-control-data-planes.svg)
 
 ## 小节
 
@@ -59,32 +62,5 @@ CubeCL `ComputeClient` 只作为训练数据面和设备运行时的固定源码
 
 示例代码位于 `examples/ch09-cluster-simulator`，只使用 Rust 标准库和虚拟
 时间。它验证调度协议、通信成本模型、checkpoint 恢复和资源归还；它不
-测量真实 GPU、网络或 NCCL 性能，也不声称 Burn 固定快照提供作业队列、
+测量真实 GPU、网络或 NCCL 性能，也不声称 本书所用的 Burn 版本提供作业队列、
 多租户隔离、弹性 membership 或自动故障迁移。
-
-## 来源与改编说明
-
-本章改编并重组 OpenMLSys v1 `chapter_distributed_training/` 中的系统概述、
-并行方法、集合通信、参数服务器和集群架构内容。新增的队列、配额、故障域、
-遥测字段和 CPU 模拟器是框架无关的系统设计材料；固定 Burn/CubeCL 源码
-只用于核验设备、通信、stream、内存和训练入口的边界。本章没有复用上游
-硬件图片或历史性能数字。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：队列、gang admission、拓扑放置、通信成本、故障
-  retry、checkpoint replay 和资源归还；
-- `源码核验`：Burn/CubeCL 的设备、stream、memory、collective 和
-  training data-plane 入口；
-- `协议/成本模型`：控制面、故障域、队列公平、链路热点和
-  machine-readable trace；
-- `可选平台实验`：真实 GPU 集群、NCCL/RDMA、网络拥塞、多租户 runtime
-  和弹性 membership；
-- `未覆盖`：把模拟器虚拟时间、放置结果或通信 penalty 当作 GPU
-  benchmark。
-
-对应 trace schema、队列指标和控制面边界见[核心主题比较卡](comparison-cards.md#第-9-章gpu-集群与控制面)。
-

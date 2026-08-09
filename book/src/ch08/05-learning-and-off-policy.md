@@ -89,10 +89,9 @@ Rust 的关联类型将具体 transition、training output 和 record 绑定起�
 7. `RLTraining::OffPolicyStrategy` 负责 rollout、replay、evaluation 和
    checkpoint。
 
-这段代码证明的是“固定快照可以组合出一个 DQN example”，不是
-`burn-rl` 自带 DQN。该 example 还被独立 workspace 排除在根 CI 外，因为
-gym-rs 带来 native SDL2 等环境依赖；所以本书基础实验不直接复制它的
-外部 simulator。
+这段代码证明的是“本版可以组合出一个 DQN example”，不是
+`burn-rl` 自带 DQN。该 example 还放在独立工程里，因为 gym-rs 会引入
+native SDL2 等环境依赖；所以本书默认实验不直接复制它的外部 simulator。
 
 ## Checkpoint 不只保存 policy
 

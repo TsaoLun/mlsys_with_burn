@@ -59,25 +59,7 @@ inference、replay、训练、评估和 checkpoint，但这不等于已经提供
 7. [实验：CPU 确定性 rollout 与 replay](ch08/07-rollout-lab.md)
 8. [练习、延伸阅读与来源](ch08/08-exercises-and-sources.md)
 
-示例代码位于 `examples/ch08-rl-rollout`，使用当前项目固定 Burn revision
+示例代码位于 `examples/ch08-rl-rollout`，使用当前项目本书固定版本的 Burn
 的 Flex CPU。它验证环境交互、`TransitionBuffer` 随机 batch 的 shape 和
 表格 TD 更新；它不下载 gym、不使用网络、不训练神经网络，也不把一次
 单进程测试外推为 GPU 仿真或多智能体吞吐结论。
-
-## 证据状态
-
-以下标签是本书的阅读证据分类，不代表 Burn 官方能力等级；完整定义见
-[逐文件对照矩阵导读](crosswalk-guide.md)。
-
-- `CPU 可运行验证`：Environment、Policy 组合、done/truncated、replay
-  shape 和表格 TD update；
-- `源码核验`：`burn-rl` 的 Environment/Policy/TransitionBuffer 与
-  `burn-train` 的 rollout/evaluation/checkpoint 边界；
-- `协议/成本模型`：policy freshness、behavior/target metadata、
-  双智能体 action/reward vector 和 credit assignment；
-- `可选平台实验`：真实 simulator、神经网络 DQN、Actor–Learner 和
-  MARL 集群；
-- `未覆盖`：把抽象组合 API 描述成完整 DQN/PPO/SAC/MARL runtime。
-
-对应 policy freshness 和 joint transition 协议见[核心主题比较卡](comparison-cards.md#第-8-章强化学习)。
-

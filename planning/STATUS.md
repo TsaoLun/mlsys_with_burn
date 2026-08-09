@@ -1,16 +1,17 @@
 # 实时状态
 
-更新日期：2026-08-08
+更新日期：2026-08-09
 
 ## 当前里程碑
 
-M5：首个稳定版审计准备。
+M5：首个稳定版审计准备（可与 M6 并行；M5 tag 不阻塞于 M6）。
 
 ## 当前目标
 
 完成以 OpenMLSys v1 固定 revision 为参照的 P0/P1 对照发布审计，并保持
 九章候选版的 CPU-first、源码证据和可选平台边界可复核；静态书站经
-GitHub Pages 可读。
+GitHub Pages 可读。读者正文按 D020/D021 只面向学习者；项目自洽材料在附录。
+M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落地（D022）。
 
 ## 进行中
 
@@ -19,15 +20,20 @@ GitHub Pages 可读。
   `main` 后确认 `https://tsaolun.github.io/mlsys_with_burn/` 可访问。
 - [x] 修复线上 `$...$` 公式不渲染：自定义 theme 启用 MathJax 美元分隔符
   （D019）；全书 42 个含公式页面 Puppeteer 核验通过。
+- [x] 学习者文风改写（D020）与自洽材料后移附录（D021）：章首五标签/
+  对照页/来源长文已迁入 `appendix-scope-and-evidence.md` 与
+  `appendix-sources.md`。
+- [x] M6a/M6b/M6c：章末系统结论、设备/Runtime 地图、ch2–4/6/7/9 GPU
+  与原理加厚、`docs/OPTIONAL_PROFILES.md` + D022。
 
 ## 下一步
 
-1. 合并 MathJax `$` 分隔符修复并推送 `main`，确认 Pages 上
-   `ch02/07-labs.html` 等含公式页不再显示裸美元符。
+1. 提交并推送 D020/D021/D022 与 M6 正文（若尚未上线），确认 Pages
+   导航、附录与配图正常。
 2. 由发布者审阅 `planning/comparison/openmlsys-v1-crosswalk.md` 和
    `tools/check_release.py` 的机器可读输出，决定候选版归档/tag。
-3. 若要增加真实 GPU、NCCL、ONNX、DDP、DQN/MARL 或网络实验，建立独立
-   平台 profile，不能改变默认 CPU gate。
+3. 真机 CUDA/NCCL 仅在 pins 与环境允许时，向
+   `docs/OPTIONAL_PROFILES.md` 追加命令；不得改默认 CPU gate（D022）。
 4. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
 
 ## 已完成
@@ -203,6 +209,56 @@ GitHub Pages 可读。
   与折叠提示；`docs/AUTHORING.md` 补充练习体例。
 
 ## 本次交接
+
+- 已完成（2026-08-09 读者口吻扫尾）：主路径去掉 CI/验收/D0xx/「源码核验」
+  /「根 workspace」等审计腔；改为「默认示例」「本书示例」「你需要核对什么」
+  等读者说法。附录证据账本按 D021 保留标签语。综合实验、ch3/6/7/8、
+  `running-examples.md` 等已改。
+- 验证：`mdbook build book`；`python3 tools/check_release.py
+  --require-built-book --json` → `ok=true`、`errors=[]`、`warnings=[]`。
+- 偏差：附录与 `docs/`/`planning/` 仍含项目自洽用语（有意）。
+- 下一步：提交推送；确认 Pages；再决定候选 tag/归档。
+
+## 前次交接（2026-08-09 M6）
+
+- 已完成（2026-08-09 M6）：相对 OpenMLSys 的内容/结构补强。
+  - M6a：AUTHORING 三轨与系统结论体例；九章收束；设备/Runtime 与
+    控制面/数据面配图。
+  - M6b：ch3/4 GPU·多 Runtime·stream；ch2 接口史/计算图；ch7 部署闭环；
+    ch6 collective 源码导读；ch9 机柜数值衔接；产业对照短表。
+  - M6c：`docs/OPTIONAL_PROFILES.md`、D022、`running-examples.md` 交叉引用。
+  - 会话日志：`planning/session-logs/2026-08-09-m6-content-structure.md`。
+- 验证：当时 `mdbook build` 与 release audit 通过；未改默认 Cargo feature。
+- 偏差：真机 CUDA/NCCL 仍为“源码先、跑通后”；随后做了读者口吻扫尾。
+- 下一步：并入口吻扫尾后提交。
+
+## 前次交接（2026-08-09 D021）
+
+- 已完成（2026-08-09 D021）：项目自洽材料整包后移附录。删除章首五标签、
+  `ch01/08`、`crosswalk-guide.md`、`comparison-cards.md`；新建
+  `appendix-scope-and-evidence.md` 与 `appendix-sources.md`；章末来源
+  改为一句指针；SUMMARY 附录收纳二者；`check_release.py` 改校验附录
+  与 ch01=7 小节；新增 D021，更新 AUTHORING/TERM_GLOSSARY/STATUS。
+- 验证：`mdbook build book`；`python3 tools/check_release.py
+  --require-built-book --json` → `ok=true`、`errors=[]`、`warnings=[]`；
+  `git diff --check` 通过；主路径无「本章你能验证什么 / crosswalk-guide /
+  comparison-cards / ch01/08」残留。
+- 偏差：五标签与比较卡内容仍存在于附录（供需要者查阅）；lab 边界句与
+  running-examples 留在主路径。
+- 下一步：并入 M6 一并提交。
+
+## 前次交接（2026-08-09 学习者文风）
+
+- 已完成（2026-08-09 学习者文风）：按盘点三批改写。章首「证据状态」→
+  「本章你能验证什么」；九章练习前言去 CI 句；README、ch02 阶段表、
+  各章 lab 改为「你会学到/观察到」；降频固定快照/pins；来源节去
+  planning/D0xx；新增 D020；同步 check_release/AUTHORING/术语表。
+- 验证：当时 `mdbook build` 与 release audit 通过；随后由 D021 继续
+  把五标签墙移出章首。
+- 偏差：对照页当时仍在贯穿区；已由本次 D021 后移。
+- 下一步：当时为提交；现并入 D021 一并提交。
+
+## 前次交接（2026-08-08 MathJax）
 
 - 已完成（2026-08-08 MathJax）：全面排查线上公式渲染失败。根因是
   mdBook 默认 MathJax 2 配置不识别正文使用的 `$...$`/`$$...$$`。新增

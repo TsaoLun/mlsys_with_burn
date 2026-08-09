@@ -68,7 +68,7 @@ $$
 `makespan`。一个跨机柜通信较多的 placement 也可能不影响单卡 kernel，
 但会增加 `T_collective` 和网络热点。
 
-## Burn 固定快照能说明什么
+## 本版 Burn 能说明什么
 
 固定 Burn 源码中，`burn-train` 的 `ExecutionStrategy` 有：
 
@@ -89,5 +89,5 @@ rank rendezvous、资源配额或节点故障处理。
 
 集群系统的第一个抽象不是 GPU 数量，而是带有内存、通信、故障域和目标的
 workload card。`queue wait`、`collective`、`checkpoint` 和 `recovery`
-都应成为可观测的时间项。Burn/CubeCL 固定快照可以作为设备和通信数据面
+都应成为可观测的时间项。Burn/CubeCL 本版可以作为设备和通信数据面
 的案例，但不能替代集群控制面。
