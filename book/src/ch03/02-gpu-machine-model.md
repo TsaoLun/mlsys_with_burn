@@ -21,9 +21,9 @@ CubeCL 将一次 launch 描述为多个 cube，每个 cube 内含三维排列的
 | CubeCL | CUDA 常用术语 | 含义 |
 |---|---|---|
 | CubeCount | grid 维度 | 本次 launch 有多少个工作组 |
-| Cube | block | 可以协作并使用共享资源的一组 unit |
-| CubeDim | block 维度 | 每个 cube 内 unit 的三维形状 |
-| Plane | warp | 可执行协同操作的一组 unit；一个 Cube 内通常有多个 |
+| Cube | block | 工作组：其内 unit 可共享资源并显式同步 |
+| CubeDim | block 维度 | 该工作组内 unit 的三维形状 |
+| Plane | warp | 工作组内的更小协同子集（如 shuffle）；通常多个 Plane 组成一个 Cube |
 | Unit | thread | 执行 Kernel 实例的逻辑工作项 |
 
 这只是认知映射，不是 ABI 等价关系。Plane 大小不是语言层固定常数，CPU
