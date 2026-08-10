@@ -8,12 +8,12 @@
     <text x="320" y="62" fill="#3b5bdb" font-size="12">一次 launch 的 cube 网格（对照 CUDA grid）</text>
 
     <rect x="56" y="78" width="528" height="230" fill="#eef2ff" stroke="#6366f1" rx="6" stroke-width="2"/>
-    <text x="320" y="104" fill="#312e81" font-size="15">Cube / CubeDim(x, y, z)</text>
-    <text x="320" y="124" fill="#4f46e5" font-size="12">可协作并共享资源的工作组（对照 block）</text>
+    <text x="320" y="104" fill="#312e81" font-size="15">Cube</text>
+    <text x="320" y="124" fill="#4f46e5" font-size="12">可协作工作组（对照 block）· CubeDim(x, y, z)</text>
 
     <rect x="96" y="144" width="448" height="140" fill="#fdf2f8" stroke="#db2777" rx="6" stroke-width="2" stroke-dasharray="7 4"/>
     <text x="320" y="170" fill="#831843" font-size="14">Plane</text>
-    <text x="320" y="190" fill="#be185d" font-size="12">相邻 Unit 的协同子集（对照 warp；Cube 内通常有多个）</text>
+    <text x="320" y="190" fill="#be185d" font-size="12">相邻 Unit 的协同子集（对照 warp）</text>
 
     <rect x="148" y="208" width="344" height="54" fill="#ede9fe" stroke="#8b5cf6" rx="4" stroke-width="1.5"/>
     <text x="320" y="232" fill="#4c1d95" font-size="14">Unit</text>

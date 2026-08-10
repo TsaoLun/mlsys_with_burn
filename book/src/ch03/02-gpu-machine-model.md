@@ -13,17 +13,18 @@ Host 程序分配 buffer、选择 launch 拓扑并提交 Kernel；Device 执行�
 
 CubeCL 将一次 launch 描述为多个 cube，每个 cube 内含三维排列的 unit：
 
-![CubeCL 并行层次：CubeCount 包含 Cube，Cube 内的 Plane 再包含 Unit](../img/ch03-cube-hierarchy.svg)
+![CubeCL 并行层次由外到内：CubeCount、Cube（含 CubeDim）、虚线 Plane、Unit](../img/ch03-cube-hierarchy.svg)
 
-粗略对照如下：
+与 CUDA 的粗略对照如下。行序按图由外到内；`CubeDim` 是 Cube
+的形状参数，不是多一层框：
 
-| CubeCL | CUDA 常用术语 | 含义 |
+| CubeCL（对应图中） | CUDA 常用术语 | 含义 |
 |---|---|---|
 | CubeCount | grid 维度 | 本次 launch 有多少个工作组 |
 | Cube | block | 可以协作并使用共享资源的一组 unit |
-| CubeDim | block 维度 | 每个 cube 内 unit 的三维形状 |
+| CubeDim（写在 Cube 框内） | block 维度 | 每个 cube 内 unit 的三维形状 |
+| Plane（虚线框） | warp | 可执行协同操作的一组 unit；Cube 内通常有多个 |
 | Unit | thread | 执行 Kernel 实例的逻辑工作项 |
-| Plane | warp | 可执行协同操作的一组 unit |
 
 这只是认知映射，不是 ABI 等价关系。Plane 大小不是语言层固定常数，CPU
 Runtime 的 plane 能力也不同于真实 GPU。Kernel 不应凭习惯写死 32。

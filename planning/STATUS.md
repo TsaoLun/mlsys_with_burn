@@ -210,14 +210,12 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
 
 ## 本次交接
 
-- 已完成（2026-08-10）：定稿第 3.2 节 `ch03-cube-hierarchy.svg` 为真嵌套
-  CubeCount⊃Cube⊃Plane⊃Unit（Plane 虚线）；去掉图内「launch 拓扑 /
-  非 launch 维度」等作者旁注，标签只保留读者含义 + CUDA 对照。同步
-  更新图片 alt。
-- 验证：`python3 -c "import xml.etree.ElementTree as ET; ET.parse('book/src/img/ch03-cube-hierarchy.svg')"`；
-  `rsvg-convert` 渲染抽检。
-- 偏差：Plane 大小不固定等细节仍由紧随其后的正文说明，不塞进图内。
-- 下一步：确认配图观感后提交推送；其余仍为候选 tag/归档决策。
+- 已完成（2026-08-10）：第 3.2 节对照表按图由外到内重排；CubeDim /
+  Plane 在首列标注「写在 Cube 框内 / 虚线框」；图仅微调 Cube 副标题与
+  Plane 文案，避免与表重复。
+- 验证：`python3 -c "import xml.etree.ElementTree as ET; ET.parse('book/src/img/ch03-cube-hierarchy.svg')"`。
+- 偏差：无。
+- 下一步：确认后提交推送；其余仍为候选 tag/归档决策。
 
 ## 前次交接（2026-08-09 读者口吻扫尾）
 
