@@ -210,10 +210,10 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
 
 ## 本次交接
 
-- 已完成（2026-08-10）：第 3.2 节对照表按图由外到内重排；CubeDim /
-  Plane 在首列标注「写在 Cube 框内 / 虚线框」；图仅微调 Cube 副标题与
-  Plane 文案，避免与表重复。
-- 验证：`python3 -c "import xml.etree.ElementTree as ET; ET.parse('book/src/img/ch03-cube-hierarchy.svg')"`。
+- 已完成（2026-08-10）：第 3.2 节对照表按由外到内重排；去掉「写在
+  Cube 框内 / 虚线框」等配图元说明，改回读者向术语表，并用一句说明
+  CubeDim 是形状参数而非并列层。
+- 验证：目视核对 `02-gpu-machine-model.md` 表与图标签。
 - 偏差：无。
 - 下一步：确认后提交推送；其余仍为候选 tag/归档决策。
 
