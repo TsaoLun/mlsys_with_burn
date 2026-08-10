@@ -34,7 +34,9 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
    `tools/check_release.py` 的机器可读输出，决定候选版归档/tag。
 3. 真机 CUDA/NCCL 仅在 pins 与环境允许时，向
    `docs/OPTIONAL_PROFILES.md` 追加命令；不得改默认 CPU gate（D022）。
-4. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
+4. 继续跟踪 Burn 预发布快照（见
+   `planning/upstream/burn-0.22-roadmap-from-prs.md`）；更新 pins 前先
+   新增决策记录并重跑全书审计。
 
 ## 已完成
 
@@ -209,6 +211,19 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
   与折叠提示；`docs/AUTHORING.md` 补充练习体例。
 
 ## 本次交接
+
+- 已完成（2026-08-10）：Burn 0.21 之后 PR / 0.22 目标只读分析。
+  - 新增 `planning/upstream/burn-0.22-roadmap-from-prs.md`：以 0.21
+    “What’s Next” 为显式目标，归纳 Device/dispatch 去 Backend 泛型、
+    CubeCL/CubeK 一体、Fusion 可扩展、Remote 多设备、store/burnpack、
+    LoRA→reparam、量化加深与 open（Pliron/FP8/双层量化）信号。
+  - 会话日志：`planning/session-logs/2026-08-10-burn-022-roadmap-analysis.md`。
+  - 未改 pins / 正文 / 示例。
+- 验证：`gh` releases、PR search、关键 PR 正文与 burn.dev 0.21 blog。
+- 偏差：上游无 GitHub Milestone；未来项标为推断/open，非官方冻结路线图。
+- 下一步：升 pin 前先写 DECISIONS 并重跑全书审计；其余仍为候选 tag/归档。
+
+## 前次交接（2026-08-10 术语）
 
 - 已完成（2026-08-10）：读者向术语缺口处理（高/中优先项）。
   - `glossary.md` 增补：host reference、Flex/`Device::cpu()`、
