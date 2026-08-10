@@ -25,7 +25,8 @@ tile。这样能产生特化代码，也可能增加编译数量；它不是普�
 ## 2. Runtime 与 ComputeClient
 
 `Runtime` 关联设备、编译器和计算服务。host 通过
-`R::client(device)` 获得 `ComputeClient<R>`，再完成：
+`R::client(device)` 获得计算客户端（`ComputeClient<R>`）——向该 Runtime
+创建 buffer、launch Kernel 并读回结果的入口——再完成：
 
 1. 创建输入和输出 buffer；
 2. 选择 `CubeCount` 与 `CubeDim`；
@@ -50,10 +51,15 @@ Kernel IR 可以由不同 Runtime 编译，并不意味着各 Runtime 的能力�
 
 阅读顺序建议：
 
-1. 先把 Kernel 语义在 `CpuRuntime` 上钉死（本章实验）；
-2. 有图形驱动时，用同一 Kernel 走 `WgpuRuntime`，核对数值；
+1. 先用主机参考实现（host reference：普通 host 代码写出的可观察正确结果）
+   写清语义，再在 `CpuRuntime` 上验证（本章实验；见实验节
+   `scale_reference`）；
+2. 有图形驱动时，用同一 Kernel 走 `WgpuRuntime`，对照同一 host reference；
 3. 再打开 `CudaRuntime` / `HipRuntime` 源码，看 client、编译与同步入口
    如何对应 GPU 完成边界——不必本机装齐驱动也能读懂契约。
+
+`CpuRuntime` 是默认可跑路径，不是语义定义本身；Plane 大小、共享内存与
+完成边界仍因 Runtime 而异，不能从 CPU 正确性直接外推。
 
 Burn 侧通过 `burn-cubecl` / `burn-wgpu` / `burn-cuda` 把 `Device` 接到这些
 Runtime；Flex **不**走这条桥。因此“Tensor API 统一”不等于“默认已经测过
@@ -97,11 +103,11 @@ stride 同样属于 unsafe 合约的一部分。
 
 建议按以下顺序开发：
 
-1. 用 host reference 定义可观察语义；
+1. 用 host reference 定义可观察语义（对照标准，不是某个 Runtime）；
 2. 实现带显式边界的标量 Kernel；
 3. 在 CPU 或 checked mode 中验证多个 shape；
 4. 再引入 Vector、plane、共享内存和矩阵指令；
-5. 在真实目标设备上测量，并保留 fallback。
+5. 在真实目标设备上测量，并保留回退路径（fallback）。
 
 这种顺序将“算法错了”和“优化只在某设备不成立”分开。CubeCL 提供可移植
 表达方式，但性能可移植性仍需要多种策略和测量，这正是 CubeK 的职责之一。

@@ -64,7 +64,7 @@ CubeK 或 GPU 融合路径。
 | 层次 | 本书固定版本中的入口（相对上游仓库） | 默认实验 | 正文怎么读 |
 |---|---|---|---|
 | Device / dispatch | `burn-tensor` 的 `Device`；`burn-dispatch` 的 `DispatchDevice` | `Device::flex()` | 第 1–2 章 |
-| CPU 后端 | `burn-flex` | 是 | 语义与可复现锚点 |
+| CPU 后端 | `burn-flex` | 是 | 默认可复现的语义观察 |
 | GPU/图形后端 | `burn-wgpu`、`burn-cuda` 等 crate | 否（可选） | 第 3–4、7 章对照 |
 | CubeCL 桥 | `burn-cubecl`、`burn-cubecl-fusion` | 第 3–4 章相关示例 | Kernel / Fusion |
 | CubeCL Runtime | `cubecl-cpu::CpuRuntime`、`cubecl-wgpu::WgpuRuntime`、`cubecl-cuda::CudaRuntime`、`cubecl-hip::HipRuntime` | CPU；可选 WGPU | 同一 IR、不同设备完成边界 |

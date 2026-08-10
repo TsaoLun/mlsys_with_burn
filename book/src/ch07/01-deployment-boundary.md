@@ -2,7 +2,7 @@
 
 ## 主线闭环：从训练态到服务边界
 
-本章主线按一条可测试的闭环阅读（默认实验钉在 CPU Record/Burnpack）：
+本章主线按一条可测试的闭环阅读（默认实验在 CPU 上走 Record/Burnpack）：
 
 ![训练态 → Artifact → 校验 → 推理 Device → 服务边界（batch/队列/版本）](../img/ch07-deploy-loop.svg)
 

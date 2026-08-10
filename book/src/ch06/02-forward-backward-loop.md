@@ -99,7 +99,7 @@ backend 决定；只有 `read` 或 `Device::sync` 等明确边界才能谈完成
 - 只调用 `backward`，忘记把梯度交给 optimizer，loss 自然不会因参数更新
   而改变；
 - 在更新后继续把旧 module 当作当前参数使用；
-- 把输入 batch 的 host device 和 autodiff device 混为一个类型；
+- 把输入 batch 所在的普通 Device 与带 autodiff 能力的 Device 混为一个类型；
 - 把一次 loss 读回的时间当成整个训练 step 的设备完成时间；
 - 先用多设备/异步执行掩盖单设备梯度错误；
 - 只打印 loss，不保存 step、epoch、学习率和数据范围，导致曲线无法复现。

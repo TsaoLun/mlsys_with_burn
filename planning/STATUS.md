@@ -210,6 +210,34 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
 
 ## 本次交接
 
+- 已完成（2026-08-10）：读者向术语缺口处理（高/中优先项）。
+  - `glossary.md` 增补：host reference、Flex/`Device::cpu()`、
+    ComputeClient、fallback、autotune/特化键、fuser、Fusion stream、
+    ExecutionStrategy 同名、rank、reorder buffer、Dispatch/Bridge 等。
+  - 首次出现补中英定义：`ch02/02`、`ch03/03`–`04`/`06`/`07`、`ch04/03`、
+    `ch05/01`、`ch06/01`、`ch09/01`；`running-examples` 同步措辞。
+  - 修 `ch06/02`「host device」歧义；`docs/TERM_GLOSSARY.md` 对齐作者表。
+  - 此前已改：host reference 定语义 / CpuRuntime 只验证；软化钉死/锚点。
+- 验证：目视核对术语表新行与各章首次定义句；`rg` 无「钉死 / host device」
+  残留。
+- 偏差：低优先级单项（occupancy、HtoD、staging 等）仍靠章内上下文，
+  未全部入表，避免术语表膨胀。
+- 下一步：确认后提交推送；其余仍为候选 tag/归档决策。
+
+## 前次交接（2026-08-10 语义锚点）
+
+- 已完成（2026-08-10）：修正「默认 CPU/Runtime = 语义权威」类表述。
+  - `ch03/03`：阅读顺序改为 host reference 定可观察语义，再在
+    `CpuRuntime` 验证；并写明 CPU 非语义定义、不可外推 Plane/完成边界。
+  - 同步软化 `ch01/04`、`ch02/01`、`ch04/01`、`ch07/01`、`ch07/04` 中
+    「钉死/钉在/锚点」等易误导措辞（版本钉扎用语未改）。
+- 验证：`rg` 确认正文无「钉死 / 钉在 / 锚点是 CpuRuntime」残留；目视
+  核对阅读顺序与第 5 节开发顺序一致。
+- 偏差：无。
+- 下一步：确认后提交推送；其余仍为候选 tag/归档决策。
+
+## 前次交接（2026-08-10 Cube/Plane）
+
 - 已完成（2026-08-10）：第 3.2 节对照表区分 Cube / Plane：Cube 为可共享
   资源的工作组，Plane 为组内更小协同子集；避免两行都写「一组 unit」。
 - 验证：目视核对 `02-gpu-machine-model.md` 表与图标签。

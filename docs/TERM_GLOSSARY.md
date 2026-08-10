@@ -9,15 +9,26 @@
 |---|---|---|
 | 用户张量类型 | `Tensor<D, K>`；秩 `D`，类别 `K` | 旧文档 `Tensor<B, D>` 仅作历史对照 |
 | 设备选择 | Device；运行时分派到 DispatchDevice | 不把 Device 称作 Backend |
+| 分派桥 | BridgeTensor / Dispatch；路由到具体后端 | 不把桥接层说成第三种数学语义 |
 | 后端实现契约 | Backend / BackendTypes（实现层） | 不对读者说“换 Backend 泛型” |
-| 默认 CPU 路径 | Flex（eager） | 不暗示 Flex 走 Fusion |
+| 默认 CPU 路径 | Flex / `Device::flex()`（eager） | 不暗示 Flex 走 Fusion/CubeCL |
+| Fusion CPU 设备 | `Device::cpu()`（需 `cpu`+`fusion`） | 不与 Flex 混为同一条证据路径 |
+| 主机参考实现 | host reference；普通 host 代码的可观察正确结果 | 不把 host reference 等同于 Host/Device 机器模型或某个 Runtime |
+| 计算客户端 | ComputeClient；buffer / launch / read 入口 | 不把 host 返回当成设备完成 |
+| 回退路径 | fallback；仍正确的较简实现 | 不把 fallback 写成“失败”或与高性能路径成本等同 |
+| 自动调优 | autotune / tune key；当前设备测量并缓存 | 不把 CPU 缓存命中外推到其他 Runtime |
+| 特化键 / 编译键 | specialization / compile key | 不把任意运行时标量都塞进 comptime 键 |
+| 融合器 | fuser；Fusion 接受/拒绝操作块的组件 | 不把 Inspector 的 fuser 名当成设备 Kernel 名 |
+| Fusion 流 | Fusion stream / `StreamId` | 不与 CUDA stream 或集群作业队列混称 |
+| ExecutionStrategy 同名 | Fusion 块内策略 vs `burn-train` 训练策略 | 不把两处同名类型当成同一个 API |
 | 自动微分表示 | autodiff tape（一阶反模式） | 不称“Burn 计算图” |
 | 融合表示 | Burn IR / OperationIr；Fusion 计划 | 不与 tape 混称 |
 | CubeCL 表示 | Scope / KernelDefinition / CubeCL IR | 不称“计算图” |
 | 设备重放 | backend / device graph capture | 仅在 Runtime 支持时提及 |
 | 并行拓扑 | Cube / Unit / Plane | 正文主用 CubeCL 词，CUDA 对照放表内 |
-| 算子库路径 | CubeK Blueprint–Routine；Strategy/Launch | 不把 Guide 说成四层架构 |
-| 同步边界 | read / `Device::sync` 为完成边界；flush 为提交/推进 | 不把 flush 写成设备完成 |
+| 算子库路径 | CubeK Blueprint–Routine；Strategy/Launch；LocalTuner | 不把 Guide 说成四层架构 |
+| 同步边界 | read / readback / `Device::sync` 为完成边界；flush 为提交/推进 | 不把 flush 写成设备完成 |
+| 训练进程号 | rank（分布式副本序号） | 不与张量秩（rank）混用 |
 | 状态保存 | ModuleRecord | 不写旧 `Record<B>` |
 | 切断依赖 | `detach()`（保留 require-grad 意图） | 不写“detach 后不可求导” |
 | 负载分析 | workload card；计算、数据、设备、目标四元组 | 不用模型名称替代系统负载 |

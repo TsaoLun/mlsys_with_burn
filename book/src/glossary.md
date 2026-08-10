@@ -8,9 +8,11 @@
 | 术语 | 英文 | 含义 | 章节 |
 |---|---|---|---|
 | 张量 | `Tensor<D, K>` | Burn 的张量类型；`D` 为秩，`K` 为类别 | [第 2 章](ch02-programming-and-graph.md) |
-| 设备 | Device | 用户侧设备选择；运行时分派到 DispatchDevice | [第 2 章](ch02-programming-and-graph.md) |
+| 设备 | Device | 用户侧设备选择；内部经 `DispatchDevice` 分派到具体后端 | [第 2 章](ch02-programming-and-graph.md) |
+| 分派桥 | BridgeTensor / Dispatch | Tensor 与具体后端之间的运行时桥接层；不是第三种数学语义 | [第 2 章](ch02-programming-and-graph.md) |
 | 后端契约 | Backend / BackendTypes | 后端实现层契约，不等于用户手里的 Device | [第 2 章](ch02-programming-and-graph.md) |
-| 默认 CPU 后端 | Flex | 纯 Rust eager CPU 后端；默认实验路径不走 Fusion/CubeCL | [第 1 章](ch01-introduction.md) |
+| 默认 CPU 后端 | Flex / `Device::flex()` | 纯 Rust eager CPU；默认实验路径，**不**走 Fusion/CubeCL | [第 1 章](ch01-introduction.md) |
+| Fusion CPU 设备 | `Device::cpu()` | 启用 `cpu`+`fusion` 后走 CubeCL CPU Fusion；与 Flex 不同路径 | [第 4 章](ch04-compiler-and-runtime.md) |
 | 自动微分记录 | autodiff tape | 一阶反向模式动态 tape，位于 `burn-autodiff` | [第 2 章](ch02-programming-and-graph.md) |
 | 切断依赖 | `detach()` | 切断旧图形成新叶子，保留 require-grad 意图 | [第 2 章](ch02-programming-and-graph.md) |
 | 状态保存 | ModuleRecord | Burn 的参数 artifact 表示 | [第 7 章](ch07-model-serving.md) |
@@ -20,12 +22,19 @@
 | 术语 | 英文 | 含义 | 章节 |
 |---|---|---|---|
 | 并行拓扑 | Cube / Unit / Plane | CubeCL 的并行层次术语 | [第 3 章](ch03-accelerator.md) |
-| 算子库路径 | Blueprint–Routine | CubeK 的算子组织方式；Strategy/Launch 负责选择与启动 | [第 3 章](ch03-accelerator.md) |
+| 主机参考实现 | host reference | 用普通 host 代码写出的可观察正确结果，用来对照 Kernel/Runtime 输出；**不是** Host/Device 机器模型本身 | [第 3 章](ch03-accelerator.md) |
+| 计算客户端 | ComputeClient | host 向某 Runtime 创建 buffer、launch Kernel、读回结果的入口 | [第 3 章](ch03-accelerator.md) |
+| 回退路径 | fallback | 高性能候选不可用或不合适时改走仍正确的较简实现；正确性相同 ≠ 成本相同 | [第 3 章](ch03-accelerator.md) |
+| 自动调优 | autotune / tune key | 在当前设备上测量候选并按键缓存；CPU 命中不能直接搬到另一 Runtime | [第 3 章](ch03-accelerator.md) |
+| 特化键 / 编译键 | specialization / compile key | 参与 Kernel 变体区分的 comptime 或编译配置输入；键变了可能触发重编译 | [第 3 章](ch03-accelerator.md) |
+| 算子库路径 | Blueprint–Routine | CubeK 的算子组织方式；Strategy/Launch 负责选择与启动；LocalTuner 注册候选 | [第 3 章](ch03-accelerator.md) |
 | 算术强度 | arithmetic intensity | FLOP/字节（教学模型可用 FLOP/加载元素）；是复用方向指标，不是实测性能 | [第 3 章](ch03-accelerator.md) |
 | 融合表示 | Burn IR / OperationIr | Fusion 计划的中间表示；与 autodiff tape 不同层 | [第 4 章](ch04-compiler-and-runtime.md) |
+| 融合器 | fuser | Fusion 里接受/拒绝一组操作并生成融合块的组件（如 ElementWise） | [第 4 章](ch04-compiler-and-runtime.md) |
+| Fusion 流 | Fusion stream / `StreamId` | Fusion 延迟队列的隔离键；不是 CUDA stream，也不是集群作业队列 | [第 4 章](ch04-compiler-and-runtime.md) |
 | CubeCL 表示 | Scope / KernelDefinition | CubeCL 侧的 IR 对象，不称“计算图” | [第 4 章](ch04-compiler-and-runtime.md) |
 | 设备重放 | graph capture | backend/device 级执行重放，仅在 Runtime 支持时存在 | [第 4 章](ch04-compiler-and-runtime.md) |
-| 同步边界 | read / `Device::sync` | 完成边界；flush 只是提交/推进，不代表设备完成 | [第 4 章](ch04-compiler-and-runtime.md) |
+| 同步边界 | read / readback / `Device::sync` | 完成边界；flush 只是提交/推进，不代表设备完成 | [第 4 章](ch04-compiler-and-runtime.md) |
 
 ## 数据与训练
 
@@ -34,9 +43,12 @@
 | 负载卡片 | workload card | 计算、数据、设备、目标四元组描述的系统负载 | [第 1 章](ch01-introduction.md) |
 | 数据供给模型 | $F/P/G$ | 读取、变换、设备消费三类速率 | [第 5 章](ch05-data-processing.md) |
 | 分片与提交 | shard / epoch commit | 确定性分片 offset；epoch 边界的提交点 | [第 5 章](ch05-data-processing.md) |
+| 重排缓冲 | reorder buffer | 多 worker 乱序到达后按全局序号恢复可读顺序的缓冲 | [第 5 章](ch05-data-processing.md) |
 | 加权集合通信 | weighted AllReduce | 按样本数聚合局部梯度，而非等权平均 | [第 6 章](ch06-training-systems.md) |
 | 梯度新鲜度 | gradient staleness | 当前参数版本与梯度版本的差距 | [第 6 章](ch06-training-systems.md) |
 | 流水线空泡 | pipeline bubble | 1F1B 的 warm-up/drain 空闲槽 | [第 6 章](ch06-training-systems.md) |
+| 训练执行策略 | `ExecutionStrategy`（burn-train） | MultiDevice/DDP 等训练装配策略；**不是**第 4 章 Fusion 块内的同名搜索对象 | [第 6 章](ch06-training-systems.md) |
+| 训练进程号 | rank | 分布式作业里的进程/副本序号；与张量的秩（rank）不是同一概念 | [第 9 章](ch09-gpu-cluster.md) |
 
 ## 部署与强化学习
 

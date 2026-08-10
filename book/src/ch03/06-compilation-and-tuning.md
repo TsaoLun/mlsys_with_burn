@@ -19,13 +19,16 @@ explosion；若特化太少，又可能保留低效的动态逻辑。
 
 本章只需记住：Kernel 不是直接把 Rust 源码交给 GPU，而是经过宏展开、IR
 构建、Runtime 编译和 launch。对 GPU 读者还要多记一步：**编译产物与
-tune key 绑定设备与 Runtime**；CPU 上的缓存命中不能直接搬到另一张卡。
+调优键（tune key）绑定设备与 Runtime**；CPU 上的缓存命中不能直接搬到
+另一张卡。特化键 / 编译键则标出哪些 comptime 或编译配置会区分 Kernel
+变体——键变了可能触发重编译。
 
 ## 2. Autotune 不是静态规则表
 
-本版中，CubeCL 提供全局 autotune level 与缓存配置；burn-cubecl
-使用 `LocalTuner` 为 matmul、conv、reduce 和 attention 等注册候选。
-典型流程是：
+自动调优（autotune）是在**当前设备**上测量候选实现并缓存选择，不是一张
+跨机器通用的静态规则表。本版中，CubeCL 提供全局 autotune level 与缓存
+配置；burn-cubecl 使用 `LocalTuner` 为 matmul、conv、reduce 和 attention
+等注册候选。典型流程是：
 
 ```text
 输入 shape/layout/dtype + Device 能力

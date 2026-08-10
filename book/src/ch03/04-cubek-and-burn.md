@@ -2,7 +2,8 @@
 
 CubeCL 解决“怎样表达和运行 Kernel”，CubeK 解决“怎样组织可复用的高性能
 算子实现”。`burn-cubecl` 把二者接入 Burn Backend，并负责 shape 处理、
-策略选择、fallback 与 autotune。
+策略选择、回退路径（fallback：高性能候选不可用时改走仍正确的较简实现）
+与自动调优（autotune）。
 
 ## 1. 从架构到调用接口
 

@@ -22,9 +22,10 @@
 
 1. **控制面（control plane）**：接收作业、维护队列、检查配额、选择资源、
    做成组准入、处理抢占和故障恢复；
-2. **训练数据面（training data plane）**：在已经分配的 rank/device 之间
-   传输梯度、参数和 activation，执行 AllReduce、AllGather 或
-   ReduceScatter；
+2. **训练数据面（training data plane）**：在已经分配的 rank 与 device
+   之间传输梯度、参数和 activation，执行 AllReduce、AllGather 或
+   ReduceScatter。这里的 rank 指训练进程/副本序号，与张量的秩不是同一
+   概念；
 3. **设备运行时（device runtime）**：在一张 GPU 或一个设备 backend 内
    管理 kernel、stream、buffer、编译缓存和完成同步。
 

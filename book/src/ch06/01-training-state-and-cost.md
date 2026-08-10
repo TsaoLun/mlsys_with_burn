@@ -128,5 +128,7 @@ OpenMLSys v1 `overview.md` 和 `methods.md` 使用“切分—并行—合并”
 - AllReduce 需要 backend 的 `DistributedOps`，不是普通 `Tensor` API
   自动拥有的跨节点能力。
 
-因此，后续看到 `ExecutionStrategy::MultiDevice` 或 DDP 时，应先问它维护的
-状态是什么、谁负责等待、谁负责保存，而不是只比较设备数量。
+因此，后续看到 `burn-train` 的 `ExecutionStrategy::MultiDevice` 或 DDP
+时，应先问它维护的状态是什么、谁负责等待、谁负责保存，而不是只比较设备
+数量。这个名字与第 4 章 Fusion 块内的 `ExecutionStrategy` 只是同名，
+职责不同。

@@ -41,7 +41,7 @@ cargo test -p ch01-stack-probe --locked --offline
 |---|---|---|
 | `ch01-stack-probe` | 第 1 章 | Device → Backend → Tensor 的执行栈路径 |
 | `ch02-tensor-basics` | 第 2 章 | 广播、Module 参数统计、autodiff 梯度 |
-| `ch03-cubecl-kernel` | 第 3 章 | 在 CPU 上运行 CubeCL Kernel 并对照 host reference |
+| `ch03-cubecl-kernel` | 第 3 章 | 在 CPU 上运行 CubeCL Kernel，并对照主机参考实现（host reference） |
 | `ch03-tile-loads` | 第 3 章 | tile 加载计数与算术强度模型 |
 | `ch04-fusion-inspector` | 第 4 章 | Fusion 执行计划、数值等价与同步边界 |
 | `ch05-data-pipeline` | 第 5 章 | 数据守恒、固定 seed、多 worker 边界 |

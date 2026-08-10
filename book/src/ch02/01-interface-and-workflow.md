@@ -144,10 +144,10 @@ Module / Tensor API
       → Kernel launch → 设备完成 → host read/sync
 ```
 
-本章实验钉在 Flex CPU 上，是为了把类型、广播、Module 状态和 tape 语义
-看清楚。设备与 Runtime 地图见第 1 章；拓扑与多 Runtime 见第 3 章；Pass
-与 stream 见第 4 章。不要把“Tensor API 写对了”读成“已经测过某张 GPU
-的吞吐”。
+本章实验默认在 Flex CPU 上运行，是为了把类型、广播、Module 状态和 tape
+语义看清楚。设备与 Runtime 地图见第 1 章；拓扑与多 Runtime 见第 3 章；
+Pass 与 stream 见第 4 章。不要把“Tensor API 写对了”读成“已经测过某张
+GPU 的吞吐”。
 
 ## 产业对照（概念对齐，不是性能对等）
 

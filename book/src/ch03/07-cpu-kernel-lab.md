@@ -11,8 +11,10 @@
 
 ## 1. Host reference
 
-`scale_reference` 用普通 Rust 定义语义：每个输入乘以整数 scale。把
-Kernel 输出与它对一下，比只看打印更可靠。
+主机参考实现（host reference）是用普通 host 代码写出的可观察正确结果，
+用来对照 Kernel/Runtime 输出；它定义“算对了”长什么样，本身不是
+CubeCL Runtime。本实验的 `scale_reference` 即这一角色：每个输入乘以
+整数 scale。把 Kernel 输出与它对一下，比只看打印更可靠。
 
 scale 使用 `u32`，因为 `#[comptime]` 值会参与 Kernel 特化键，必须满足
 固定宏实现所需的可哈希约束；`f32` 不能直接作为这个特化键。Kernel 内再将

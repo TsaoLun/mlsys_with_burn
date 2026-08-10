@@ -70,8 +70,9 @@ $128 \times 1024 \times 4\ \text{B} = 512\ \text{KiB}$；改用 2 字节的
 
 ## Device 与 Dispatch
 
-0.22 的用户张量不再携带 Backend 类型参数。`Device` 内部包装
-`DispatchDevice`，张量操作通过运行时分派到具体后端：
+0.22 的用户张量不再携带 Backend 类型参数。`Device` 内部包装分派设备
+（`DispatchDevice`）；张量经分派桥（`BridgeTensor` → Dispatch）到达具体
+后端——桥接层负责路由，不另定一套数学语义：
 
 ```text
 Tensor<D, K>
@@ -86,7 +87,9 @@ Dispatch + DispatchDevice
 ```
 
 Cargo feature 决定哪些分派变体被编译进程序，Device 工厂方法选择其中一个
-实例。教材默认使用 `Device::flex()`，因此无需 GPU 驱动。
+实例。教材默认使用 `Device::flex()`（纯 Rust eager CPU，不走
+Fusion/CubeCL），因此无需 GPU 驱动。第 4 章观察 Fusion 时改用
+`Device::cpu()`，二者不要混为同一条证据路径。
 
 ## Backend trait 位于实现层
 
@@ -94,8 +97,9 @@ Cargo feature 决定哪些分派变体被编译进程序，Device 工厂方法�
 但它们主要面向后端与扩展作者。用户侧 Module 不再需要写成
 `Model<B: Backend>`。
 
-统一 Backend 契约保证基本操作语义，却不保证所有能力相同。例如 Flex 的
-graph primitive 是不支持状态，CubeCL 后端则可能提供融合和 graph capture。
+统一 Backend 契约保证基本操作语义，却不保证所有能力相同。例如 Flex 对
+图原语（graph primitive：后端是否暴露可捕获/重放的执行图能力）给出
+“不支持”，CubeCL 后端则可能提供融合和 graph capture。
 
 ## 所有权与 clone
 
