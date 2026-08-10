@@ -13,7 +13,7 @@ Host 程序分配 buffer、选择 launch 拓扑并提交 Kernel；Device 执行�
 
 CubeCL 将一次 launch 描述为多个 cube，每个 cube 内含三维排列的 unit：
 
-![CubeCL 并行层次：CubeCount 网格包含多个 Cube，Cube 内是 CubeDim 个 Unit，相邻 Unit 可组成 Plane](../img/ch03-cube-hierarchy.svg)
+![CubeCL 并行层次：CubeCount 包含 Cube，Cube 内的 Plane 再包含 Unit](../img/ch03-cube-hierarchy.svg)
 
 粗略对照如下：
 
