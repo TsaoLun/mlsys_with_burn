@@ -64,7 +64,8 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+对照第 4 章「内存、Stream 与异步执行」中的生命周期、别名和 stream 依赖；
+`ReadWrite` 只说明访问模式，不说明没有其他 handle 仍可能读它。
 
 </details>
 
@@ -73,7 +74,9 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-见第 6 章 1F1B 配图与空泡占比公式。
+对照第 4 章「CubeCL Lowering、JIT 与缓存」：编译缓存避免重新 lowering/
+codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pipeline 的
+执行状态混为一谈。
 
 </details>
 
@@ -274,7 +277,7 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 
 ## 延伸阅读
 
-固定上游中的权威入口：
+本书固定版本源码中的权威入口：
 
 - `burn/crates/burn-ir/src/`
 - `burn/crates/burn-fusion/src/ops/`

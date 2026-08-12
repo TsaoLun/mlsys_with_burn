@@ -50,7 +50,7 @@ $$
 ## 3. 运行
 
 ```bash
-cargo run -p ch04-fusion-inspector
+cargo run -p ch04-fusion-inspector --locked
 ```
 
 本版上的一种输出为：
@@ -70,7 +70,7 @@ cargo run -p ch04-fusion-inspector
 ## 4. 测试
 
 ```bash
-cargo test -p ch04-fusion-inspector
+cargo test -p ch04-fusion-inspector --locked
 ```
 
 你会观察到：
@@ -96,7 +96,7 @@ cargo test -p ch04-fusion-inspector
 无需 test-util 时，可运行：
 
 ```bash
-BURN_FUSION_LOG=full cargo run -p ch04-fusion-inspector
+BURN_FUSION_LOG=full cargo run -p ch04-fusion-inspector --locked
 ```
 
 日志级别和环境变量属于本书所用 Burn 版本的配置接口。Full 日志可显示

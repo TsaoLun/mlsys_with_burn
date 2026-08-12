@@ -167,7 +167,8 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 
 ## 延伸阅读
 
-以下路径均相对于本地固定上游：
+以下路径均相对于本书固定版本的源码仓库（如何获取见
+[如何运行本书示例](../running-examples.md) 的「阅读固定源码」）：
 
 - `burn/crates/burn/src/lib.rs`：Burn 能力总览与限制；
 - `burn/crates/burn-backend/src/backend/base.rs`：Backend 设计契约；

@@ -30,11 +30,11 @@ impl std::error::Error for TrainingError {}
 /// Observable values produced by the small training experiment.
 #[derive(Debug, PartialEq)]
 pub struct TrainingReport {
-    /// Mean-squared loss after each forward pass.
+    /// Mean-squared loss after each pre-update forward pass.
     pub losses: Vec<f32>,
     /// Loss before the first optimizer step.
     pub initial_loss: f32,
-    /// Loss from the final forward pass.
+    /// Loss recomputed with the final parameters after the last optimizer step.
     pub final_loss: f32,
     /// Sum of absolute changes in the learned weight parameters.
     pub parameter_delta: f32,
@@ -85,7 +85,12 @@ pub fn run_training(steps: usize, learning_rate: f64) -> Result<TrainingReport, 
         .map(|(before, after)| (after - before).abs())
         .sum();
     let initial_loss = losses.first().copied().ok_or(TrainingError::NoSteps)?;
-    let final_loss = losses.last().copied().ok_or(TrainingError::NoSteps)?;
+    let final_loss = {
+        let prediction = model.forward(inputs);
+        let difference = prediction - targets;
+        let loss = difference.powf_scalar(2.0).mean();
+        loss.into_scalar::<f32>()
+    };
 
     Ok(TrainingReport {
         losses,

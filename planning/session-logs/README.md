@@ -67,4 +67,7 @@ Agent 开始工作时依次阅读：
 - [`2026-08-08-reader-facing-p0-fixes.md`](2026-08-08-reader-facing-p0-fixes.md)：
   读者视角 P0–P1 修订、事实复核、九章深度加厚，以及第六批结构配图
   （8 张 SVG）与九章练习难度/提示体例。
+- [`2026-08-12-content-structure-hardening.md`](2026-08-12-content-structure-hardening.md)：
+  内容合理性与结构加固：实验语义/成本模型修正、章导航与桥接、SVG 修复、
+  练习提示纠偏和内容发布检查扩展。
 

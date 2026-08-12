@@ -280,7 +280,7 @@ map、selection、shuffle、partial 和 window 组合成惰性逻辑。`Batcher`
 
 ## 延伸阅读
 
-固定上游中的权威入口：
+本书固定版本源码中的权威入口：
 
 - `burn/crates/burn-dataset/src/dataset/base.rs`
 - `burn/crates/burn-dataset/src/dataset/in_memory.rs`

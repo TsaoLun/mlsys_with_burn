@@ -79,14 +79,14 @@ tiled_intensity = 8.0
 conflict、边界 tile、cube 同步或真实带宽。真实共享内存 Kernel 仍属练习。
 
 ```bash
-cargo run -p ch03-tile-loads
-cargo test -p ch03-tile-loads
+cargo run -p ch03-tile-loads --locked
+cargo test -p ch03-tile-loads --locked
 ```
 
 ## 5. 运行与测试 scale Kernel
 
 ```bash
-cargo run -p ch03-cubecl-kernel
+cargo run -p ch03-cubecl-kernel --locked
 ```
 
 预期输出：
@@ -100,7 +100,7 @@ output:  [2.0, 4.0, 6.0, 8.0]
 运行测试：
 
 ```bash
-cargo test -p ch03-cubecl-kernel
+cargo test -p ch03-cubecl-kernel --locked
 ```
 
 scale 测试使用包含负数、零和小数的输入，并与 host reference 做精确比较。

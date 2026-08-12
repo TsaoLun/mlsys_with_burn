@@ -63,6 +63,20 @@ cargo run  -p ch06-training-loop --locked
 各章“实验”小节会给出该章示例的具体命令和输出解读。示例关注 shape、
 数值误差、守恒性等语义字段，不把墙钟时间当成性能结论。
 
+## 阅读固定源码
+
+示例构建不依赖本地源码镜像。若你想打开各章练习中列出的
+`burn/...`、`cubecl/...`、`openmlsys/...` 文件，请按根目录
+`pins.toml` 中的 URL 和 revision 检出对应仓库，例如：
+
+```bash
+git clone https://github.com/tracel-ai/burn.git
+git -C burn checkout 976aa9c5ec1d2dd3412710f99759e3c44bdff03d
+```
+
+这些 checkout 只用于阅读；不要改成 Cargo `path` 依赖。在线对照时也应
+把 URL 中的分支名替换为同一 revision，避免看到已经变化的 `main`。
+
 ## 可选跑通（有环境再跑）
 
 主线正文已同步讲解 GPU 拓扑、CubeCL 多 Runtime、部署 Device 选择与
@@ -97,6 +111,7 @@ mdbook serve book   # 本地预览
 
 ## 想一次跑通全书默认示例时
 
-按章学习通常不必全仓库检查。若你在改示例或提交补丁，可在仓库根目录运行
-`make check`：它会构建文档、跑格式与 lint、执行各章默认 CPU 示例，并检查
-依赖锁定是否与正文版本一致。
+按章学习通常不必运行全仓库检查：每个示例自己的
+`cargo test -p <名称> --locked` 就够了。如果你修改了示例代码、想确认
+全书仍然自洽，仓库根目录提供了 `make check`：它会构建本书、检查格式、
+执行各章默认 CPU 示例，并核对依赖版本与正文一致。

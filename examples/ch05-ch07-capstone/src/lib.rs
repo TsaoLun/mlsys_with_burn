@@ -241,6 +241,7 @@ fn audit_matches_expected(
 // ANCHOR: capstone_pipeline
 /// Run the complete deterministic data → train → artifact → inference path.
 pub fn run_capstone() -> Result<CapstoneReport, Box<dyn Error>> {
+    // Stage 1: build and audit the data boundary before any training begins.
     let train_device = Device::flex().autodiff();
     let validation_device = Device::flex();
     train_device.seed(73);
@@ -271,6 +272,7 @@ pub fn run_capstone() -> Result<CapstoneReport, Box<dyn Error>> {
         ));
     }
 
+    // Stage 2: train on the already audited loader.
     let config = LinearConfig::new(2, 1);
     let mut model = config.init(&train_device);
     let initial_weights: Vec<f32> = model.weight.val().into_data().iter::<f32>().collect();
@@ -312,6 +314,7 @@ pub fn run_capstone() -> Result<CapstoneReport, Box<dyn Error>> {
         .map(|(before, after)| (after - before).abs())
         .sum::<f32>();
 
+    // Stage 3: move the trained module to the validation device and serialize it.
     let valid_model = model.valid();
     let validation_loss = evaluate_loss(&valid_model, &validation_loader)?;
     let final_train_loss = evaluate_loss(&valid_model, &train_eval_loader)?;
@@ -323,6 +326,7 @@ pub fn run_capstone() -> Result<CapstoneReport, Box<dyn Error>> {
         .clone()
         .init(&validation_device)
         .try_load_record(restored_record)?;
+    // Stage 4: verify restored inference and reject a wrong topology.
     let inference_input =
         Tensor::<2>::from_data([[-1.0, 0.0], [0.0, 1.0], [1.0, -1.0]], &validation_device);
     let reference: Vec<f32> = valid_model

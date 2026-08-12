@@ -12,7 +12,8 @@
 1. 区分集群控制面、训练通信数据面和 GPU 设备运行时；
 2. 用 GPU、节点、机柜、ToR（Top of Rack）和 Spine 描述通信域；
 3. 为一个成组调度（gang scheduling）作业写出 GPU、显存和网络域需求；
-4. 用 `alpha + beta * bytes` 模型解释集合通信和拓扑放置的关系；
+4. 用 `alpha + beta * bytes` 模型解释集合通信，并区分同节点、同机柜
+   跨节点、跨机柜三档放置域的成本跳变；
 5. 解释 FIFO、拓扑感知放置、配额和资源碎片之间的取舍；
 6. 设计带 checkpoint、attempt、step 和幂等确认的故障恢复协议；
 7. 区分 Burn/CubeCL 已核验的本机/设备接口与外部集群调度职责；
@@ -60,7 +61,10 @@ device runtime ── stream / memory pool / kernel / sync
 7. [实验：CPU 集群调度与故障模拟器](ch09/07-cpu-cluster-simulator-lab.md)
 8. [练习、延伸阅读与来源](ch09/08-exercises-and-sources.md)
 
+读完全书主线后，可回到[综合实验](capstone.md)，把数据、训练、状态
+保存和推理恢复作为一个端到端系统再检查一遍。
+
 示例代码位于 `examples/ch09-cluster-simulator`，只使用 Rust 标准库和虚拟
 时间。它验证调度协议、通信成本模型、checkpoint 恢复和资源归还；它不
-测量真实 GPU、网络或 NCCL 性能，也不声称 本书所用的 Burn 版本提供作业队列、
+测量真实 GPU、网络或 NCCL 性能，也不声称本书所用 Burn 版本提供作业队列、
 多租户隔离、弹性 membership 或自动故障迁移。

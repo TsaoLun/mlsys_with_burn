@@ -89,6 +89,8 @@ pub enum RolloutError {
     ZeroCapacity,
     /// A replay batch needs at least one item.
     ZeroSampleBatch,
+    /// Replay-driven learning needs at least one update round.
+    ZeroUpdateRounds,
     /// The requested replay batch is larger than the collected buffer.
     SampleTooLarge {
         /// Number of requested samples.
@@ -96,6 +98,8 @@ pub enum RolloutError {
         /// Number of available samples.
         available: usize,
     },
+    /// A stored tensor could not be read back to the host.
+    Readback(String),
 }
 
 impl Display for RolloutError {
@@ -104,6 +108,7 @@ impl Display for RolloutError {
             Self::NoSteps => write!(formatter, "rollout requires at least one step"),
             Self::ZeroCapacity => write!(formatter, "replay capacity must be positive"),
             Self::ZeroSampleBatch => write!(formatter, "sample batch must be positive"),
+            Self::ZeroUpdateRounds => write!(formatter, "replay learning needs a round"),
             Self::SampleTooLarge {
                 requested,
                 available,
@@ -111,6 +116,7 @@ impl Display for RolloutError {
                 formatter,
                 "sample batch {requested} exceeds available transitions {available}"
             ),
+            Self::Readback(error) => write!(formatter, "tensor readback failed: {error}"),
         }
     }
 }
@@ -124,8 +130,10 @@ pub struct RolloutReport {
     pub transitions_collected: usize,
     /// Number of transitions retained by the circular buffer.
     pub buffer_len: usize,
-    /// Number of transitions marked done or truncated.
-    pub terminal_transitions: usize,
+    /// Number of transitions terminated by the environment itself.
+    pub done_transitions: usize,
+    /// Number of transitions cut off by the external step limit.
+    pub truncated_transitions: usize,
     /// Shape of sampled state tensors.
     pub sampled_state_shape: [usize; 2],
     /// Shape of sampled action tensors.
@@ -199,6 +207,19 @@ fn state_index(position: i32) -> usize {
     position.clamp(0, 2) as usize
 }
 
+/// Deterministic action schedule shared by the online and replay-driven paths.
+///
+/// The first episode is `Right, Right`, reaching position 2 and producing a
+/// natural `done`; later episodes keep alternating and eventually hit the
+/// truncation limit.
+fn scheduled_action(index: usize) -> CounterAction {
+    match index {
+        1 => CounterAction::Right,
+        _ if index.is_multiple_of(2) => CounterAction::Right,
+        _ => CounterAction::Left,
+    }
+}
+
 fn action_index(action: CounterAction) -> usize {
     match action {
         CounterAction::Left => 0,
@@ -206,7 +227,12 @@ fn action_index(action: CounterAction) -> usize {
     }
 }
 
-/// Collect transitions, sample replay data, and apply a small tabular TD update.
+/// Collect transitions, sample replay data for shape inspection, and apply online TD updates.
+///
+/// The TD updates use transitions as they are collected; the replay batch is sampled
+/// after collection and is intentionally not fed back into the table. Keeping those
+/// two paths separate prevents this small example from pretending to be a full
+/// off-policy DQN learner.
 // ANCHOR: rollout
 pub fn run_rollout(
     steps: usize,
@@ -237,20 +263,20 @@ pub fn run_rollout(
     let mut q_values = [[0.0f32; 2]; 3];
     let gamma = 0.9;
     let learning_rate = 0.5;
-    let mut terminal_transitions = 0;
+    let mut done_transitions = 0;
+    let mut truncated_transitions = 0;
 
     for index in 0..steps {
         let state = environment.state();
-        let action = if index % 2 == 0 {
-            CounterAction::Right
-        } else {
-            CounterAction::Left
-        };
+        let action = scheduled_action(index);
         let result = environment.step(action);
-        let terminal = result.done || result.truncated;
-        if terminal {
-            terminal_transitions += 1;
+        if result.done {
+            done_transitions += 1;
         }
+        if result.truncated {
+            truncated_transitions += 1;
+        }
+        let terminal = result.done || result.truncated;
 
         buffer.push(
             state_tensor(state, &device),
@@ -281,7 +307,8 @@ pub fn run_rollout(
     Ok(RolloutReport {
         transitions_collected: steps,
         buffer_len: buffer.len(),
-        terminal_transitions,
+        done_transitions,
+        truncated_transitions,
         sampled_state_shape: batch.states.dims(),
         sampled_action_shape: batch.actions.dims(),
         sampled_reward_shape: batch.rewards.dims(),
@@ -290,6 +317,134 @@ pub fn run_rollout(
     })
 }
 // ANCHOR_END: rollout
+
+/// Observable values produced by replay-driven updates.
+#[derive(Debug, PartialEq)]
+pub struct ReplayUpdateReport {
+    /// Number of environment steps collected before learning.
+    pub transitions_collected: usize,
+    /// Number of transitions retained by the circular buffer.
+    pub buffer_len: usize,
+    /// Number of sampled transitions applied to the table.
+    pub updates_applied: usize,
+    /// Q value for the initial state and right action after replay-driven updates.
+    pub initial_right_q: f32,
+}
+
+/// Collect transitions without learning, then update the table from replay samples.
+///
+/// Phase 1 stores the same deterministic rollout used by [`run_rollout`], but
+/// leaves the Q table untouched. Phase 2 repeatedly samples the buffer and
+/// applies the same TD rule to the sampled rows. With `capacity = 1` the ring
+/// retains only the newest transition, so the learner can never see the initial
+/// state again: this makes the effect of replay capacity directly observable.
+pub fn run_replay_driven(
+    steps: usize,
+    capacity: usize,
+    sample_size: usize,
+    update_rounds: usize,
+) -> Result<ReplayUpdateReport, RolloutError> {
+    if steps == 0 {
+        return Err(RolloutError::NoSteps);
+    }
+    if capacity == 0 {
+        return Err(RolloutError::ZeroCapacity);
+    }
+    if sample_size == 0 {
+        return Err(RolloutError::ZeroSampleBatch);
+    }
+    if update_rounds == 0 {
+        return Err(RolloutError::ZeroUpdateRounds);
+    }
+    let available = steps.min(capacity);
+    if sample_size > available {
+        return Err(RolloutError::SampleTooLarge {
+            requested: sample_size,
+            available,
+        });
+    }
+
+    // Phase 1: collect only. No Q update happens while the environment runs.
+    let buffer = collect_rollout(steps, capacity)?;
+
+    let gamma = 0.9;
+    let learning_rate = 0.5;
+    let mut q_values = [[0.0f32; 2]; 3];
+
+    // ANCHOR: replay_update
+    for _ in 0..update_rounds {
+        let batch = buffer.sample(sample_size);
+        let states = read_rows(&batch.states)?;
+        let next_states = read_rows(&batch.next_states)?;
+        let actions = read_rows(&batch.actions)?;
+        let rewards = read_rows(&batch.rewards)?;
+        let dones = read_rows(&batch.dones)?;
+
+        for row in 0..sample_size {
+            let state_row = state_index(states[row][0] as i32);
+            let next_row = state_index(next_states[row][0] as i32);
+            let action_column = if actions[row][0] < 0.0 { 0 } else { 1 };
+            let next_max_q = q_values[next_row]
+                .iter()
+                .copied()
+                .fold(f32::NEG_INFINITY, f32::max);
+            let target = td_target(rewards[row][0], next_max_q, dones[row][0] != 0.0, gamma);
+            let current = q_values[state_row][action_column];
+            q_values[state_row][action_column] = current + learning_rate * (target - current);
+        }
+    }
+    // ANCHOR_END: replay_update
+
+    Ok(ReplayUpdateReport {
+        transitions_collected: steps,
+        buffer_len: buffer.len(),
+        updates_applied: update_rounds * sample_size,
+        initial_right_q: q_values[0][1],
+    })
+}
+
+/// Run the deterministic rollout without any learning and return the buffer.
+fn collect_rollout(
+    steps: usize,
+    capacity: usize,
+) -> Result<TransitionBuffer<Tensor<2>, Tensor<2>>, RolloutError> {
+    if capacity == 0 {
+        return Err(RolloutError::ZeroCapacity);
+    }
+    let device = Device::flex();
+    let mut environment = CounterEnv::new();
+    let mut buffer = TransitionBuffer::<Tensor<2>, Tensor<2>>::new(capacity, &device);
+
+    for index in 0..steps {
+        let state = environment.state();
+        let action = scheduled_action(index);
+        let result = environment.step(action);
+        buffer.push(
+            state_tensor(state, &device),
+            state_tensor(result.next_state, &device),
+            action_tensor(action, &device),
+            result.reward as f32,
+            result.done || result.truncated,
+        );
+        if result.done || result.truncated {
+            environment.reset();
+        }
+    }
+
+    Ok(buffer)
+}
+
+/// Read a `[rows, columns]` tensor back into per-row vectors.
+fn read_rows(tensor: &Tensor<2>) -> Result<Vec<Vec<f32>>, RolloutError> {
+    let [rows, columns] = tensor.dims();
+    let flat = tensor
+        .clone()
+        .into_data()
+        .to_vec::<f32>()
+        .map_err(|error| RolloutError::Readback(error.to_string()))?;
+    debug_assert_eq!(flat.len(), rows * columns);
+    Ok(flat.chunks(columns).map(Vec::from).collect())
+}
 
 #[cfg(test)]
 mod tests {
@@ -319,17 +474,34 @@ mod tests {
     }
 
     #[test]
+    fn environment_reports_natural_done_before_step_limit() {
+        let mut environment = CounterEnv::new();
+        let first = environment.step(CounterAction::Right);
+        let second = environment.step(CounterAction::Right);
+
+        assert!(!first.done);
+        assert!(!first.truncated);
+        assert!(second.done);
+        assert!(!second.truncated);
+    }
+
+    #[test]
     fn rollout_samples_shapes_and_updates_q_value() {
         let report = run_rollout(6, 4, 2).expect("valid deterministic rollout");
 
         assert_eq!(report.transitions_collected, 6);
         assert_eq!(report.buffer_len, 4);
-        assert_eq!(report.terminal_transitions, 1);
+        assert_eq!(report.done_transitions, 1);
+        assert_eq!(report.truncated_transitions, 1);
         assert_eq!(report.sampled_state_shape, [2, 2]);
         assert_eq!(report.sampled_action_shape, [2, 1]);
         assert_eq!(report.sampled_reward_shape, [2, 1]);
         assert_eq!(report.sampled_done_shape, [2, 1]);
-        assert!(report.initial_right_q > 0.0);
+        assert!(
+            (report.initial_right_q - 1.2125).abs() < 1e-6,
+            "unexpected fixed Q reference: {}",
+            report.initial_right_q
+        );
     }
 
     #[test]
@@ -348,6 +520,69 @@ mod tests {
             Err(RolloutError::SampleTooLarge {
                 requested: 2,
                 available: 1
+            })
+        );
+    }
+
+    #[test]
+    fn unit_capacity_retains_only_the_latest_aligned_transition() {
+        let buffer = collect_rollout(6, 1).expect("valid collection");
+
+        assert_eq!(buffer.len(), 1);
+        let batch = buffer.sample(1);
+        // The last scheduled transition is state=[1,3] --Left--> next=[0,4]
+        // with reward 0. It hits the step limit, so the stored replay `done`
+        // flag is 1 even though the environment reported truncated, not done.
+        // Sampling a 1-element ring is deterministic, so every column must
+        // come from that same retained transition.
+        assert_eq!(
+            read_rows(&batch.states).expect("states"),
+            vec![vec![1.0, 3.0]]
+        );
+        assert_eq!(
+            read_rows(&batch.next_states).expect("next_states"),
+            vec![vec![0.0, 4.0]]
+        );
+        assert_eq!(
+            read_rows(&batch.actions).expect("actions"),
+            vec![vec![-1.0]]
+        );
+        assert_eq!(read_rows(&batch.rewards).expect("rewards"), vec![vec![0.0]]);
+        assert_eq!(read_rows(&batch.dones).expect("dones"), vec![vec![1.0]]);
+    }
+
+    #[test]
+    fn replay_driven_with_unit_capacity_cannot_update_initial_q() {
+        let report = run_replay_driven(6, 1, 1, 8).expect("valid replay-driven run");
+
+        assert_eq!(report.transitions_collected, 6);
+        assert_eq!(report.buffer_len, 1);
+        assert_eq!(report.updates_applied, 8);
+        // The retained transition touches state 1 / Left only, and its target is
+        // zero; the initial state value stays at exactly zero.
+        assert_eq!(report.initial_right_q, 0.0);
+    }
+
+    #[test]
+    fn replay_driven_rejects_invalid_configuration() {
+        assert_eq!(run_replay_driven(0, 1, 1, 1), Err(RolloutError::NoSteps));
+        assert_eq!(
+            run_replay_driven(1, 0, 1, 1),
+            Err(RolloutError::ZeroCapacity)
+        );
+        assert_eq!(
+            run_replay_driven(1, 1, 0, 1),
+            Err(RolloutError::ZeroSampleBatch)
+        );
+        assert_eq!(
+            run_replay_driven(1, 1, 1, 0),
+            Err(RolloutError::ZeroUpdateRounds)
+        );
+        assert_eq!(
+            run_replay_driven(4, 2, 3, 1),
+            Err(RolloutError::SampleTooLarge {
+                requested: 3,
+                available: 2
             })
         );
     }

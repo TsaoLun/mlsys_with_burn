@@ -34,9 +34,11 @@ forward → loss → backward → GradientsParams → SGD → loss
 {{#include ../../../examples/ch06-training-loop/src/lib.rs:train_step}}
 ```
 
-每次循环先保留一个 loss 标量用于观察，再调用 `backward`。随后
+每次循环先保留一个**更新前** loss 标量用于观察，再调用 `backward`。随后
 `GradientsParams::from_grads` 根据 module 参数建立优化器需要的映射，
 `SgdConfig::new().init()` 返回的 optimizer 消费 model 并返回更新后的 model。
+循环结束后，实验再用最终参数重新 forward 一次得到 `final_loss`；这样
+“最终 loss”指的是最终模型本身，而不是最后一次更新前的观察值。
 
 这段代码没有显式调用“清空梯度”。Burn 的这种手写路径中，每次
 `loss.backward()` 返回一次新的 `Gradients`；若要实现梯度累积，应该显式
@@ -46,8 +48,8 @@ forward → loss → backward → GradientsParams → SGD → loss
 ## 3. 运行与测试
 
 ```bash
-cargo test -p ch06-training-loop
-cargo run -p ch06-training-loop
+cargo test -p ch06-training-loop --locked
+cargo run -p ch06-training-loop --locked
 ```
 
 跑完后，你应能观察到：

@@ -92,7 +92,7 @@ pub struct Job {
     pub memory_mb: u64,
     pub steps: u32,
     pub compute_us_per_step: u64,
-    pub gradient_bytes: u64,
+    pub gradient_bytes_per_step: u64,
     pub checkpoint_interval: u32,
     pub failure_step: Option<u32>,
 }
@@ -104,7 +104,7 @@ impl Job {
         memory_mb: u64,
         steps: u32,
         compute_us_per_step: u64,
-        gradient_bytes: u64,
+        gradient_bytes_per_step: u64,
         checkpoint_interval: u32,
     ) -> Self {
         Self {
@@ -113,7 +113,7 @@ impl Job {
             memory_mb,
             steps,
             compute_us_per_step,
-            gradient_bytes,
+            gradient_bytes_per_step,
             checkpoint_interval,
             failure_step: None,
         }
@@ -140,18 +140,33 @@ impl fmt::Display for PlacementPolicy {
     }
 }
 
+/// Link costs for the three placement domains: same node, same rack across
+/// nodes, and across racks. Multipliers apply on top of the `alpha + beta`
+/// baseline; 1 means "no extra penalty" for that domain.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct NetworkModel {
     pub alpha_us: u64,
     pub beta_ns_per_byte: u64,
+    pub cross_node_multiplier: u64,
     pub cross_rack_multiplier: u64,
 }
 
 impl NetworkModel {
+    /// Baseline model with a two-times cross-node penalty.
     pub const fn new(alpha_us: u64, beta_ns_per_byte: u64, cross_rack_multiplier: u64) -> Self {
+        Self::with_multipliers(alpha_us, beta_ns_per_byte, 2, cross_rack_multiplier)
+    }
+
+    pub const fn with_multipliers(
+        alpha_us: u64,
+        beta_ns_per_byte: u64,
+        cross_node_multiplier: u64,
+        cross_rack_multiplier: u64,
+    ) -> Self {
         Self {
             alpha_us,
             beta_ns_per_byte,
+            cross_node_multiplier,
             cross_rack_multiplier,
         }
     }
@@ -166,6 +181,7 @@ impl Default for NetworkModel {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct CommunicationCost {
     pub total_us: u64,
+    pub cross_node_bytes: u64,
     pub cross_rack_bytes: u64,
     pub rounds: u64,
 }
@@ -179,6 +195,7 @@ pub fn communication_cost(
     if placement.len() < 2 {
         return CommunicationCost {
             total_us: 0,
+            cross_node_bytes: 0,
             cross_rack_bytes: 0,
             rounds: 0,
         };
@@ -191,6 +208,9 @@ pub fn communication_cost(
         nanos_to_micros(u128::from(network.beta_ns_per_byte).saturating_mul(logical_bytes));
     let base_latency_us = u128::from(network.alpha_us) * u128::from(rounds);
 
+    // Node identity is the (rack, node) pair: node numbers repeat per rack in
+    // the fixtures, just as server numbering repeats per rack in a real cluster.
+    let mut cross_node_pairs = 0_u128;
     let mut cross_rack_pairs = 0_u128;
     for (left_index, left_id) in placement.iter().enumerate() {
         for right_id in placement.iter().skip(left_index + 1) {
@@ -202,24 +222,32 @@ pub fn communication_cost(
             };
             if left.rack != right.rack {
                 cross_rack_pairs += 1;
+            } else if left.node != right.node {
+                cross_node_pairs += 1;
             }
         }
     }
 
+    let cross_node_bytes = u128::from(gradient_bytes).saturating_mul(cross_node_pairs);
     let cross_rack_bytes = u128::from(gradient_bytes).saturating_mul(cross_rack_pairs);
-    let extra_multiplier = network.cross_rack_multiplier.saturating_sub(1);
-    let cross_rack_penalty_us = nanos_to_micros(
-        u128::from(network.beta_ns_per_byte)
-            .saturating_mul(cross_rack_bytes)
-            .saturating_mul(u128::from(extra_multiplier)),
-    );
+    let penalty_us =
+        nanos_to_micros(
+            u128::from(network.beta_ns_per_byte).saturating_mul(
+                cross_node_bytes
+                    .saturating_mul(u128::from(network.cross_node_multiplier.saturating_sub(1)))
+                    .saturating_add(cross_rack_bytes.saturating_mul(u128::from(
+                        network.cross_rack_multiplier.saturating_sub(1),
+                    ))),
+            ),
+        );
 
     CommunicationCost {
         total_us: saturating_u128_to_u64(
             base_latency_us
                 .saturating_add(base_transfer_us)
-                .saturating_add(cross_rack_penalty_us),
+                .saturating_add(penalty_us),
         ),
+        cross_node_bytes: saturating_u128_to_u64(cross_node_bytes),
         cross_rack_bytes: saturating_u128_to_u64(cross_rack_bytes),
         rounds,
     }
@@ -450,7 +478,15 @@ struct RunningJob {
     placement: Vec<usize>,
     finish_us: u64,
     failure_us: Option<u64>,
-    communication: CommunicationCost,
+    per_step_communication: CommunicationCost,
+    executed_collective_steps: u64,
+}
+
+#[derive(Debug)]
+struct SimulationTotals {
+    retries: usize,
+    collective_time_us: u64,
+    cross_rack_bytes: u64,
 }
 
 // ANCHOR: simulator_api
@@ -485,9 +521,11 @@ pub fn simulate(
     let mut trace = Vec::new();
     let mut now_us = 0;
     let mut peak_allocated_gpus = 0;
-    let mut total_retries = 0;
-    let mut total_collective_time_us = 0;
-    let mut total_cross_rack_bytes = 0;
+    let mut totals = SimulationTotals {
+        retries: 0,
+        collective_time_us: 0,
+        cross_rack_bytes: 0,
+    };
 
     while !pending.is_empty() || !running.is_empty() {
         admit_jobs(
@@ -533,17 +571,10 @@ pub fn simulate(
                 &running_job,
                 &config,
                 now_us,
-                &mut total_retries,
+                &mut totals,
             )?;
         } else {
-            handle_completion(
-                &mut reports,
-                &mut trace,
-                &running_job,
-                now_us,
-                &mut total_collective_time_us,
-                &mut total_cross_rack_bytes,
-            )?;
+            handle_completion(&mut reports, &mut trace, &running_job, now_us, &mut totals)?;
         }
     }
 
@@ -561,9 +592,9 @@ pub fn simulate(
         makespan_us: now_us,
         total_queue_wait_us,
         p95_queue_wait_us: percentile_95(&queue_waits),
-        cross_rack_bytes: total_cross_rack_bytes,
-        collective_time_us: total_collective_time_us,
-        retries: total_retries,
+        cross_rack_bytes: totals.cross_rack_bytes,
+        collective_time_us: totals.collective_time_us,
+        retries: totals.retries,
         peak_allocated_gpus,
         free_gpu_count: free.len(),
         trace,
@@ -608,6 +639,13 @@ fn validate_job(cluster: &Cluster, job: &Job) -> Result<(), SimulationError> {
         });
     }
 
+    if job.gpu_count > 1 && job.gradient_bytes_per_step == 0 {
+        return Err(SimulationError::InvalidJob {
+            id: job.id,
+            reason: "multi-rank jobs need a positive per-step gradient size",
+        });
+    }
+
     let eligible_gpus = cluster
         .gpus()
         .iter()
@@ -643,20 +681,19 @@ fn admit_jobs(
             return Ok(());
         };
 
-        let communication = communication_cost(
+        let per_step_communication = communication_cost(
             cluster,
             &placement,
-            pending_job.job.gradient_bytes,
+            pending_job.job.gradient_bytes_per_step,
             config.network,
         );
-        let finish_us = now_us
-            .saturating_add(work_time(
-                &pending_job.job,
-                pending_job.resume_step,
-                pending_job.job.steps,
-                config.checkpoint_cost_us,
-            ))
-            .saturating_add(communication.total_us);
+        let finish_us = now_us.saturating_add(work_time(
+            &pending_job.job,
+            pending_job.resume_step,
+            pending_job.job.steps,
+            config.checkpoint_cost_us,
+            per_step_communication.total_us,
+        ));
         let failure_us = if pending_job.failure_injected {
             None
         } else {
@@ -666,9 +703,16 @@ fn admit_jobs(
                     pending_job.resume_step,
                     step,
                     config.checkpoint_cost_us,
+                    per_step_communication.total_us,
                 ))
             })
         };
+        let executed_collective_steps = u64::from(
+            pending_job
+                .job
+                .steps
+                .saturating_sub(pending_job.resume_step),
+        );
 
         for id in &placement {
             free.remove(id);
@@ -699,7 +743,8 @@ fn admit_jobs(
             placement,
             finish_us,
             failure_us,
-            communication,
+            per_step_communication,
+            executed_collective_steps,
         });
     }
 }
@@ -726,13 +771,19 @@ fn choose_placement(
     match policy {
         PlacementPolicy::Fifo => Some(eligible.into_iter().take(job.gpu_count).collect()),
         PlacementPolicy::TopologyAware => {
+            // Tightest domain first: one node, then one rack, then across racks.
+            let mut by_node = BTreeMap::<(usize, usize), Vec<usize>>::new();
             let mut by_rack = BTreeMap::<usize, Vec<usize>>::new();
             for id in eligible {
                 if let Some(gpu) = cluster.gpu(id) {
+                    by_node.entry((gpu.rack, gpu.node)).or_default().push(id);
                     by_rack.entry(gpu.rack).or_default().push(id);
                 }
             }
 
+            if let Some(group) = by_node.values().find(|group| group.len() >= job.gpu_count) {
+                return Some(group.iter().copied().take(job.gpu_count).collect());
+            }
             if let Some(group) = by_rack.values().find(|group| group.len() >= job.gpu_count) {
                 return Some(group.iter().copied().take(job.gpu_count).collect());
             }
@@ -756,13 +807,23 @@ fn handle_failure(
     running: &RunningJob,
     config: &SimulationConfig,
     now_us: u64,
-    total_retries: &mut usize,
+    totals: &mut SimulationTotals,
 ) -> Result<(), SimulationError> {
     let job = &running.pending.job;
     let failed_step = job.failure_step.unwrap_or(running.pending.resume_step);
     let checkpoint_step = NonZeroU32::new(job.checkpoint_interval)
         .map_or(0, |interval| failed_step / interval.get() * interval.get());
     let replayed_steps = failed_step.saturating_sub(checkpoint_step);
+    let executed_before_failure =
+        u64::from(failed_step.saturating_sub(running.pending.resume_step));
+    let collective_time_before_failure = running
+        .per_step_communication
+        .total_us
+        .saturating_mul(executed_before_failure);
+    let cross_rack_bytes_before_failure = running
+        .per_step_communication
+        .cross_rack_bytes
+        .saturating_mul(executed_before_failure);
     let Some(report) = reports.get_mut(&job.id) else {
         return Err(SimulationError::MissingReport(job.id));
     };
@@ -770,7 +831,19 @@ fn handle_failure(
     report.checkpoint_replay_steps = report
         .checkpoint_replay_steps
         .saturating_add(replayed_steps);
-    *total_retries += 1;
+    report.collective_time_us = report
+        .collective_time_us
+        .saturating_add(collective_time_before_failure);
+    report.cross_rack_bytes = report
+        .cross_rack_bytes
+        .saturating_add(cross_rack_bytes_before_failure);
+    totals.retries += 1;
+    totals.collective_time_us = totals
+        .collective_time_us
+        .saturating_add(collective_time_before_failure);
+    totals.cross_rack_bytes = totals
+        .cross_rack_bytes
+        .saturating_add(cross_rack_bytes_before_failure);
     trace.push(TraceEvent::JobFailed {
         job_id: job.id,
         attempt: running.pending.attempt,
@@ -799,25 +872,26 @@ fn handle_completion(
     trace: &mut Vec<TraceEvent>,
     running: &RunningJob,
     now_us: u64,
-    total_collective_time_us: &mut u64,
-    total_cross_rack_bytes: &mut u64,
+    totals: &mut SimulationTotals,
 ) -> Result<(), SimulationError> {
     let job_id = running.pending.job.id;
+    let collective_time = running
+        .per_step_communication
+        .total_us
+        .saturating_mul(running.executed_collective_steps);
+    let cross_rack_bytes = running
+        .per_step_communication
+        .cross_rack_bytes
+        .saturating_mul(running.executed_collective_steps);
     let Some(report) = reports.get_mut(&job_id) else {
         return Err(SimulationError::MissingReport(job_id));
     };
     report.completed_step = running.pending.job.steps;
-    report.collective_time_us = report
-        .collective_time_us
-        .saturating_add(running.communication.total_us);
-    report.cross_rack_bytes = report
-        .cross_rack_bytes
-        .saturating_add(running.communication.cross_rack_bytes);
+    report.collective_time_us = report.collective_time_us.saturating_add(collective_time);
+    report.cross_rack_bytes = report.cross_rack_bytes.saturating_add(cross_rack_bytes);
     report.end_us = Some(now_us);
-    *total_collective_time_us =
-        total_collective_time_us.saturating_add(running.communication.total_us);
-    *total_cross_rack_bytes =
-        total_cross_rack_bytes.saturating_add(running.communication.cross_rack_bytes);
+    totals.collective_time_us = totals.collective_time_us.saturating_add(collective_time);
+    totals.cross_rack_bytes = totals.cross_rack_bytes.saturating_add(cross_rack_bytes);
     trace.push(TraceEvent::JobCompleted {
         job_id,
         attempt: running.pending.attempt,
@@ -830,7 +904,13 @@ fn release(free: &mut BTreeSet<usize>, placement: &[usize]) {
     free.extend(placement.iter().copied());
 }
 
-fn work_time(job: &Job, from_step: u32, to_step: u32, checkpoint_cost_us: u64) -> u64 {
+fn work_time(
+    job: &Job,
+    from_step: u32,
+    to_step: u32,
+    checkpoint_cost_us: u64,
+    per_step_collective_us: u64,
+) -> u64 {
     if to_step <= from_step {
         return 0;
     }
@@ -842,6 +922,7 @@ fn work_time(job: &Job, from_step: u32, to_step: u32, checkpoint_cost_us: u64) -
     };
     step_count
         .saturating_mul(job.compute_us_per_step)
+        .saturating_add(step_count.saturating_mul(per_step_collective_us))
         .saturating_add(checkpoint_count.saturating_mul(checkpoint_cost_us))
 }
 
@@ -954,6 +1035,113 @@ mod tests {
         let large = communication_cost(&cluster, &placement, 2_000, NetworkModel::default());
         assert!(large.total_us > small.total_us);
         assert!(large.cross_rack_bytes > small.cross_rack_bytes);
+    }
+
+    #[test]
+    fn collective_cost_scales_with_completed_steps() {
+        let cluster = fixture_cluster();
+        let one_step = simulate(
+            &cluster,
+            vec![Job::new(1, 2, 4_000, 1, 100, 4_000, 0)],
+            SimulationConfig::default(),
+        )
+        .expect("one-step simulation should complete");
+        let two_steps = simulate(
+            &cluster,
+            vec![Job::new(1, 2, 4_000, 2, 100, 4_000, 0)],
+            SimulationConfig::default(),
+        )
+        .expect("two-step simulation should complete");
+
+        assert_eq!(
+            two_steps.collective_time_us,
+            one_step.collective_time_us.saturating_mul(2)
+        );
+        assert_eq!(
+            two_steps.cross_rack_bytes,
+            one_step.cross_rack_bytes.saturating_mul(2)
+        );
+    }
+
+    #[test]
+    fn failure_and_replay_count_collectives_for_every_executed_step() {
+        let cluster = fixture_cluster();
+        let job = Job::new(1, 2, 4_000, 4, 100, 4_000, 2).with_failure_step(3);
+        let per_step = communication_cost(
+            &cluster,
+            &[0, 2],
+            job.gradient_bytes_per_step,
+            SimulationConfig::default().network,
+        );
+        let result = simulate(&cluster, vec![job], SimulationConfig::default())
+            .expect("failure should be recoverable");
+        let report = &result.jobs[0];
+
+        // First attempt executes steps 0..3; replay from checkpoint 2 executes 2..4.
+        let executed_collectives = 3_u64 + 2_u64;
+        assert_eq!(
+            report.collective_time_us,
+            per_step.total_us.saturating_mul(executed_collectives)
+        );
+        assert_eq!(
+            report.cross_rack_bytes,
+            per_step
+                .cross_rack_bytes
+                .saturating_mul(executed_collectives)
+        );
+        assert_eq!(
+            result.collective_time_us,
+            per_step.total_us.saturating_mul(executed_collectives)
+        );
+    }
+
+    #[test]
+    fn communication_cost_distinguishes_three_placement_domains() {
+        // Two racks, two nodes per rack, two GPUs per node:
+        // (0,2) same node, (0,4) same rack but different node, (0,1) across racks.
+        let cluster = Cluster::uniform_interleaved(2, 2, 2, 16_000)
+            .expect("three-tier fixture cluster must be valid");
+        let network = NetworkModel::with_multipliers(10, 1, 2, 4);
+
+        let same_node = communication_cost(&cluster, &[0, 2], 1_000, network);
+        let cross_node = communication_cost(&cluster, &[0, 4], 1_000, network);
+        let cross_rack = communication_cost(&cluster, &[0, 1], 1_000, network);
+
+        // Base cost for a 2-participant model: 2 rounds * 10us + 1000 bytes at
+        // 1ns/byte = 21us. Penalties stack on top per domain multiplier minus 1.
+        assert_eq!(same_node.total_us, 21);
+        assert_eq!(same_node.cross_node_bytes, 0);
+        assert_eq!(same_node.cross_rack_bytes, 0);
+
+        assert_eq!(cross_node.total_us, 22);
+        assert_eq!(cross_node.cross_node_bytes, 1_000);
+        assert_eq!(cross_node.cross_rack_bytes, 0);
+
+        assert_eq!(cross_rack.total_us, 24);
+        assert_eq!(cross_rack.cross_node_bytes, 0);
+        assert_eq!(cross_rack.cross_rack_bytes, 1_000);
+
+        assert!(same_node.total_us < cross_node.total_us);
+        assert!(cross_node.total_us < cross_rack.total_us);
+    }
+
+    #[test]
+    fn topology_aware_prefers_node_local_before_rack_local() {
+        let cluster = Cluster::uniform_interleaved(2, 2, 2, 16_000)
+            .expect("three-tier fixture cluster must be valid");
+        let job = fixture_job(1, 2);
+        let topology = simulate(
+            &cluster,
+            vec![job],
+            SimulationConfig {
+                placement_policy: PlacementPolicy::TopologyAware,
+                ..SimulationConfig::default()
+            },
+        )
+        .expect("topology-aware simulation should complete");
+
+        assert_eq!(topology.jobs[0].placements, vec![vec![0, 2]]);
+        assert_eq!(topology.jobs[0].cross_rack_bytes, 0);
     }
 
     #[test]

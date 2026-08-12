@@ -42,7 +42,9 @@ autodiff tape。这让“训练时需要梯度”和“评估/推理不需要 ta
 {{#include ../../examples/ch05-ch07-capstone/src/main.rs:capstone_main}}
 ```
 
-数据、训练、artifact 和恢复逻辑位于同一个库函数：
+数据、训练、artifact 和恢复逻辑位于同一个库函数。阅读时建议按函数内
+注释分成四段对照：`loader audit → 训练循环 → Record 往返 → 推理验证`，
+而不是把它当成一个必须逐行记住的长函数。
 
 ```rust,ignore
 {{#include ../../examples/ch05-ch07-capstone/src/lib.rs:capstone_pipeline}}
@@ -59,6 +61,20 @@ cargo run -p ch05-ch07-capstone --locked --offline
 模型精度或服务 latency 结论。`ModuleRecord` 验证的是 Burn 参数 artifact
 边界；ONNX 转换、HTTP 服务、Remote、GPU 和多节点部署仍然是第 7 章明确
 标出的可选路径。
+
+## 把它变成你自己的实验
+
+运行通过只说明你能复现本书给出的参考结果。把它变成学习成果，请再做一
+件小改动并记录结果：
+
+1. 任选一个变量：`BATCH_SIZE`、样本数、训练 epoch、学习率或模型输入维数；
+2. 先预测哪些不变量仍应成立（样本守恒、shape、拓扑错误、往返误差）；
+3. 修改源码并运行测试；
+4. 用一段实验笔记记录：配置、预测、实际输出、失败原因或解释。
+
+例如把 batch size 从 4 改为 5 时，样本数仍应是 16/4，但 batch 数和每个
+batch 的 shape 都会变化；如果你只改断言而不解释为什么会变，这条实验还
+没有形成系统结论。你不需要提交代码，只需要能用输出证明你理解了每个边界。
 
 ## 与 OpenMLSys 的比较
 

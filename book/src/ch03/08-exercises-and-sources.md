@@ -127,7 +127,7 @@ CubeK。
 
 </details>
 
-4. 【进阶】在支持的机器上运行 `cargo test -p ch03-cubecl-kernel --features wgpu`。
+4. 【进阶】在支持的机器上运行 `cargo test -p ch03-cubecl-kernel --features wgpu --locked`。
 
 <details>
 <summary>提示</summary>
@@ -162,7 +162,8 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-见第 9 章拓扑与调度节及网络配图。
+对照 `examples/ch03-cubecl-kernel` 的边界检查与第 3 章「Slice、Vector 与
+Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 
 </details>
 
@@ -197,12 +198,14 @@ CubeK。
 
 </details>
 
-3. 【进阶】沿 Burn matmul 路径找到 `cubek::matmul::launch::launch_ref`。
+3. 【进阶】沿 Burn matmul 路径找到 `cubek::matmul::launch::launch_ref`，
+   并说出六个决策点各自回答了什么问题。
 
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+对照[CubeK 与 Burn 算子路径](04-cubek-and-burn.md)的「逐层走查」小节，
+按其中的文件路径在本书固定版本源码里各读一遍。
 
 </details>
 
@@ -270,7 +273,7 @@ CubeK。
 
 ## 延伸阅读
 
-固定上游中的权威入口：
+本书固定版本源码中的权威入口：
 
 - `cubecl/README.md`
 - `cubecl/examples/gelu/`
@@ -280,7 +283,11 @@ CubeK。
 - `cubecl/crates/cubecl-runtime/src/config/autotune.rs`
 - `cubek/GUIDE.md`
 - `cubek/crates/cubek-matmul/src/`
+- `cubek/crates/cubek-matmul/src/launch.rs`（统一入口到 Strategy 的转发）
+- `cubek/crates/cubek-matmul/src/strategy/strategy.rs`（策略空间枚举）
 - `cubek/crates/cubek-reduce/src/`
+- `burn/crates/burn-tensor/src/tensor/api/numeric.rs`（`Tensor::matmul` 的校验与 vec-mat 重解释）
+- `burn/crates/burn-cubecl/src/ops/tensor.rs`（`float_matmul` 的策略选择）
 - `burn/crates/burn-cubecl/src/kernel/matmul/`
 - `burn/crates/burn-cubecl/src/kernel/attention/`
 - `burn/crates/burn-cubecl/src/ops/module.rs`

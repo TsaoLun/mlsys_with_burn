@@ -56,6 +56,86 @@ pub fn run_round_trip() -> Result<RoundTripReport, burn::store::RecordError> {
 }
 // ANCHOR_END: run_round_trip
 
+/// Serialize the example model into in-memory Burnpack bytes.
+pub fn sample_record_bytes() -> Result<burn::tensor::Bytes, burn::store::RecordError> {
+    let device = Device::flex();
+    let config = LinearConfig::new(2, 1).with_initializer(Initializer::Constant { value: 0.5 });
+    let model = config.init(&device);
+    model.into_record().into_bytes()
+}
+
+/// Errors reported by the minimal Burnpack header reader.
+#[derive(Debug, PartialEq, Eq)]
+pub enum LayoutError {
+    /// Fewer bytes than the fixed header.
+    TruncatedHeader,
+    /// The magic number does not identify a Burnpack container.
+    BadMagic([u8; 4]),
+}
+
+impl std::fmt::Display for LayoutError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::TruncatedHeader => formatter.write_str("burnpack header is truncated"),
+            Self::BadMagic(magic) => write!(formatter, "bad burnpack magic: {magic:02x?}"),
+        }
+    }
+}
+
+impl std::error::Error for LayoutError {}
+
+/// Byte-level facts read from the fixed Burnpack header alone.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct BurnpackLayout {
+    /// Magic bytes as stored on disk.
+    pub magic: [u8; 4],
+    /// Container format version.
+    pub version: u16,
+    /// Size of the CBOR metadata section in bytes.
+    pub metadata_size: u32,
+    /// Absolute offset where the 256-byte-aligned tensor data section starts.
+    pub data_section_start: usize,
+    /// Total container length in bytes.
+    pub total_len: usize,
+}
+
+/// The fixed header is magic (4) + version (2) + metadata size (4).
+pub const BURNPACK_HEADER_SIZE: usize = 10;
+
+/// Tensor data starts on a 256-byte boundary so absolute file offsets stay
+/// aligned for mmap-style zero-copy loading.
+pub const BURNPACK_TENSOR_ALIGNMENT: usize = 256;
+
+// ANCHOR: burnpack_layout
+/// Parse only the fixed Burnpack header, without any serde machinery.
+///
+/// The format's magic constant is `0x4255524E` ("BURN" in ASCII). Because the
+/// header is written little-endian, the bytes on disk read `NRUB` — seeing the
+/// letters reversed is expected, not corruption.
+pub fn inspect_burnpack_layout(bytes: &[u8]) -> Result<BurnpackLayout, LayoutError> {
+    if bytes.len() < BURNPACK_HEADER_SIZE {
+        return Err(LayoutError::TruncatedHeader);
+    }
+    let magic = [bytes[0], bytes[1], bytes[2], bytes[3]];
+    let version = u16::from_le_bytes([bytes[4], bytes[5]]);
+    let metadata_size = u32::from_le_bytes([bytes[6], bytes[7], bytes[8], bytes[9]]);
+    if u32::from_le_bytes(magic) != 0x4255_524E {
+        return Err(LayoutError::BadMagic(magic));
+    }
+    let data_section_start = (BURNPACK_HEADER_SIZE + metadata_size as usize)
+        .div_ceil(BURNPACK_TENSOR_ALIGNMENT)
+        * BURNPACK_TENSOR_ALIGNMENT;
+
+    Ok(BurnpackLayout {
+        magic,
+        version,
+        metadata_size,
+        data_section_start,
+        total_len: bytes.len(),
+    })
+}
+// ANCHOR_END: burnpack_layout
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ArtifactManifest {
     pub version: u64,
@@ -127,6 +207,45 @@ mod tests {
             "restored output changed by {}",
             report.max_abs_error
         );
+    }
+
+    #[test]
+    fn burnpack_layout_exposes_endianness_version_and_alignment() {
+        let bytes = sample_record_bytes().expect("record serialization should work");
+        let layout = inspect_burnpack_layout(&bytes).expect("valid burnpack header");
+
+        // The magic constant is "BURN" (0x4255524E); stored little-endian, the
+        // bytes on disk read "NRUB".
+        assert_eq!(&layout.magic, b"NRUB");
+        assert_eq!(layout.version, 1);
+        assert!(layout.metadata_size > 0);
+        assert_eq!(
+            layout.data_section_start % BURNPACK_TENSOR_ALIGNMENT,
+            0,
+            "tensor data must start on a 256-byte boundary"
+        );
+        assert!(
+            layout.data_section_start >= BURNPACK_HEADER_SIZE + layout.metadata_size as usize,
+            "data section must not overlap the metadata"
+        );
+        assert!(layout.total_len >= layout.data_section_start);
+    }
+
+    #[test]
+    fn burnpack_layout_rejects_truncated_or_foreign_bytes() {
+        assert_eq!(
+            inspect_burnpack_layout(b"BUR"),
+            Err(LayoutError::TruncatedHeader)
+        );
+
+        let mut bytes = sample_record_bytes()
+            .expect("record serialization should work")
+            .to_vec();
+        bytes[0] = b'X';
+        assert!(matches!(
+            inspect_burnpack_layout(&bytes),
+            Err(LayoutError::BadMagic(_))
+        ));
     }
 
     #[test]

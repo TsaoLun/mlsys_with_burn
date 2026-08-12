@@ -17,7 +17,7 @@
 
 1. 用 Load、Shuffle、Map、Batch 和 Send 描述数据处理路径；
 2. 用生产速率、变换速率和消费速率定位数据管道的瓶颈；
-3. 阅读 本书所用的 Burn 版本中的 `Dataset`、`MapperDataset`、`Batcher` 和
+3. 阅读本书所用 Burn 版本中的 `Dataset`、`MapperDataset`、`Batcher` 和
    `DataLoader` 边界；
 4. 区分 `InMemDataset` 的全内存模型、惰性变换和基于 SQLite 的按索引读取；
 5. 解释固定 seed、每个 epoch 的 shuffle，以及 `SamplerDataset` 的替换语义；
@@ -57,3 +57,6 @@ trait、`Iterator`、`Send`/`Sync` 和基本线程通信；不要求先学习 SQ
 6. [存储、缓存与扩展路径](ch05/06-storage-and-scaling.md)
 7. [实验：可复现数据管道](ch05/07-reproducible-pipeline-lab.md)
 8. [练习、延伸阅读与来源](ch05/08-exercises-and-sources.md)
+
+下一章把已经可靠到达的 batch 放入训练循环，讨论 optimizer 状态、
+checkpoint 与跨设备同步。

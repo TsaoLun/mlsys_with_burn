@@ -162,7 +162,9 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-见第 9 章拓扑与调度节及网络配图。
+按本章末「延伸阅读与固定源码入口」打开本书固定版本；配合
+`examples/ch07-record-roundtrip` 观察错误 topology 如何被
+`RecordError::Validation` 拒绝。
 
 </details>
 
@@ -330,6 +332,8 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 
 - `burn/crates/burn-core/src/store/mod.rs`
 - `burn/crates/burn-core/src/module/base.rs`
+- `burn/crates/burn-pack/src/base.rs`（Burnpack 头部、对齐与容量上限）
+- `burn/crates/burn-pack/src/writer.rs`（CBOR metadata 与 tensor 布局规划）
 - `burn/crates/burn-store/src/traits.rs`
 - `burn/crates/burn-store/src/burnpack/`
 - `burn/crates/burn-store/src/safetensors/`

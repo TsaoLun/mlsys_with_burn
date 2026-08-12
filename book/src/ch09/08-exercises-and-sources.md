@@ -38,7 +38,9 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-见第 5 章数据路径与背压模型节。
+对照第 9 章「集群负载、系统分层与能力边界」和第 6 章「集合通信、DDP
+与能力边界」：队列等待属于控制面，`all_reduce` 属于训练数据面，
+`ComputeClient::sync` 属于设备运行时完成边界。
 
 </details>
 
@@ -121,7 +123,9 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch08-rl-rollout` 并对照第 8 章对应抽象。
+改 `examples/ch09-cluster-simulator` 的 `choose_placement`，并为队首阻塞、
+资源归还和最终准入写虚拟时间测试；不要从第 8 章 replay 类比例会改变资源
+所有权。
 
 </details>
 
@@ -188,7 +192,8 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 
 </details>
 
-2. 【挑战】改变 `gradient_bytes` 与 `cross_rack_multiplier`，验证通信成本模型的
+2. 【挑战】改变 `gradient_bytes_per_step`、`cross_node_multiplier` 与
+   `cross_rack_multiplier`，验证通信成本模型随每步字节与三档拓扑域的
    单调性，并说明它不是实测带宽。
 
 <details>
@@ -224,7 +229,9 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch08-rl-rollout` 并对照第 8 章对应抽象。
+运行 `examples/ch09-cluster-simulator`，先让 `collective_time_us` 按
+已执行 step 累计，再比较不同 interval 下的 checkpoint 成本与
+`checkpoint_replay_steps`。
 
 </details>
 
@@ -258,7 +265,8 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+对照第 6 章「集合通信、DDP 与能力边界」；注意第 9 章模拟器只建立成本
+协议，不调用这些 Burn collective API。
 
 </details>
 
@@ -352,7 +360,9 @@ CubeCL revision 是 `be278a1e76aed881e2cc6b165414ee6103ca4634`：
 ## 本章系统结论
 
 1. 集群控制面负责作业、资源与故障；训练数据面负责 rank 间通信——两层不能混称。
-2. gang scheduling、拓扑放置与 $\alpha+\beta$ 通信成本共同决定 makespan。
+2. gang scheduling、按“同节点→同机柜→跨机柜”收紧的拓扑放置，与
+   $\alpha+\beta$ 通信成本共同决定 makespan；链路每往外跨一档，带宽
+   通常低 1–2 个数量级。
 3. CPU 模拟器验证了队列、成组准入、故障重放与确定性 trace，不测量真实 GPU/NCCL。
 4. GPU 阅读时应把第 6 章一次 AllReduce 的字节量放进机柜/链路模型重算成本。
 5. Burn/CubeCL 源码可定位设备与 collective 数据面入口，但不提供作业队列实现。

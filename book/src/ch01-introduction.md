@@ -54,3 +54,16 @@ GPU 编程或分布式系统也没有关系：本章先建立地图，后续章�
 把这套框架无关架构映射到固定版本的 Burn 技术栈，最后通过一个 CPU 实验
 验证“源码快照 → Cargo feature → Device → Backend → Tensor 执行”的
 最短路径。
+
+## 小节
+
+1. [机器学习应用与系统负载](ch01/01-applications-and-loads.md)
+2. [机器学习系统的设计目标](ch01/02-design-goals.md)
+3. [从编程接口到硬件](ch01/03-system-architecture.md)
+4. [Burn 技术栈](ch01/04-burn-stack.md)
+5. [生命周期、生态与阅读路径](ch01/05-lifecycle-and-ecosystem.md)
+6. [实验：探测执行栈](ch01/06-stack-probe-lab.md)
+7. [练习、延伸阅读与来源](ch01/07-exercises-and-sources.md)
+
+下一章先建立 `Tensor`、`Device`、`Module` 与 autodiff 的编程接口；后续
+硬件和编译章节都会以这套接口为入口。

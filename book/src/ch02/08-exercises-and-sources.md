@@ -216,7 +216,7 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 
 ## 延伸阅读
 
-固定上游中的权威入口：
+本书固定版本源码中的权威入口：
 
 - `burn/crates/burn-tensor/src/tensor/api/base.rs`
 - `burn/crates/burn-tensor/src/tensor/api/float.rs`

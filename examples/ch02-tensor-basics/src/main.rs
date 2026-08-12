@@ -1,8 +1,8 @@
 use std::process::ExitCode;
 
 use ch02_tensor_basics::{
-    average_vectors, branch_gradient, broadcast_rows_and_columns, inspect_device_modes,
-    inspect_tiny_model, multiply_with_gradients,
+    average_vectors, branch_gradient, broadcast_rows_and_columns, detached_leaf_gradient,
+    inspect_device_modes, inspect_tensor_bytes, inspect_tiny_model, multiply_with_gradients,
 };
 
 fn main() -> ExitCode {
@@ -11,6 +11,17 @@ fn main() -> ExitCode {
 
         let broadcast = broadcast_rows_and_columns()?;
         println!("广播：{:?} -> {:?}", broadcast.dims, broadcast.values);
+
+        let bytes = inspect_tensor_bytes();
+        println!(
+            "张量字节：dims={:?} dtype={:?} bytes={} 首元素(1.0)={:02x?} 末元素(-0.0)={:02x?} f64_bytes={}",
+            bytes.dims,
+            bytes.dtype,
+            bytes.byte_len,
+            bytes.first_element_bytes,
+            bytes.negative_zero_bytes,
+            bytes.f64_byte_len
+        );
 
         let gradients = multiply_with_gradients()?;
         println!("乘法前向值：{:?}", gradients.product);
@@ -27,6 +38,12 @@ fn main() -> ExitCode {
         println!(
             "控制流分支 {}：输出 {:?}，梯度 {:?}",
             branch.branch, branch.output, branch.input_gradient
+        );
+
+        let detach = detached_leaf_gradient()?;
+        println!(
+            "detach：原始梯度={:?}，新 leaf 梯度={:?}",
+            detach.original_gradient, detach.detached_gradient
         );
 
         Ok::<(), ch02_tensor_basics::ExampleError>(())

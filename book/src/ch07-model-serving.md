@@ -19,7 +19,8 @@
 1. 把模型部署拆成模型产物（artifact）、执行运行时（runtime）、请求服务和安全治理四个边界；
 2. 解释 ONNX 图到 Burn Rust source 的转换为什么不是简单的文件改名；
 3. 区分模型拓扑、参数状态、权重格式、运行时 backend 和服务协议；
-4. 使用 `ModuleRecord`/Burnpack 在 CPU 上保存并恢复参数，验证推理输出；
+4. 使用 `ModuleRecord`/Burnpack 在 CPU 上保存并恢复参数，验证推理输出，
+   并读出容器的 magic、版本、metadata 边界与 256 字节对齐；
 5. 区分 `burn-onnx` 的 `File`、`Embedded`、`Bytes` 和 `None` 加载策略；
 6. 用 batch、队列和设备读回建立延迟/吞吐的基本模型；
 7. 解释 Burn Remote 的 compute peer 边界，以及 WASM 异步连接的限制；
@@ -65,6 +66,9 @@ Remote 把 tensor operation 送到 compute peer；服务端的路由、鉴权、
 6. [Remote、WASM/no_std 与部署边界](ch07/06-remote-wasm-and-nostd.md)
 7. [实验：CPU 模型状态往返保存与恢复](ch07/07-record-roundtrip-lab.md)
 8. [练习、延伸阅读与来源](ch07/08-exercises-and-sources.md)
+
+第 5–7 章已经覆盖“数据 → 训练 → artifact → 推理”的最小闭环；书末的
+[综合实验](capstone.md) 会把这条链跑成一次端到端检查。
 
 示例代码位于 `examples/ch07-record-roundtrip`，使用当前项目固定 Burn
 revision 的 Flex CPU。它验证的是 Burnpack 参数状态的内存导出/加载和输出

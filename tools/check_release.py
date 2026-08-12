@@ -15,6 +15,7 @@ import subprocess
 import sys
 import tomllib
 import unicodedata
+import xml.etree.ElementTree as ElementTree
 from collections import Counter
 from pathlib import Path
 from typing import Any, Iterable
@@ -97,7 +98,9 @@ class ReleaseAudit:
         self.check("pins-and-cargo", self.validate_pins_and_cargo)
         self.check("licenses-and-attribution", self.validate_licenses)
         self.check("markdown-links", self.validate_links)
+        self.check("cargo-command-locking", self.validate_cargo_commands)
         self.check("formulas", self.validate_formulas)
+        self.check("svg-assets", self.validate_svg_assets)
         self.check("code-snippet-annotations", self.validate_code_snippet_annotations)
         self.check("repository-hygiene", self.validate_repository_hygiene)
         self.check("generated-book", self.validate_generated_book)
@@ -360,6 +363,24 @@ class ReleaseAudit:
                         broken.append(f"{source.relative_to(ROOT)} -> {target}")
         self.require(not broken, f"书内链接损坏: {broken}")
 
+    def validate_cargo_commands(self) -> None:
+        unlocked: list[str] = []
+        command = re.compile(r"\bcargo\s+(?:test|run|check)\b(?P<args>[^`\n]*)")
+        for source in BOOK_SRC.rglob("*.md"):
+            for line_number, line in enumerate(
+                source.read_text(encoding="utf-8").splitlines(), start=1
+            ):
+                for match in command.finditer(line):
+                    arguments = match.group("args")
+                    if "-p " not in arguments and "--package" not in arguments:
+                        continue
+                    if "--locked" not in arguments:
+                        unlocked.append(f"{source.relative_to(ROOT)}:{line_number}")
+        self.require(
+            not unlocked,
+            f"示例 Cargo 命令缺少 --locked: {unlocked}",
+        )
+
     def validate_formulas(self) -> None:
         display_count = 0
         inline_count = 0
@@ -433,6 +454,39 @@ class ReleaseAudit:
         self.require(not formula_errors, f"公式下标/结构错误: {formula_errors}")
         self.require(display_count > 0, "没有发现 display math")
         self.require(inline_count > 0, "没有发现 inline math")
+
+    def validate_svg_assets(self) -> None:
+        invalid: list[str] = []
+        for image in sorted(BOOK_SRC.rglob("*.svg")):
+            try:
+                text = image.read_text(encoding="utf-8")
+            except UnicodeDecodeError:
+                invalid.append(f"{image.relative_to(ROOT)} 不是有效 UTF-8")
+                continue
+            bad_controls = [
+                f"U+{ord(character):04X}"
+                for character in text
+                if unicodedata.category(character) == "Cc"
+                and character not in {"\t", "\n", "\r"}
+            ]
+            if bad_controls:
+                invalid.append(
+                    f"{image.relative_to(ROOT)} 含 XML 禁止的控制字符: {bad_controls[:8]}"
+                )
+                continue
+            if chr(0xFFFD) in text:
+                invalid.append(f"{image.relative_to(ROOT)} 含 U+FFFD 替换字符（多字节文本已损坏）")
+                continue
+            if "??" in text:
+                invalid.append(
+                    f"{image.relative_to(ROOT)} 含连续问号（非 ASCII 文本疑似被改写为 ?）"
+                )
+                continue
+            try:
+                ElementTree.fromstring(text)
+            except ElementTree.ParseError as error:
+                invalid.append(f"{image.relative_to(ROOT)} XML 解析失败: {error}")
+        self.require(not invalid, f"SVG 资产损坏: {invalid}")
 
     def validate_code_snippet_annotations(self) -> None:
         invalid: list[str] = []

@@ -42,6 +42,47 @@ CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单�
 不能由 crate 名推断某次调用一定使用 Tensor Core；实际策略取决于 feature、
 设备属性、输入与 autotune。
 
+### 逐层走查：一次 `matmul` 经过的六个决策点
+
+把上面的箭头像绳子一样拉直，固定版本里每一层都在回答一个确定的问题。
+建议对照源码各读一遍（路径见章末源码入口）：
+
+1. **用户 API 层**（`burn-tensor/src/tensor/api/numeric.rs` 的
+   `Tensor::matmul`）：回答“这次调用 shape 合法吗？能否不改数据就换成
+   更好算的形态？”先做 `TensorCheck::matmul` 校验；随后一个细节值得
+   注意——`[..., B, 1, K] @ [..., 1, K, N]` 这种 batched vec-mat 会被
+   `swap_dims` 重解释成普通 matmul，因为后者通常更快。这是纯元数据
+   变换，不触碰任何元素。
+2. **算子 ops 层**（`burn-cubecl/src/ops/tensor.rs` 的 `float_matmul`）：
+   回答“用哪个策略族？”——`MatmulStrategy::default()` 在启用
+   `autotune` feature 时是 Autotune，否则是 Cube。注意这里出现了
+   `unwrap`：ops trait 的签名不能返回 `Result`，因此策略配置错误只能
+   在这一层 panic。接口形状决定了错误的报告位置。
+3. **Kernel 准备层**（`burn-cubecl/src/kernel/matmul/base.rs` 的
+   `matmul`）：回答“输出放哪？能不能再少读一遍？”——先
+   `init_matmul_output` 预分配输出；然后把“broadcast 右操作数的
+   batched matmul”（`[.., b, m, k] @ [.., 1, k, n]`）折叠成单个
+   `[.., 1, b*m, k]` 调用，避免 b 次各自重读整个 rhs。源码注释明确
+   写着这是纯元数据：launch 操作数共享同一份 handle。
+4. **绑定层**（同文件的 `launch_matmul`）：回答“数据以什么身份进入
+   kernel？”——把 tensor 包装成 `InputBinding`，同时把 Burn dtype
+   映射为存储类型；量化输入在这里拆成 data/scale 两个 handle。
+5. **CubeK 入口**（`cubek-matmul/src/launch.rs` 的 `launch_ref`）：
+   几乎只是一个转发——`strategy.launch_ref(...)`。它存在的意义是把
+   “统一的调用签名”与“巨大的策略空间”解耦。
+6. **策略与 Routine 层**（`cubek-matmul/src/strategy/` 与
+   `routines/`）：回答“tile 多大、要不要双缓冲、用不用矩阵指令？”
+   ——`Strategy` 是一个很大的枚举：Naive、CpuGemm、Simple/CMMA/MMA 族、
+   double buffering、ordered、specialized、TMA、VecMat 及 unit 变体，
+   每个变体携带自己的 Blueprint 参数。Routine 据此计算 cube 拓扑并
+   生成 Blueprint，最后交给 CubeCL IR 与具体 Runtime。
+
+这六层里，最早的两处性能优化（vec-mat 重解释与 broadcast-rhs 折叠）
+都发生在**任何 kernel 还不存在的时候**。“最快的数据搬运是不搬运”：
+高层 shape 改写先消灭重复读取，tile 和向量化只能在此之后继续优化。
+这也解释了为什么第 4 章的 Pass 思维在 eager 路径上同样存在——它们
+只是写死在代码里的固定变换，而不是可配置的编译器管线。
+
 ## 3. 覆盖范围与边界
 
 固定 Burn 快照会调用 CubeK 的 matmul、implicit-GEMM convolution、

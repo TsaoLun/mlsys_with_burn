@@ -14,7 +14,7 @@
     </marker>
   </defs>
   <rect class="box" x="16" y="56" width="110" height="56" rx="4"/>
-  <text class="h" x="28" y="80">��</text>
+  <text class="h" x="28" y="80">训练状态</text>
   <text class="s" x="28" y="100">Module / Param</text>
 
   <path class="arr" d="M126 84 H154"/>
@@ -24,19 +24,19 @@
 
   <path class="arr" d="M274 84 H302"/>
   <rect class="box" x="302" y="56" width="110" height="56" rx="4"/>
-  <text class="h" x="314" y="80">!�</text>
-  <text class="s" x="314" y="100">shape/dtype/p<</text>
+  <text class="h" x="314" y="80">校验</text>
+  <text class="s" x="314" y="100">shape / dtype / path</text>
 
   <path class="arr" d="M412 84 H440"/>
   <rect class="box2" x="440" y="56" width="120" height="56" rx="4"/>
-  <text class="h" x="452" y="80">�</text>
-  <text class="s" x="452" y="100">Device 	�</text>
+  <text class="h" x="452" y="80">运行时</text>
+  <text class="s" x="452" y="100">Device 选择</text>
 
   <path class="arr" d="M560 84 H588"/>
   <rect class="box" x="588" y="56" width="130" height="56" rx="4"/>
-  <text class="h" x="600" y="80">��L</text>
-  <text class="s" x="600" y="100">batch//H,</text>
+  <text class="h" x="600" y="80">服务边界</text>
+  <text class="s" x="600" y="100">batch / 队列 / 版本</text>
 
-  <text class="s" x="16" y="160">DeviceCPU/WGPU/CUDA	�� Runtime9� artifact W�,�</text>
-  <text class="s" x="16" y="182">ONNX�codegen /���gh�e9 workspace ؤ�V</text>
+  <text class="s" x="16" y="160">Device（CPU/WGPU/CUDA）与 Runtime 影响 artifact 如何执行，不改变语义。</text>
+  <text class="s" x="16" y="182">ONNX 经 codegen 是独立对照路径，不并入默认 workspace 验证。</text>
 </svg>

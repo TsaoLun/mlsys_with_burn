@@ -37,7 +37,7 @@
 ## 2. 运行探测
 
 ```bash
-cargo run -p ch01-stack-probe
+cargo run -p ch01-stack-probe --locked
 ```
 
 输出应类似：
@@ -57,7 +57,7 @@ observed value after sync: 7
 ## 3. 运行测试
 
 ```bash
-cargo test -p ch01-stack-probe
+cargo test -p ch01-stack-probe --locked
 ```
 
 测试会核对：
@@ -69,7 +69,7 @@ cargo test -p ch01-stack-probe
 
 ## 4. 沿源码追踪
 
-建议按以下顺序在本书固定版本的上游中查找：
+建议按以下顺序在本书固定版本的源码仓库中查找：
 
 1. `burn/crates/burn-tensor/src/device.rs`：公开 `Device`；
 2. `burn/crates/burn-dispatch/src/device.rs`：`DispatchDevice::Flex`；

@@ -33,7 +33,21 @@ features。
 
 这证明 Rust 类型只固定了二维，广播兼容性和结果尺寸仍由运行时检查。
 
-## 3. Module 与参数注册
+## 3. 字节视图
+
+```rust,ignore
+{{#include ../../../examples/ch02-tensor-basics/src/lib.rs:tensor_bytes}}
+```
+
+`into_data()` 把张量读回主机，得到 `bytes + shape + dtype` 三元组。
+本段直接检查原始字节：6 个 `f32` 占 24 字节；1.0 的小端 IEEE-754
+字节是 `00 00 80 3F`；`-0.0` 虽然与 `0.0` 数值相等，字节却是
+`00 00 00 80`——符号位只在字节层可见。把同一份数据转成 `F64` 后
+字节数翻倍为 48，shape 不变。这些观察对应
+[Tensor、Device 与运行时后端](02-tensor-device-backend.md)
+中「字节视图」小节的分析，也是第 7 章读取 Burnpack 容器字节的前置技能。
+
+## 4. Module 与参数注册
 
 ```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:module}}
@@ -46,13 +60,13 @@ Linear 从 3 个输入特征映射到 2 个输出特征，共有 $3 \times 2 = 6
 实验在创建模型前调用 `device.seed(42)`，使随机初始化可复现；测试不依赖
 具体随机值，只断言参数量与 shape。
 
-## 4. Device 与 autodiff 能力标志
+## 5. Device 与 autodiff 能力标志
 
 示例还分别读取 `Device::flex()` 和 `.autodiff()` 的
 `is_autodiff()`。这只是设备能力标签，不是一次 backward；真正的 tape
 行为仍由下一节的 `require_grad`、前向操作和 `backward` 验证。
 
-## 5. 动态自动微分
+## 6. 动态自动微分
 
 ```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:autodiff}}
@@ -77,7 +91,7 @@ product = left * right = [4, 49]
 `grad` 返回 Option，因为没有参与跟踪的 Tensor 不一定有梯度。示例把缺少
 叶子梯度作为可传播错误，而不是在库代码中 panic。
 
-## 6. 控制流只记录实际分支
+## 7. 控制流只记录实际分支
 
 ```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:branch_autodiff}}
@@ -87,7 +101,7 @@ product = left * right = [4, 49]
 为 `input + 1`，梯度为全 1。两次调用各自构建 tape，互不混入未执行分支。
 这固定了图外控制流与 eager autodiff 的边界，不是完整训练循环。
 
-## 7. detach 是 tape 边界
+## 8. detach 是 tape 边界
 
 ```rust,ignore
 {{#include ../../../examples/ch02-tensor-basics/src/lib.rs:detach_autodiff}}
@@ -104,10 +118,10 @@ product = left * right = [4, 49]
 这证明的是 tape 的连接语义，不是“所有 runtime 错误都会返回 Result”；
 shape/device 错误仍应按固定 backend 的 API 契约单独验证。
 
-## 8. 运行
+## 9. 运行
 
 ```bash
-cargo run -p ch02-tensor-basics
+cargo run -p ch02-tensor-basics --locked
 ```
 
 输出应包含：
@@ -115,6 +129,7 @@ cargo run -p ch02-tensor-basics
 ```text
 逐元素平均值：[2.0, 3.0, 4.0]
 广播：[3, 2] -> [11.0, 21.0, 12.0, 22.0, 13.0, 23.0]
+张量字节：dims=[3, 2] dtype=F32 bytes=24 首元素(1.0)=[00, 00, 80, 3f] 末元素(-0.0)=[00, 00, 00, 80] f64_bytes=48
 乘法前向值：[4.0, 49.0]
 left 梯度：[4.0, 7.0]
 right 梯度：[1.0, 7.0]
@@ -124,18 +139,19 @@ Device autodiff：普通=false，autodiff 包装=true
 detach：原始梯度=None，新 leaf 梯度=Some([3.0, 3.0])
 ```
 
-## 9. 测试
+## 10. 测试
 
 ```bash
-cargo test -p ch02-tensor-basics
+cargo test -p ch02-tensor-basics --locked
 ```
 
-测试覆盖逐元素数值、广播、Module 参数注册、乘法梯度、控制流分支梯度和
-detach 的 `Option`/数值/shape 状态。张量、广播和梯度行为可在固定上游的
-`burn-backend-tests` 找到对应回归；Module 参数遍历与统计由 `burn-core`
-的 Module 测试支撑。
+测试覆盖逐元素数值、广播、字节布局（小端 `f32`、`-0.0` 符号位、`F64`
+转换后的宽度）、Module 参数注册、乘法梯度、控制流分支梯度和 detach 的
+`Option`/数值/shape 状态。张量、广播和梯度行为可在本书固定版本的
+`burn-backend-tests` 中找到对应的回归测试；Module 参数遍历与统计由
+`burn-core` 的 Module 测试支撑。
 
-## 10. 沿源码追踪
+## 11. 沿源码追踪
 
 建议按顺序阅读：
 

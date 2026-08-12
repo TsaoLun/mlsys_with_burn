@@ -59,7 +59,13 @@ inference、replay、训练、评估和 checkpoint，但这不等于已经提供
 7. [实验：CPU 确定性 rollout 与 replay](ch08/07-rollout-lab.md)
 8. [练习、延伸阅读与来源](ch08/08-exercises-and-sources.md)
 
-示例代码位于 `examples/ch08-rl-rollout`，使用当前项目本书固定版本的 Burn
-的 Flex CPU。它验证环境交互、`TransitionBuffer` 随机 batch 的 shape 和
-表格 TD 更新；它不下载 gym、不使用网络、不训练神经网络，也不把一次
-单进程测试外推为 GPU 仿真或多智能体吞吐结论。
+若你想继续向规模化走，第 9 章会把多个训练/采样进程放回共享集群，
+讨论队列、拓扑、故障与遥测。
+
+示例代码位于 `examples/ch08-rl-rollout`，使用本书固定版本 Burn 的
+Flex CPU。它分两个阶段验证环境交互与回放：`done`/`truncated` 边界、
+`TransitionBuffer` 的容量与随机 batch shape、transition 产生处的在线
+表格 TD 更新，以及 learner 真正从 replay batch 学习的回放驱动路径——
+并用 `capacity = 1` 的极端对照展示容量如何截断 learner 的数据分布。
+实验不下载 gym、不使用网络、不训练神经网络，也不把一次单进程测试外推为
+GPU 仿真或多智能体吞吐结论。

@@ -44,31 +44,67 @@ module，再调用 `try_load_record`。
 或不匹配的 artifact 变成可报告的错误。固定源码中的 validation 会检查
 shape 和缺失 tensor；生产系统还应在加载前验证 checksum 和版本 metadata。
 
-## 3. 运行并观察
+## 3. 打开 Burnpack 字节
+
+`from_bytes` 能跑通，只说明 API 层契约成立。部署时更底层的问题是：
+这串字节是不是我期望的格式、什么版本、参数数据从哪里开始？固定版本
+`burn-pack` 的容器布局很简单，可以不用任何序列化库直接读：
+
+```text
+header（10 字节，小端）
+  magic u32        = 0x4255524E（"BURN"）
+  version u16      = 1
+  metadata_size u32
+metadata（CBOR）：tensor 名 → dtype / shape / data_offsets / param_id
+tensor data：起点对齐到 256 字节，每个 tensor 的起点也按 256 对齐
+```
+
+一个容易踩的细节：magic 常量写成 `"BURN"`，但小端落盘后文件头四个字节
+是 `NRUB`——字母顺序反过来不是损坏，而是字节序的直接后果。示例按这份
+规格手写一个最小读取器：
+
+```rust,ignore
+{{#include ../../../examples/ch07-record-roundtrip/src/lib.rs:burnpack_layout}}
+```
+
+256 字节对齐不是洁癖：它让文件里的绝对偏移可以直接用于 mmap 零拷贝
+加载，也满足设备端读取的对齐偏好。代价可以用本实验的真实输出算出来：
+两个参数总共只有 12 字节（weight 8 + bias 4），但因为每个 tensor 各占
+一段 256 对齐的区域，容器总长是 `256（header+metadata 对齐）+ 256
+（weight）+ 4（bias）= 516` 字节。小 artifact 上对齐开销巨大；参数以
+GB 计时它又可以忽略——这个比例本身就说明格式在为谁优化。固定源码还
+内置了防滥用的上限（metadata ≤ 100 MB、tensor 数 ≤ 100 000、CBOR 递归
+≤ 128 层），加载不可信文件时这些上限就是第一道防线。
+
+## 4. 运行并观察
 
 在项目根目录运行：
 
 ```bash
-cargo test -p ch07-record-roundtrip
-cargo run -p ch07-record-roundtrip
+cargo test -p ch07-record-roundtrip --locked
+cargo run -p ch07-record-roundtrip --locked
 ```
 
 你应能观察到：
 
 1. 记录包含两个参数 tensor（Linear 的 weight 和 bias）；
 2. 恢复后的输出 shape 为 `[3, 1]`；
-3. reference 与 restored output 的最大绝对误差小于 `1e-6`。
+3. reference 与 restored output 的最大绝对误差小于 `1e-6`；
+4. Burnpack 头读起来是 `NRUB`、版本为 1，tensor 数据区从 256 的整数倍
+   开始。
 
 主程序输出类似：
 
 ```text
 record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
+burnpack magic=NRUB version=1 metadata_bytes=133 data_section_start=256 total_bytes=516
 ```
 
-小数形式可能随 backend 变化；请抓住“参数数目、shape 和误差边界”，
-不要把 bytes 长度当成性能结论。
+小数形式可能随 backend 变化；`metadata_bytes` 与 `total_bytes` 由固定
+版本的 CBOR 字段决定，升级版本线时应重新核对。请抓住“参数数目、shape、
+误差边界和头部契约”，不要把 bytes 长度当成性能结论。
 
-## 4. 从实验走向部署
+## 5. 从实验走向部署
 
 可以按以下顺序扩展，而不混淆边界：
 
@@ -86,7 +122,7 @@ record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
 第 5 步不能跳过：固定仓库的 `burn-onnx` 仍指向较早 Burn revision，
 本章没有把两个 revision 的 generated model 类型混进同一依赖图。
 
-## 5. 接到第 5–6 章
+## 6. 接到第 5–6 章
 
 若要从真实数据和训练状态进入 artifact，而不是手工初始化 Linear，请运行
 [综合实验：数据到推理](../capstone.md)。它在本实验的

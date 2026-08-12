@@ -54,7 +54,18 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 
 </details>
 
-4. 【基础】增大 `num_envs`、`autobatch_size` 和 `train_steps` 分别会怎样影响
+4. 【进阶】同一环境、同一动作序列下，为什么在线 TD 与回放驱动 TD 会学到
+   不同的 Q 值？`capacity = 1` 时 `initial_right_q` 为什么精确等于 0？
+
+<details>
+<summary>提示</summary>
+
+运行 `examples/ch08-rl-rollout` 并对照实验的第 4 节；先回答 learner 在
+两条路径下分别能看到哪些 transition，再检查 TD 公式本身是否改变。
+
+</details>
+
+5. 【基础】增大 `num_envs`、`autobatch_size` 和 `train_steps` 分别会怎样影响
    queue wait、device utilization、policy staleness 和样本吞吐？
 
 <details>
@@ -64,7 +75,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 
 </details>
 
-5. 【进阶】为什么 `MultiAgentEnvLoop` 的“agent”不能直接说明 Burn 已支持
+6. 【进阶】为什么 `MultiAgentEnvLoop` 的“agent”不能直接说明 Burn 已支持
    多智能体强化学习？
 
 <details>
@@ -74,7 +85,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 
 </details>
 
-6. 【进阶】policy parameters、target network、optimizer state、exploration step
+7. 【进阶】policy parameters、target network、optimizer state、exploration step
    和 replay 哪些必须进入严格恢复协议？请给出理由。
 
 <details>
@@ -84,7 +95,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 
 </details>
 
-7. 【进阶】对同一条 episode 分别计算 Monte Carlo return、TD(0) target 和
+8. 【进阶】对同一条 episode 分别计算 Monte Carlo return、TD(0) target 和
    Q-learning target，比较 bias/variance、终止和截断 step 的处理。
 
 <details>
@@ -94,7 +105,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 
 </details>
 
-8. 【进阶】实现 epsilon-greedy 的可恢复衰减状态，记录 behavior policy version；
+9. 【进阶】实现 epsilon-greedy 的可恢复衰减状态，记录 behavior policy version；
    解释为什么仅保存 Q 网络参数不足以重现 replay 分布。
 
 <details>
@@ -325,7 +336,9 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 <details>
 <summary>提示</summary>
 
-见第 9 章拓扑与调度节及网络配图。
+对照第 8 章「多智能体与分布式系统边界」：联合 transition 需要同时表达
+所有 agent 的动作与奖励；非平稳性来自其他 agent 的策略变化，不是网络拓扑
+或调度顺序问题。
 
 </details>
 
@@ -361,8 +374,8 @@ OpenMLSys v1：
 ## 本章系统结论
 
 1. RL 系统把“环境交互”接进与监督学习不同的数据与状态边界（done/truncated、轨迹）。
-2. replay、policy 版本与 off-policy 元数据决定样本能否安全用于更新。
-3. CPU 上你观察到确定性 rollout、circular replay 与表格 TD 更新。
+2. replay、policy 版本与 off-policy 元数据决定样本能否安全用于更新；容量与采样分布本身就是 learner 的数据边界。
+3. CPU 上你观察到确定性 rollout、circular replay、在线与回放驱动两条 TD 路径在同一环境序列上的不同结果。
 4. GPU 阅读线索：大批量 replay 与策略网络 forward 的设备放置、以及 Actor–Learner 间的版本延迟。
 5. 不能把组合 API 或小型 TD 实验当成完整 DQN/PPO/MARL runtime。
 

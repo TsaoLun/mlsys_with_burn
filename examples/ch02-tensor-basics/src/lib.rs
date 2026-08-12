@@ -6,7 +6,7 @@ use std::fmt::{self, Display, Formatter};
 use burn::{
     module::Module,
     nn::{Linear, LinearConfig, Relu},
-    tensor::{Device, Tensor},
+    tensor::{DType, Device, Tensor},
 };
 
 /// 教材示例读回数据或梯度失败。
@@ -83,6 +83,56 @@ pub struct GradientReport {
     /// 对 `right` 的梯度，等于 `left`。
     pub right_gradient: Vec<f32>,
 }
+
+/// Byte-level facts about a tensor's host-side representation.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TensorBytesReport {
+    /// Runtime shape of the tensor.
+    pub dims: [usize; 2],
+    /// Runtime element type.
+    pub dtype: DType,
+    /// Raw byte length of the f32 payload.
+    pub byte_len: usize,
+    /// Little-endian bytes of the first element (1.0).
+    pub first_element_bytes: [u8; 4],
+    /// Little-endian bytes of the last element (-0.0).
+    pub negative_zero_bytes: [u8; 4],
+    /// Byte length of the same values after converting to f64.
+    pub f64_byte_len: usize,
+}
+
+// ANCHOR: tensor_bytes
+/// Read a tensor back and inspect its raw bytes, shape, and dtype.
+///
+/// `TensorData` is just `bytes + shape + dtype`: the bytes are the content,
+/// the shape says how to group them, and the dtype says how wide each element
+/// is. Converting dtype changes the byte width without changing the shape.
+pub fn inspect_tensor_bytes() -> TensorBytesReport {
+    let device = Device::flex();
+    let tensor = Tensor::<2>::from_floats([[1.0, -2.0], [3.5, 0.25], [0.0, -0.0]], &device);
+    let data = tensor.into_data();
+    let bytes = data.as_bytes();
+    let first_element_bytes = [bytes[0], bytes[1], bytes[2], bytes[3]];
+    let tail = bytes.len() - 4;
+    let negative_zero_bytes = [
+        bytes[tail],
+        bytes[tail + 1],
+        bytes[tail + 2],
+        bytes[tail + 3],
+    ];
+
+    let f64_byte_len = data.clone().convert_dtype(DType::F64).as_bytes().len();
+
+    TensorBytesReport {
+        dims: data.shape.dims(),
+        dtype: data.dtype,
+        byte_len: bytes.len(),
+        first_element_bytes,
+        negative_zero_bytes,
+        f64_byte_len,
+    }
+}
+// ANCHOR_END: tensor_bytes
 
 // ANCHOR: autodiff
 /// 在 Flex 上构建动态反向图并读取两个叶子张量的梯度。
@@ -234,6 +284,20 @@ mod tests {
 
         assert_eq!(report.dims, [3, 2]);
         assert_eq!(report.values, vec![11.0, 21.0, 12.0, 22.0, 13.0, 23.0]);
+    }
+
+    #[test]
+    fn tensor_bytes_expose_ieee754_little_endian_layout() {
+        let report = inspect_tensor_bytes();
+
+        assert_eq!(report.dims, [3, 2]);
+        assert_eq!(report.dtype, DType::F32);
+        assert_eq!(report.byte_len, 6 * 4);
+        assert_eq!(report.first_element_bytes, 1.0f32.to_le_bytes());
+        // -0.0 compares equal to 0.0, but its sign bit is visible in the bytes.
+        assert_eq!(report.negative_zero_bytes, (-0.0f32).to_le_bytes());
+        assert_eq!(report.negative_zero_bytes, [0x00, 0x00, 0x00, 0x80]);
+        assert_eq!(report.f64_byte_len, 6 * 8);
     }
 
     #[test]

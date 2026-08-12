@@ -46,3 +46,17 @@ Tensor 操作
 随后讨论 Kernel 选择、stream 与异步边界。默认实验用 FusionInspector
 在 CPU Fusion 路径上看计划切分；有 GPU 环境时，阅读重点转向 launch/
 同步代价，而不是把 CPU 计划数当成硬件计数器。
+
+## 小节
+
+1. [编译栈与中间表示](ch04/01-stack-and-ir.md)
+2. [静态信息、Pass 与自动微分边界](ch04/02-static-analysis-and-passes.md)
+3. [Burn IR 与运行时融合](ch04/03-burn-ir-and-fusion.md)
+4. [图优化、Kernel 选择与回退](ch04/04-graph-and-kernel-selection.md)
+5. [CubeCL Lowering、JIT 与缓存](ch04/05-cubecl-lowering-and-jit.md)
+6. [内存、Stream 与异步执行](ch04/06-memory-streams-execution.md)
+7. [实验：观察 Fusion 执行计划](ch04/07-fusion-inspector-lab.md)
+8. [练习、延伸阅读与来源](ch04/08-exercises-and-sources.md)
+
+第 5 章会把问题移回设备之前：样本读取、变换与 batching 不进入本章的
+Fusion 图，却会通过吞吐率与缓冲决定设备是否持续有工作可做。

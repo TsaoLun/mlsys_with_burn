@@ -1,6 +1,6 @@
 # 实时状态
 
-更新日期：2026-08-10
+更新日期：2026-08-12
 
 ## 当前里程碑
 
@@ -16,8 +16,9 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
 ## 进行中
 
 - [ ] P0/P1 已完成；等待发布者决定是否创建候选 tag/发布归档。
-- [ ] 仓库 Settings → Pages → Source 需设为 GitHub Actions，并在推送
-  `main` 后确认 `https://tsaolun.github.io/mlsys_with_burn/` 可访问。
+- [x] 仓库 `origin/main` 已到 `1ae11a5`，Pages 站点
+  `https://tsaolun.github.io/mlsys_with_burn/` 此前已可访问；本机仍不能
+  代替管理员核对 Settings → Pages 的 Source/environment 保护。
 - [x] 修复线上 `$...$` 公式不渲染：自定义 theme 启用 MathJax 美元分隔符
   （D019）；全书 42 个含公式页面 Puppeteer 核验通过。
 - [x] 学习者文风改写（D020）与自洽材料后移附录（D021）：章首五标签/
@@ -25,16 +26,21 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
   `appendix-sources.md`。
 - [x] M6a/M6b/M6c：章末系统结论、设备/Runtime 地图、ch2–4/6/7/9 GPU
   与原理加厚、`docs/OPTIONAL_PROFILES.md` + D022。
+- [x] 内容与结构加固批次（2026-08-12）：修正实验语义/成本模型、补齐
+  章节导航与桥接、修复损坏 SVG、修正误导性练习提示，并扩展
+  `check_release.py` 防回归。
 
 ## 下一步
 
-1. 提交并推送 D020/D021/D022 与 M6 正文（若尚未上线），确认 Pages
-   导航、附录与配图正常。
+1. 提交并推送本批内容与结构加固；推送后抽查 Pages 导航、三张修复 SVG、
+   第 8/9 章实验页与综合实验页。
 2. 由发布者审阅 `planning/comparison/openmlsys-v1-crosswalk.md` 和
    `tools/check_release.py` 的机器可读输出，决定候选版归档/tag。
-3. 真机 CUDA/NCCL 仅在 pins 与环境允许时，向
+3. 在能访问 `tracel-llvm` 固定资产的环境重跑完整 `make check`；本机
+   当前被上游 `macos-x64.checksums.json` 404 阻断在 CubeCL CPU 构建。
+4. 真机 CUDA/NCCL 仅在 pins 与环境允许时，向
    `docs/OPTIONAL_PROFILES.md` 追加命令；不得改默认 CPU gate（D022）。
-4. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
+5. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
 
 ## 已完成
 
@@ -209,6 +215,121 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
   与折叠提示；`docs/AUTHORING.md` 补充练习体例。
 
 ## 本次交接
+
+- 已完成（2026-08-12 夜 2）：第 3 章 matmul 逐层走查深化。
+  - `ch03/04` 第 2 节从高层箭头链升级为「六个决策点」走查，每层按固定
+    源码核实：API 层校验与 vec-mat 重解释、ops 层策略默认与 unwrap
+    边界、kernel 准备层 broadcast-rhs 折叠与量化 binding、CubeK
+    `launch_ref` 转发、Strategy 大枚举空间。
+  - 教学主线：最早两处性能优化都是 kernel 存在之前的纯元数据变换。
+  - `ch03/08` 源码题 3 的错配提示修正并指向走查小节；延伸阅读补
+    numeric.rs / ops/tensor.rs / launch.rs / strategy.rs 具体路径；
+    学习目标同步。
+- 验证：`mdbook build/test book`、`check_release.py`
+  （`ok=true`）、`git diff --check` 通过；本节为阅读走查，无新增示例
+  代码需要编译。
+
+- 已完成（2026-08-12 夜）：第 2 章张量字节视图深化（前几章 Burn 纵深）。
+  - 示例 `ch02-tensor-basics` 新增 `inspect_tensor_bytes`：读回
+    `TensorData{bytes, shape, dtype}` 并断言 `1.0f32` 小端字节、
+    `-0.0` 符号位、24→48 字节的 dtype 宽度变化；共 8 项测试。
+  - 正文 `ch02/02` 新增「字节视图」概念小节（含同宽度原地/跨宽度克隆
+    的固定源码事实、与 Burnpack 同一 `Bytes` 的呼应）；`ch02/07` 新增
+    实验第 3 节并顺延编号；学习目标同步。
+- 验证：`cargo test/clippy/run -p ch02-tensor-basics --locked`、
+  `mdbook build/test book`、`check_release.py`（`ok=true`）、
+  `cargo fmt --all --check`、`git diff --check` 均通过。
+
+- 已完成（2026-08-12 傍晚 4）：第 7 章 Burnpack 字节级深化。
+  - 依据固定源码核验 `ModuleRecord::into_bytes` 走 `burn_pack::Writer`；
+    `burn-pack/src/base.rs` 的 header/对齐/上限注释。
+  - 示例新增最小 header 读取器：断言盘上 magic 为 `NRUB`（小端后果）、
+    version=1、metadata 与 256 对齐数据区不重叠、截断/篡改报错；
+    共 5 项测试通过。
+  - 正文 `ch07/07` 新增「打开 Burnpack 字节」：格式规格、字节序细节、
+    mmap 对齐动机，并用真实输出算清 12 字节参数 → 516 字节容器的对齐
+    开销；学习目标与源码入口同步。
+- 验证：`cargo test/clippy/run -p ch07-record-roundtrip --locked`、
+  `mdbook build/test book`、`check_release.py`（`ok=true`）、
+  `cargo fmt --all --check`、`git diff --check` 均通过。
+
+- 已完成（2026-08-12 傍晚 3）：第 9 章三级通信域深化（参考原作
+  cluster.md 的节点内/机柜间量级证据）。
+  - 模拟器：`NetworkModel` 增加 `cross_node_multiplier`；成本按
+    (rack,node) 分同节点/同机柜跨节点/跨机柜三档；TopologyAware 放置
+    改为同节点→同机柜→跨机柜；`CommunicationCost` 新增
+    `cross_node_bytes`。默认参数下既有断言与主程序输出不变。
+  - 新测试：三档域 21/22/24us 精确成本与字节分类、node 优先放置；
+    共 10 项通过。
+  - 正文：`ch09/02` 新增「数量级直觉」小节（原作数字标注为写作代际的
+    量级直觉、提醒 Gb/s vs GB/s）；`ch09/07` 通信成本改三档表；学习
+    目标、系统结论、练习同步。
+- 验证：`cargo test/clippy/run -p ch09-cluster-simulator --locked`、
+  `mdbook build/test book`、`check_release.py`（`ok=true`）、
+  `cargo fmt --all --check`、`git diff --check` 均通过。
+
+- 已完成（2026-08-12 傍晚 2）：修复 SVG 中文被写成问号的事故。
+  - 根因：通用文件写入工具把多字节中文字符替换为 `?`；`?` 是合法
+    XML 字符，上午的 svg-assets 检查（UTF-8/控制字符/XML 解析）拦不住。
+  - 修复：改用 Python 以 UTF-8 重写三张 SVG 并读回核对；严格扫描全部
+    18 张（U+FFFD、`??`、控制字符、CJK 计数）确认健康。
+  - 防回归：`svg-assets` 新增拒绝 U+FFFD 与连续 `??`；写非 ASCII 资产
+    的纪律记入会话日志（写后读回核对、校验脚本用 `chr(0xFFFD)` 构造
+    替换字符，避免通道剥离字面量造成空串假阳性）。
+- 验证：`mdbook build book`、`check_release.py --require-built-book
+  --json`（`ok=true`）、`git diff --check` 通过。
+
+- 已完成（2026-08-12 傍晚）：读者语言可读性扫尾。
+  - 主路径复查 CI/门禁/发布审计/D 编号/crosswalk 等维护者术语：均只在
+    附录与 planning（有意，D020/D021）。
+  - 修掉正文残留：`capstone.md` 裸「reference」；ch08 实验页
+    「reference/回归观察值」与有歧义的「第 5 节」（改为具体小节链接）；
+    ch01/06「上游」、ch01/07「本地固定上游」；四章练习页
+    「固定上游中的权威入口」统一为「本书固定版本源码」。
+  - `running-examples.md` 的 `make check` 段改为先声明「按章学习不必
+    全仓库检查」，避免普通读者误以为必须运行贡献者检查。
+  - 保留项及理由：`pins.toml`/`checkout`/`revision`（动手指导必需）、
+    `workspace`（GPU 工作区内存，非 Cargo）、`host reference`（术语表
+    已定义）、「镜像」（容器镜像）。
+- 验证：`mdbook build book`、`check_release.py --require-built-book
+  --json`（`ok=true`）、`git diff --check` 通过。
+
+- 已完成（2026-08-12 下午）：第 8 章回放驱动学习加深（读者向）。
+  - `examples/ch08-rl-rollout` 新增 `run_replay_driven` 阶段：先只收集，
+    再从 replay batch 真正驱动同一 TD 规则；`capacity = 1` 的确定性对照
+    显示 `initial_right_q` 精确为 0（容量截断数据分布），与在线路径的
+    1.2125 形成因果对照；新增字段对齐/配置校验测试，共 9 项测试通过。
+  - 正文 `ch08/07-rollout-lab.md` 改为两阶段叙事，先讲在线 vs 回放的
+    数据分布差异再给代码；记录写入 replay 的 done 是合并标志的边界；
+    练习页新增一道与实验闭环的对照题；章首页与系统结论同步。
+- 验证：`cargo test/clippy/run -p ch08-rl-rollout --locked`、
+  `mdbook build/test book`、`check_release.py --require-built-book --json`
+  （`ok=true`）、`cargo fmt --all --check`、`git diff --check` 均通过。
+- 下一步：与上午的内容结构批次一并提交推送；其余见下条交接。
+
+- 已完成（2026-08-12）：内容与结构合理性强心针。
+  - 实验语义：第 6 章 `final_loss` 改为最终参数重新评估；第 8 章拆分
+    done/truncated，明确 replay sample 不参与在线 TD，并固定
+    `initial_right_q=1.2125`；第 9 章把通信成本改为每个同步 step 累计，
+    覆盖失败前与 checkpoint replay 的 step。
+  - 结构：第 1–4 章补齐可点击小节列表，九章章末补前后桥接；修正第 1 章
+    阅读路径与先修关系；综合实验增加分段阅读和学习者改动任务。
+  - 误导修正：三张损坏 SVG 重写；第 3/4/7/8/9 章练习提示改到正确概念；
+    「计算强度」统一为「算术强度」；正文 Cargo 命令补齐 `--locked`；
+    `running-examples.md` 增加固定源码检出说明。
+  - 防回归：`check_release.py` 新增 `cargo-command-locking` 与
+    `svg-assets` 检查。
+- 验证：`mdbook build book`、`mdbook test book`、受影响示例测试与
+  Clippy、五个 `cargo run` 输出观察、18 张 SVG XML/控制字符检查、
+  `python3 tools/check_release.py --require-built-book --json`
+  （`ok=true`、`errors=[]`、`warnings=[]`）、`cargo fmt --all --check`、
+  `git diff --check` 均通过。
+- 偏差：完整 `make check` 在本机止于 `tracel-llvm-bundler v22.1.4-5`
+  下载 `macos-x64.checksums.json` 的上游 404；失败发生在 CubeCL CPU
+  构建脚本，不是本次代码或文档断言。需在资产可达环境重跑完整 gate。
+- 下一步：提交推送本批修订；线上抽查 Pages；发布者再决定候选 tag/归档。
+
+## 前次交接（2026-08-10 术语缺口）
 
 - 已完成（2026-08-10）：读者向术语缺口处理（高/中优先项）。
   - `glossary.md` 增补：host reference、Flex/`Device::cpu()`、

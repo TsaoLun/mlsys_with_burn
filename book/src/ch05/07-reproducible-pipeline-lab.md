@@ -33,8 +33,8 @@
 运行命令：
 
 ```bash
-cargo run -p ch05-data-pipeline
-cargo test -p ch05-data-pipeline
+cargo run -p ch05-data-pipeline --locked
+cargo test -p ch05-data-pipeline --locked
 ```
 
 单 worker、batch size 为 3、未 shuffle 时，你应看到：

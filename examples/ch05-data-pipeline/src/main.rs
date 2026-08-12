@@ -8,6 +8,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("单线程批大小：{:?}", ordered.batch_sizes);
     println!("单线程输入顺序：{:?}", ordered.ids);
+    println!("单线程预处理值：{:?}", ordered.values);
+    println!(
+        "单线程进度：{} / {} items",
+        ordered.progress.items_processed, ordered.progress.items_total
+    );
     println!("固定 seed 的顺序：{:?}", shuffled.ids);
     println!(
         "同一 loader 两轮是否相同：{}",

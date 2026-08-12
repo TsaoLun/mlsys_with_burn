@@ -13,23 +13,22 @@
       <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
     </marker>
   </defs>
-  <text class="h" x="40" y="32">autodiff tape, 2 �	</text>
+  <text class="h" x="40" y="32">autodiff tape（第 2 章）</text>
   <rect class="box" x="40" y="48" width="280" height="180" rx="4"/>
-  <text class="t" x="56" y="80">���V-�<</text>
-  <text class="t" x="56" y="108">��,!�EgL�</text>
-  <text class="t" x="56" y="136">}hbackward �9</text>
-  <text class="s" x="56" y="168">#� / Kernel 	�</text>
-  <text class="s" x="56" y="192">Flex eager 
-�����</text>
+  <text class="t" x="56" y="80">记录实际执行的反向依赖</text>
+  <text class="t" x="56" y="108">由 require_grad / backward 驱动</text>
+  <text class="t" x="56" y="136">生命周期到一次 backward 为止</text>
+  <text class="s" x="56" y="168">目的：产生梯度，不是设备 Kernel</text>
+  <text class="s" x="56" y="192">Flex eager 默认路径也使用它</text>
 
-  <text class="h" x="400" y="32">Fusion IR / �, 4 �	</text>
+  <text class="h" x="400" y="32">Fusion IR / 计划（第 4 章）</text>
   <rect class="box2" x="400" y="48" width="280" height="180" rx="4"/>
-  <text class="t" x="416" y="80">��PA � gLW</text>
-  <text class="t" x="416" y="108">��OperationIr / stream</text>
-  <text class="t" x="416" y="136">}h0 launch/read</text>
-  <text class="s" x="416" y="168">�0 CubeCL Runtime</text>
-  <text class="s" x="416" y="192">sync ����</text>
+  <text class="t" x="416" y="80">暂存可融合的 Tensor 操作</text>
+  <text class="t" x="416" y="108">由 OperationIr / stream 组织</text>
+  <text class="t" x="416" y="136">同步或读回会切分计划</text>
+  <text class="s" x="416" y="168">目的：减少 launch 与中间读写</text>
+  <text class="s" x="416" y="192">经 CubeCL Runtime 编译执行</text>
 
   <path class="arr" d="M320 138 H390"/>
-  <text class="s" x="318" y="128">h:</text>
+  <text class="s" x="318" y="128">不同目的</text>
 </svg>

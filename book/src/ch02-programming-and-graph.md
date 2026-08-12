@@ -20,7 +20,8 @@
 完成本章后，你应该能够：
 
 1. 解释机器学习工作流为何需要张量、Module、损失和训练循环等接口；
-2. 区分 `Tensor` 的编译期秩/类别与运行时 shape、dtype、Device；
+2. 区分 `Tensor` 的编译期秩/类别与运行时 shape、dtype、Device，并读回
+   字节验证内存布局（小端 `f32`、`-0.0` 符号位、dtype 宽度）；
 3. 描述张量运算如何经 bridge 和 dispatch 到达具体 Backend；
 4. 使用 `Module`、参数化层和前向方法组织一个最小模型；
 5. 用算子、张量边、依赖和控制流解释计算图；
@@ -39,3 +40,17 @@
 我们先从完整工作流抽取编程接口，再依次进入 Tensor/Device、Module、
 计算图和自动微分。类型与 IR 一节只建立边界，融合、编译和运行时优化留到
 第 4 章。最后的 CPU 实验把张量广播、参数注册和梯度计算连接起来。
+
+## 小节
+
+1. [从工作流到编程接口](ch02/01-interface-and-workflow.md)
+2. [Tensor、Device 与运行时后端](ch02/02-tensor-device-backend.md)
+3. [Module、参数与模型状态](ch02/03-module-and-state.md)
+4. [计算图的构成与生成](ch02/04-computational-graph.md)
+5. [自动微分](ch02/05-autodiff.md)
+6. [类型、IR 与调度边界](ch02/06-types-ir-scheduling.md)
+7. [实验：张量、Module 与梯度](ch02/07-labs.md)
+8. [练习、延伸阅读与来源](ch02/08-exercises-and-sources.md)
+
+完成本章后，第 3 章会从 `Device` 继续向下进入设备与 Kernel；若你更关心
+数据与训练，也可以先跳到第 5、6 章，再回来补硬件路径。
