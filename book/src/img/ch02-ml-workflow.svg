@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 210" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/>
+    </marker>
+    <marker id="arrb" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#3b82f6"/>
+    </marker>
+  </defs>
+  <rect width="720" height="210" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <g font-size="13" text-anchor="middle">
+    <rect x="20"  y="52" width="100" height="40" fill="#dbeafe" stroke="#3b82f6" rx="4"/><text x="70"  y="77" fill="#1e3a8a">数据</text>
+    <rect x="136" y="52" width="100" height="40" fill="#dbeafe" stroke="#3b82f6" rx="4"/><text x="186" y="77" fill="#1e3a8a">批次</text>
+    <rect x="252" y="52" width="100" height="40" fill="#dcfce7" stroke="#16a34a" rx="4"/><text x="302" y="77" fill="#14532d">模型前向</text>
+    <rect x="368" y="52" width="100" height="40" fill="#dcfce7" stroke="#16a34a" rx="4"/><text x="418" y="77" fill="#14532d">损失</text>
+    <rect x="484" y="52" width="100" height="40" fill="#ffedd5" stroke="#f97316" rx="4"/><text x="534" y="77" fill="#7c2d12">梯度</text>
+    <rect x="600" y="52" width="100" height="40" fill="#ffedd5" stroke="#f97316" rx="4"/><text x="650" y="77" fill="#7c2d12">参数更新</text>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" fill="none">
+    <line x1="120" y1="72" x2="134" y2="72" marker-end="url(#arr)"/>
+    <line x1="236" y1="72" x2="250" y2="72" marker-end="url(#arr)"/>
+    <line x1="352" y1="72" x2="366" y2="72" marker-end="url(#arr)"/>
+    <line x1="468" y1="72" x2="482" y2="72" marker-end="url(#arr)"/>
+    <line x1="584" y1="72" x2="598" y2="72" marker-end="url(#arr)"/>
+  </g>
+  <path d="M650,52 C650,18 302,18 302,50" stroke="#3b82f6" stroke-width="1.5" fill="none" stroke-dasharray="5 4" marker-end="url(#arrb)"/>
+  <text x="476" y="14" font-size="12" fill="#3b82f6" text-anchor="middle">下一轮迭代（训练循环）</text>
+  <line x1="418" y1="92" x2="418" y2="130" stroke="#6b7280" stroke-width="1.5" marker-end="url(#arr)"/>
+  <rect x="252" y="132" width="332" height="38" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="4 3" rx="4"/>
+  <text x="418" y="156" font-size="13" fill="#374151" text-anchor="middle">指标、调试、保存与评估（第 5–7 章展开）</text>
+  <text x="20" y="196" font-size="12" fill="#6b7280">机器学习工作流：接口设计围绕这条反复出现的路径展开</text>
+</svg>

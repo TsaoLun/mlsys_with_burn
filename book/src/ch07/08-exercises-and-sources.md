@@ -33,7 +33,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+开头的「参数状态与模型定义」示意图就是本题的骨架。再注意
+`examples/ch07-record-roundtrip` 中 `from_bytes` 之后仍要用同一
+`LinearConfig` 重新 `init` 一个新 module 才能 `try_load_record`。
+想清楚：记录里的 path、shape、dtype 各自在加载时校验什么，而
+`forward` 逻辑由谁提供。
 
 </details>
 
@@ -43,7 +48,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)的
+「生成代码如何加载权重」逐条列出四种策略生成的入口；关于
+`std::path::Path` 的那一问，线索在
+[「Remote、WASM/no_std 与部署边界」](06-remote-wasm-and-nostd.md)
+对 `extern crate std` 的讨论里。按「权重字节在构建期还是运行期、
+从哪个来源进入 model」给四种策略排一条时间线。
 
 </details>
 
@@ -53,7 +63,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「压缩、精度与离线优化」](04-compression-and-optimization.md)开头
+把「压缩」拆成四个可以分别改变的对象，存盘表示只是第一个；加载侧
+`FromRecord`/`CastToModule` 的语义见
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)。
+沿「文件 dtype → 加载 dtype → 算子路径 → 误差证据」逐层追问：
+F16 到哪一层就停了，剩下每层还缺什么条件。
 
 </details>
 
@@ -65,7 +80,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+延迟分解式在
+[「部署边界、artifact 与服务成本」](01-deployment-boundary.md)的
+「一个最小延迟模型」；动态 batching 的三个合批条件在
+[「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)。
+逐项判断哪些成本能按 batch 摊薄、哪一项必然随等待变长，再想
+padding 与 shape bucket 又把无效计算加进了哪一项。
 
 </details>
 
@@ -75,7 +95,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「Remote、WASM/no_std 与部署边界」](06-remote-wasm-and-nostd.md)
+第一段就是起点：Remote 只移动 tensor operation 的执行位置。再拿
+[「部署边界、artifact 与服务成本」](01-deployment-boundary.md)的
+四对象分解（artifact、Runtime、请求契约、服务策略）当表格，把题中
+四个组件各归入一格，看 `Device::remote_iroh` 只落在哪一格、其余
+格子由谁补齐。
 
 </details>
 
@@ -85,7 +110,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「Remote、WASM/no_std 与部署边界」](06-remote-wasm-and-nostd.md)的
+「`no_std` 的范围」把 converter 定位成 build-time/CLI 工具，并列出
+它与生成 model 各自的依赖集合。分别写出两个阶段运行在哪台机器上、
+各需要哪些宿主能力（ONNX parser、codegen、文件系统，对比 `alloc`
+与目标 backend），答案自然分开。
 
 </details>
 
@@ -98,7 +127,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+`examples/ch07-record-roundtrip` 的 `run_round_trip` 里
+`record_tensors = record.len()`，单个 Linear 是 2（weight 与
+bias）。先推算两层后的期望值再动手改；记录收集的是整棵 module
+树的参数，嵌套字段不需要手写遍历。沿用 `Initializer::Constant`
+可以让输出误差断言保持确定性。
 
 </details>
 
@@ -108,7 +141,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+在示例里把恢复侧的 `LinearConfig` 维度改掉（比如 `new(3, 1)`）就能
+制造 mismatch。两个开关的语义见
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+的「核心 `ModuleRecord`」，实现在
+`burn/crates/burn-core/src/store/mod.rs`。分别问：它们各跳过哪类
+检查，跳过之后哪种错误会被推迟到什么时候才暴露。
 
 </details>
 
@@ -118,7 +156,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+两种 policy 谁说了算，
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+的「dtype policy 与布局」各有一句话定义。在 round-trip 实验上加一个
+不同 dtype 的目标 module，观察加载后参数 dtype 与 `max_abs_error`
+相对 `1e-6` 容差的变化；记住这只是加载时的数据类型策略，不是量化
+校准。
 
 </details>
 
@@ -128,7 +171,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)
+的「推理 runtime 的状态」给出启动六步和「handler 只借用或经锁/actor
+访问」的所有权约束。注意实验里 `into_record` 会消费 model——哪些
+API 拿走所有权，决定了共享状态里能存放什么。先写清类型：谁持有
+model、handler 拿到的是共享引用还是消息通道，再填实现。
 
 </details>
 
@@ -138,7 +185,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)
+开头强调前处理属于模型契约、schema 要与模型版本绑定；该节末尾测试
+分层里的 contract test 就是本题要写的那一层。设计方向：让前处理
+返回 `Result`，非法输入在构造 tensor 之前就被拒绝，`forward` 只
+接受已通过校验的类型化 batch。
 
 </details>
 
@@ -148,7 +199,13 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+起点是实验页「从实验走向部署」的第 1 步：把内存 bytes 换成临时
+`.bpk` 文件；`ModuleRecord::save/load` 的文件接口见
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)。
+示例的 `inspect_burnpack_layout` 测试演示了截断与坏 magic 两类字节
+层错误，比较时区分路径/IO 错误、格式错误与校验错误各在哪一层报出。
+生成代码的 `from_file` 只需对照固定 `burn-onnx` 源码阅读，不要接入
+本书 workspace。
 
 </details>
 
@@ -162,9 +219,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-按本章末「延伸阅读与固定源码入口」打开本书固定版本；配合
-`examples/ch07-record-roundtrip` 观察错误 topology 如何被
-`RecordError::Validation` 拒绝。
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+的「核心 `ModuleRecord`」列出了这条链上的每个方法，可当阅读地图；
+每一步的可观察结果（`record.len()`、误差边界）在
+`examples/ch07-record-roundtrip` 的 round-trip 测试里都有对照。找
+`ParamId` 时盯住加载侧：正文说恢复保存 id 的是 module mapper，在
+源码中定位这段逻辑。
 
 </details>
 
@@ -174,7 +234,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+正文称 `load_record` 是「失败时 panic 的便利方法」——便利方法通常
+包装另一个入口，读源码时先找出谁调用谁、panic 消息从哪来。实验页
+[「实验：CPU 模型状态往返保存与恢复」](07-record-roundtrip-lab.md)
+解释了服务启动路径为什么选 `try_load_record`；把两者的返回类型和
+失败时机放到「启动阶段」与「请求处理中」两个场景里比较。
 
 </details>
 
@@ -185,7 +249,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)的
+「`ModelGen` 的固定源码路线」已给出四阶段骨架，把它当待验证的
+假设：在源码里定位 `OnnxGraphBuilder`、`ParsedOnnxGraph::into_burn`、
+`BurnGraph::codegen` 与 `register_burnpack_loaders`，补全箭头之间
+省略的中间结构。该仓库依赖较早的 Burn revision，只读源码即可，
+不要把它接入本书 workspace。
 
 </details>
 
@@ -195,7 +264,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+先按[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)
+「生成代码如何加载权重」的四条列表写下预测，再到该文件的测试里
+核对生成 token 中出现的 constructor 名。特别留意 `Default` 在
+`File` 与 `Embedded` 下为什么含义不同（生成时的文件路径，对比
+`include_bytes!` 进 binary）。
 
 </details>
 
@@ -206,7 +279,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-见第 9 章拓扑与调度节及网络配图。
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+的「`burn-store` 提供的更大边界」逐项介绍了这些抽象。读源码时按
+职责分组：谁决定选哪些参数、谁决定叫什么名字、谁改数值/布局、谁
+决定何时 materialize tensor data；并找出正文「lazy 不等于设备端
+zero-copy」对应的实现证据。
 
 </details>
 
@@ -217,7 +294,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+三个入口名（`remote_iroh`、`remote_websocket`、`remote_iroh_async`）
+在[「Remote、WASM/no_std 与部署边界」](06-remote-wasm-and-nostd.md)
+已点出。在 `device.rs` 里对比它们的条件编译差异，在
+`server/builder.rs` 里看 `RemoteServerBuilder` 为何要求具体 backend
+的非空设备列表；再想「浏览器主线程不能阻塞连接」这一约束如何落在
+API 形状（同步返回，对比 async）上。
 
 </details>
 
@@ -227,7 +309,11 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」打开本书固定版本的对应路径。
+[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)末段
+已给出结论（`976aa9...` 对 `78f10a...`，同名 package 不同 revision
+即不同类型）；你的任务是把证据链补全：在两份 manifest 里找到各自
+的 `rev` 字段，再从 Cargo 依赖解析的角度说明为什么它们是两个 crate
+实例。这也是本书不把 ONNX 端到端接入同一依赖图的原因。
 
 </details>
 
@@ -240,7 +326,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+以 `examples/ch07-record-roundtrip` 的 `run_round_trip` 为骨架插入
+分段计时，把 `from_bytes`、`try_load_record`、首次 forward 与稳态
+forward 分开记录；启动六步与 warmup 的位置见
+[「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)。
+注意首次 forward 可能触发 lazy allocation 等一次性成本，与稳态
+混在一起会污染结论。
 
 </details>
 
@@ -250,7 +341,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+纯逻辑起点是示例里的 `dynamic_batch_groups`：按 shape 键分组并受
+最大 batch size 限制，其测试给出了分组边界的预期，本题相当于给它
+加上时间维度。合批三条件见
+[「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)。
+思考两种上限各自主导哪个指标：batch 上限主要影响吞吐还是延迟，
+queue delay 上限又会出现在哪个分位数里。
 
 </details>
 
@@ -260,7 +356,13 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+报告模板是
+[「压缩、精度与离线优化」](04-compression-and-optimization.md)末尾
+「精度—延迟—内存的验证闭环」：error、memory、latency 三组证据缺一
+不可。加载侧入口可用
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+的 dtype policy。固定输入 schema、batch、backend 与测量方式再比较；
+CPU 上的结论不要外推到其他 backend。
 
 </details>
 
@@ -270,7 +372,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+示例里的 `ArtifactManifest` 与 `rollback_allowed` 测试给了最小骨架
+（checksum、版本号、回滚条件），本题是把它扩成完整字段表。字段
+清单可对照
+[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)末尾
+「验证转换时建议记下什么」。给每个字段写一句「它能把哪类故障与
+其他故障区分开」，协议就成形了。
 
 </details>
 
@@ -280,7 +387,13 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+Remote 的成本与失效点列在
+[「Remote、WASM/no_std 与部署边界」](06-remote-wasm-and-nostd.md)；
+把每种故障映射到
+[「部署边界、artifact 与服务成本」](01-deployment-boundary.md)中
+remote 延迟分解的某一项，再决定注入与观测手段。重复提交要考虑
+幂等；真实 Iroh 网络属可选前提，故障矩阵与恢复协议可先用本地
+模拟 peer 验证。
 
 </details>
 
@@ -290,7 +403,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+预算五项正文已点名：
+[「Remote、WASM/no_std 与部署边界」](06-remote-wasm-and-nostd.md)的
+「`no_std` 的范围」末尾就是这份测量清单。结合
+[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)对
+`Embedded`（`include_bytes!` 进 binary）与 `Bytes`（调用者供字节）
+的生命周期描述，分析权重进 binary 后每项预算与更新方式怎么变。
 
 </details>
 
@@ -300,7 +418,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-回看第 7 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+对照表正文已备好：
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+的威胁四边界（at rest、in transit、in use、model behavior）加上
+[「Remote、WASM/no_std 与部署边界」](06-remote-wasm-and-nostd.md)的
+「安全边界」小节。先写清每种机制针对的攻击面，再找它们互不覆盖
+的空白，「不是同一个开关」就有了具体证据。
 
 </details>
 
@@ -310,7 +433,12 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-见第 7 章压缩节的 $s,z$ 带数字演算。
+[「压缩、精度与离线优化」](04-compression-and-optimization.md)给出
+scale/zero-point 公式和一段把校准范围 -3.2～2.8 映射到 int8 的带
+数字演算，照着扩展即可。粒度对比时数一数逐通道需要多少组
+scale/zero-point、metadata 随之怎么涨；离群值裁剪等于改变校准范围
+的选取。量化在本章是原理层讲解，验算用纯 Rust 数值即可，不依赖
+低精度 backend kernel。
 
 </details>
 
@@ -321,13 +449,21 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+题面四层就是
+[「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
+威胁模型段的展开。逐层清点手头已有的证据：示例的
+`ArtifactManifest` checksum、Burnpack 头部读取器对截断/坏 magic 的
+拒绝、固定源码内置的 metadata 与 tensor 数上限，各覆盖哪一层的哪个
+子问题；剩下没有任何机制覆盖的空白，就是 `ModuleRecord` 单独解决
+不了的部分。
 
 </details>
 
 
 ## 延伸阅读与固定源码入口
 
+量化、蒸馏、推理服务与大模型服务的论文见附录
+[参考文献](../references.md#第-7-章-模型服务)。
 本书示例使用的 Burn：
 
 - `burn/crates/burn-core/src/store/mod.rs`

@@ -28,9 +28,9 @@ steps/s——瓶颈从环境移到了 policy。继续加环境到 $N = 64$ 也�
 内存带宽、policy batch 上限、queue wait 和设备传输限制，理想上界是
 $N/T\_{\text{env}}$，但任何一项都可能先成为瓶颈。
 
-## 固定 Burn 的三种 runner
+## Burn 的三种 runner
 
-固定 `burn-train` 的 RL 代码提供三层 runner：
+`burn-train` 的 RL 代码提供三层 runner：
 
 1. `AgentEnvBaseLoop` 在当前线程顺序执行一个环境；
 2. `AgentEnvAsyncLoop` 把一个环境放到线程中，用 channel 请求 step 或
@@ -54,7 +54,7 @@ server，却没有因此获得联合动作、通信、团队奖励或 equilibriu
 
 ## OffPolicyStrategy 的执行顺序
 
-固定 `burn-train` 的 `OffPolicyStrategy` 把配置映射为一条循环：
+`burn-train` 的 `OffPolicyStrategy` 把配置映射为一条循环：
 
 ```text
 MultiAgentEnvLoop::run_steps(train_interval)
@@ -86,7 +86,7 @@ MultiAgentEnvLoop::run_steps(train_interval)
 - inference device 与 learner device 可以不同，转换实现必须处理这条
   边界。
 
-固定源码中的 `RLTraining` 还连接 metrics、renderer、event processor、
+`RLTraining` 还连接 metrics、renderer、event processor、
 interrupter 和 checkpoint。它负责训练过程的编排，不替 `PolicyLearner`
 决定 loss 或 optimizer。
 
@@ -144,9 +144,9 @@ kernel 或异步 queue 仍可能影响结果。一个可恢复的实验需要保
 - sampler/worker seed；
 - hyperparameters 和代码 revision。
 
-固定 `burn-rl::AsyncPolicy` 使用 native channel/thread，固定 replay
-使用 tensor random；它们提供机制，但没有替应用建立跨 worker 的统一
-随机种子协议。
+`burn-rl::AsyncPolicy` 使用 native channel/thread，replay 采样使用
+tensor random；它们提供机制，但没有替应用建立跨 worker 的统一随机
+种子协议。
 
 ## 本节小结
 

@@ -2,7 +2,7 @@
 
 实验位于 `examples/ch04-fusion-inspector`。本书示例工程为 Burn 启用
 `cpu` 与 `fusion`，并直接依赖带 `test-util` feature 的 `burn-fusion`。
-后者提供 `FusionInspector`，用来捕获固定 Runtime 的执行报告。
+后者提供 `FusionInspector`，用来捕获 Runtime 的执行报告。
 
 `FusionInspector` 明确是测试观测 API。生产程序通常使用
 `BURN_FUSION_LOG` 和 tracing/性能工具，而不依赖 test-util。

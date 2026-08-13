@@ -28,7 +28,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+把[「作业队列、资源向量与成组调度」](03-job-queue-and-resource-scheduling.md)
+的资源向量 `R_job` 和
+[「多租户、配额与资源碎片」](05-multitenancy-and-fragmentation.md)
+区分的三类“容量”逐项过一遍：显存不够、凑不齐成组资源、只能拿到
+跨机柜组合，分别卡在准入的哪个条件上、把代价记进哪个时间项。
 
 </details>
 
@@ -38,8 +42,10 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-对照第 9 章「集群负载、系统分层与能力边界」和第 6 章「集合通信、DDP
-与能力边界」：队列等待属于控制面，`all_reduce` 属于训练数据面，
+对照[「集群负载、系统分层与能力边界」](01-cluster-workload-and-boundary.md)
+的三层图和第 6 章
+[「集合通信、DDP 与能力边界」](../ch06/06-collective-and-ddp.md)：
+队列等待属于控制面，`all_reduce` 属于训练数据面，
 `ComputeClient::sync` 属于设备运行时完成边界。
 
 </details>
@@ -50,7 +56,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-见第 9 章拓扑与调度节及网络配图。
+[「GPU 节点、机柜与网络拓扑」](02-gpu-node-and-network-topology.md)
+给出成本函数推导与超额认购、热点的讨论；示例
+`examples/ch09-cluster-simulator` 的 `communication_cost` 只把
+每个 GPU pair 分进三档通信域再乘确定性 multiplier。对照“超额
+认购与热点”一段想一想：哪些现象是一条固定乘数表达不了的。
 
 </details>
 
@@ -60,7 +70,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+[「作业队列、资源向量与成组调度」](03-job-queue-and-resource-scheduling.md)
+列出了几种互不等价的“公平”定义和队首阻塞场景；再用
+`examples/ch09-cluster-simulator` 对比两种 `PlacementPolicy` 的
+`queue_wait_us`、`p95_queue_wait_us` 与 `cross_rack_bytes`。思考
+方向：把作业挤进同一通信域会改变剩余空闲资源的形状，这对后续
+作业的成组准入意味着什么。
 
 </details>
 
@@ -70,7 +85,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「多租户、配额与资源碎片」](05-multitenancy-and-fragmentation.md)
+里“四张空闲 GPU 分布在两个机柜”就是一个起点；示例 crate 的
+`Cluster::uniform_interleaved` 特意把相邻 id 放进不同机柜，便于
+构造这类布局。取舍对照同节“打包、保留与抢占”：保留牺牲哪种
+利用率，backfill 又必须守住哪条启动承诺。
 
 </details>
 
@@ -80,7 +99,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「拓扑感知放置与集合通信成本」](04-topology-aware-placement-and-communication.md)
+的“Burn 的 collective 边界”指出 `DistributedContext` 保存的只是
+传入的设备集合。对照本章列出的
+`burn/crates/burn-tensor/src/tensor/distributed.rs`，数一数
+`init` 的输入里有没有 job、attempt、租约或故障域字段。
 
 </details>
 
@@ -90,7 +113,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+[「故障、检查点与可观测性」](06-faults-checkpoints-and-observability.md)
+给出 checkpoint 字段清单（commit version、acknowledged）和幂等性
+要求；[「多租户、配额与资源碎片」](05-multitenancy-and-fragmentation.md)
+的 allocation 记录提供 `lease_version` 语义。从“同一
+`job_id + attempt + step` 只能生效一次”出发设计提交与拒绝规则。
 
 </details>
 
@@ -100,7 +127,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-见第 6 章集合通信节与 Flex CPU 无 collective 的边界。
+这四个时间项分属
+[「集群负载、系统分层与能力边界」](01-cluster-workload-and-boundary.md)
+作业时间模型的不同分量；在哪一层观测它们，见
+[「故障、检查点与可观测性」](06-faults-checkpoints-and-observability.md)
+的四层指标聚合。反例思路：构造一个 GPU 一直“忙”、作业却因排队
+或重放而变慢的场景。
 
 </details>
 
@@ -113,7 +145,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+从示例 crate 的 `Job` 结构、`validate_job` 和 `choose_placement`
+的显存过滤入手，用测试
+`gang_admission_does_not_start_partial_jobs` 保住成组不变量；
+配额语义对照
+[「多租户、配额与资源碎片」](05-multitenancy-and-fragmentation.md)：
+quota 检查应发生在准入，而不是放置成功之后。
 
 </details>
 
@@ -123,9 +160,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-改 `examples/ch09-cluster-simulator` 的 `choose_placement`，并为队首阻塞、
-资源归还和最终准入写虚拟时间测试；不要从第 8 章 replay 类比例会改变资源
-所有权。
+改 `examples/ch09-cluster-simulator` 的 `choose_placement` 时，
+注意“队首放不下就停止准入”的逻辑在 `admit_jobs` 里；为队首阻塞、
+资源归还和最终准入写虚拟时间测试。饥饿判据可借用
+[「多租户、配额与资源碎片」](05-multitenancy-and-fragmentation.md)
+对 backfilling 的约束：被越过的队首作业的启动承诺不能被破坏。
 
 </details>
 
@@ -135,7 +174,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+现有自由函数 `communication_cost` 的输入输出就是 trait 的候选
+签名，测试 `communication_cost_is_monotonic_in_message_size` 是
+单调性断言的模板。对照
+[「拓扑感知放置与集合通信成本」](04-topology-aware-placement-and-communication.md)
+想清楚 trait 边界：mock 应该在哪一层替换——bytes 分域之后，
+还是虚拟时间计价之后。
 
 </details>
 
@@ -145,7 +189,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+示例 crate 的 `TraceEvent`/`TraceRecord` 已带 `attempt` 和
+schema 版本字段；`lease_version` 的语义见
+[「多租户、配额与资源碎片」](05-multitenancy-and-fragmentation.md)
+的 allocation 记录。测试思路：构造一个失败重试作业，断言携带旧
+版本号的 completion 事件被拒绝，而不是写进新 attempt 的报告。
 
 </details>
 
@@ -155,7 +203,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+`Gpu` 已带 `node`/`rack` 字段，失败路径集中在示例 crate 的
+`handle_failure` 和 `release`；对照
+[「故障、检查点与可观测性」](06-faults-checkpoints-and-observability.md)
+的故障状态机，把故障单位从单个作业换成 `(rack, node)` 域：受影
+响的每个 placement 都要走“释放 → 定位 checkpoint → 重新入队”。
 
 </details>
 
@@ -165,7 +217,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+`SimulationError` 已有 `DuplicateJobId`、`JobDoesNotFit`、
+`RetryLimitExceeded`、`SchedulerDeadlock` 等变体，入口校验集中
+在 `validate_job` 与 `simulate` 主循环。参照
+[「作业队列、资源向量与成组调度」](03-job-queue-and-resource-scheduling.md)
+的状态机逐条问：哪些非法输入应在准入前拒绝、哪些只能在运行中
+暴露，并为每个错误写最小触发夹具。
 
 </details>
 
@@ -175,7 +232,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+入口是本章列出的
+`burn/crates/burn-train/src/learner/supervised/strategies/base.rs`
+（以 `pins.toml` 的 revision 为准，而不是在线最新文档）；命名
+边界见[「作业队列、资源向量与成组调度」](03-job-queue-and-resource-scheduling.md)
+的“Burn 入口不是作业调度器”：adapter 拿到的只是调用者给的设备
+列表，没有队列、租约和 rank rendezvous。
 
 </details>
 
@@ -188,7 +250,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+[「实验：CPU 集群调度与故障模拟器」](07-cpu-cluster-simulator-lab.md)
+的主程序已对同一组作业分别跑两种策略并打印这四个指标，测试
+`topology_aware_placement_reduces_cross_rack_bytes` 是最小对照。
+先预测每个指标的大小关系再跑模拟核对，重点解释与预测不一致的
+那一项。
 
 </details>
 
@@ -199,7 +265,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+用 `NetworkModel::with_multipliers` 构造参数，仿照测试
+`communication_cost_distinguishes_three_placement_domains` 对同
+节点、同机柜跨节点、跨机柜三种 placement 分别断言，每次只改一
+个参数。“不是实测带宽”的理由见
+[「实验：CPU 集群调度与故障模拟器」](07-cpu-cluster-simulator-lab.md)：
+虚拟微秒来自确定性乘法，不来自任何 NIC。
 
 </details>
 
@@ -209,7 +280,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+`SimulationResult` 已带 `p95_queue_wait_us` 字段（实现见示例
+crate 的 `percentile_95`）；
+[「作业队列、资源向量与成组调度」](03-job-queue-and-resource-scheduling.md)
+的队首阻塞场景是现成的构造起点。让大多数作业等待很短、少数
+作业等待极长，再比较均值和 p95 各自报告了什么。
 
 </details>
 
@@ -219,7 +294,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch09-cluster-simulator`；真实集群属可选平台。
+straggler 的定义和四层指标聚合见
+[「故障、检查点与可观测性」](06-faults-checkpoints-and-observability.md)；
+示例 crate 的 `TraceRecord` 目前只到 job 粒度，扩展时要把事件
+降到 rank 并带上 node/rack。指标设计的关键是把“单个 rank 慢”
+与“所有 rank 的 collective 一起变慢”区分开。
 
 </details>
 
@@ -229,9 +308,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch09-cluster-simulator`，先让 `collective_time_us` 按
-已执行 step 累计，再比较不同 interval 下的 checkpoint 成本与
-`checkpoint_replay_steps`。
+在示例 crate 里调 `Job::checkpoint_interval` 与
+`SimulationConfig::checkpoint_cost_us`，配合 `with_failure_step`
+注入故障，比较 `checkpoint_replay_steps` 和 `makespan_us` 的
+变化。成本模型不必从零推：
+[「故障、检查点与可观测性」](06-faults-checkpoints-and-observability.md)
+已推导 Young 近似间隔，把它扩展到 time-to-recovery 即可。
 
 </details>
 
@@ -241,7 +323,13 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-回看第 9 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「GPU 节点、机柜与网络拓扑」](02-gpu-node-and-network-topology.md)
+的“迁移到真实集群时要记录什么”是这份清单的起点；先用
+`Cluster::uniform_interleaved(2, 2, 2, ...)` 在模拟器里造出三种
+placement（测试
+`communication_cost_distinguishes_three_placement_domains` 的
+夹具），再逐项想哪些字段是虚拟时间模型根本没有、必须真实实验
+才能补上的。
 
 </details>
 
@@ -254,7 +342,12 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+第 6 章[「本机多设备与数据并行」](../ch06/05-local-data-parallel.md)
+和[「集合通信、DDP 与能力边界」](../ch06/06-collective-and-ddp.md)
+分别对应这两种策略，本章
+[「集群负载、系统分层与能力边界」](01-cluster-workload-and-boundary.md)
+概括了三种 `ExecutionStrategy`。读源码时盯住两点：设备集合从哪
+里来，梯度在主设备聚合还是走 collective。
 
 </details>
 
@@ -265,8 +358,10 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-对照第 6 章「集合通信、DDP 与能力边界」；注意第 9 章模拟器只建立成本
-协议，不调用这些 Burn collective API。
+调用顺序对照第 6 章
+[「集合通信、DDP 与能力边界」](../ch06/06-collective-and-ddp.md)
+的 AllReduce 语义与完成边界；注意第 9 章模拟器只建立成本协议，
+不调用这些 Burn collective API。
 
 </details>
 
@@ -277,7 +372,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+[「拓扑感知放置与集合通信成本」](04-topology-aware-placement-and-communication.md)
+的“Burn 的 collective 边界”列出这组入口的分工（启动/关闭
+server、注册参数、提交同步、`all_reduce`/`sync_collective`）。
+按 `pins.toml` 固定 revision 读 `ops.rs`，画“注册 → 提交 →
+完成”的时序，标出哪些方法有默认实现、哪些必须由 backend 提供。
 
 </details>
 
@@ -287,7 +386,10 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+[「拓扑感知放置与集合通信成本」](04-topology-aware-placement-and-communication.md)
+的“Flex CPU 不能作为 collective 实验”就是这道题的正文依据：在
+`transaction.rs` 里找到明确写明不支持 collective 的位置，再把
+“trait 有默认实现、代码能编译”与“运行时真的能归约”区分开。
 
 </details>
 
@@ -298,7 +400,11 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+完成边界的讲解在第 4 章
+[「内存、Stream 与异步执行」](../ch04/06-memory-streams-execution.md)；
+本章[「GPU 节点、机柜与网络拓扑」](02-gpu-node-and-network-topology.md)
+的“Burn/CubeCL 的局部视角”解释这些边界为何只属于设备运行时。
+画图时区分“提交到 stream”和“确认完成”分别发生在哪个调用上。
 
 </details>
 
@@ -308,7 +414,13 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+`SERVER_COMM_ENABLED` 是 `ServerCommunication` trait 的常量，
+描述 server 之间（如 peer-to-peer）的数据搬运是否可用；从
+`runtime.rs` 找到 `CpuServer` 后，顺着它的 `ServerCommunication`
+实现看取值与注释。再对照
+[「集群负载、系统分层与能力边界」](01-cluster-workload-and-boundary.md)
+的三层边界想：这个开关管到哪一层，rank rendezvous、成员管理和
+故障恢复又在哪一层。
 
 </details>
 
@@ -355,7 +467,9 @@ CubeCL revision 是 `be278a1e76aed881e2cc6b165414ee6103ca4634`：
 
 固定源码可核验设备/通信/运行时入口；不能据此声称已有集群作业队列、
 拓扑感知放置、多租户 quota、跨节点 rendezvous、elastic membership、
-自动重试、分布式 checkpoint 共识或统一集群遥测。
+自动重试、分布式 checkpoint 共识或统一集群遥测。这些能力在真实系统
+中的实现（Borg、Gandiva、Tiresias 等）见附录
+[参考文献](../references.md#第-9-章-大规模-gpu-集群管理)。
 
 ## 本章系统结论
 

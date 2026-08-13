@@ -58,7 +58,7 @@ transition → behavior_policy_version
 
 ## `PolicyLearner` 的职责
 
-固定 `burn-rl::PolicyLearner` 定义：
+`burn-rl::PolicyLearner` 定义：
 
 - `train(LearnerTransitionBatch)`：消费一个批量 transition，返回
   `RLTrainOutput`；
@@ -73,9 +73,9 @@ gradient learner 也可以返回 log probability、entropy 或 value loss。
 Rust 的关联类型将具体 transition、training output 和 record 绑定起来，
 减少了运行时类型标签，但实现者要承担更多 trait 约束。
 
-## 固定 DQN example 的完整边界
+## DQN example 的完整分工
 
-固定 `burn/examples/dqn-agent` 是理解这条边界的最好源码入口。它由应用
+`burn/examples/dqn-agent` 是理解这条分工的最好源码入口。它由应用
 自己实现：
 
 1. CartPole wrapper 把 gym observation/action 转为 `Environment` 的
@@ -89,9 +89,9 @@ Rust 的关联类型将具体 transition、training output 和 record 绑定起�
 7. `RLTraining::OffPolicyStrategy` 负责 rollout、replay、evaluation 和
    checkpoint。
 
-这段代码证明的是“本版可以组合出一个 DQN example”，不是
-`burn-rl` 自带 DQN。该 example 还放在独立工程里，因为 gym-rs 会引入
-native SDL2 等环境依赖；所以本书默认实验不直接复制它的外部 simulator。
+这段代码说明：DQN 是由应用组合出来的，`burn-rl` 并不自带 DQN。该
+example 放在独立工程里，因为 gym-rs 会引入 native SDL2 等环境依赖；
+所以本书默认实验不直接复制它的外部 simulator。
 
 ## Checkpoint 不只保存 policy
 
@@ -104,7 +104,7 @@ optimizer moments and scheduler
 exploration step / replay / RNG
 ```
 
-固定 `RLCheckpointer` 将 policy record 与 learning-agent record 分开；
+`RLCheckpointer` 将 policy record 与 learning-agent record 分开；
 learning agent 的自定义 record 可以再把 model、target 和 optimizer
 打包。它没有自动保存 replay 内容、外部环境状态或全局 RNG。若从
 checkpoint 继续训练而重置了 epsilon step 或 replay 分布，新的训练可能
@@ -116,7 +116,7 @@ checkpoint 继续训练而重置了 epsilon step 或 replay 分布，新的训�
 
 ## 评估与训练的隔离
 
-固定 `OffPolicyStrategy` 在 evaluation interval 触发 validation runner，
+`OffPolicyStrategy` 在 evaluation interval 触发 validation runner，
 把 learner 的 policy state 更新到评估 runner，并用 deterministic 配置
 运行 episode。评估还会发出 episode length、cumulative reward 等 metric
 事件。
@@ -134,7 +134,7 @@ checkpoint 继续训练而重置了 epsilon step 或 replay 分布，新的训�
 ## 本节小结
 
 RL 算法实现位于 `PolicyLearner` 与应用 model 之间，训练编排位于
-`RLTraining`/`OffPolicyStrategy`。固定 Burn 为两者提供可组合的边界，但
+`RLTraining`/`OffPolicyStrategy`。Burn 为两者提供可组合的接口，但
 不替用户选择 bootstrap、探索、target state、loss、optimizer 和恢复
-协议。先用表格 TD 实验验证数学，再用固定 DQN example 对照神经网络
+协议。先用表格 TD 实验验证数学，再用 DQN example 对照神经网络
 实现，是较安全的学习路径。

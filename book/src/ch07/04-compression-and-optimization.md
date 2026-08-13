@@ -81,7 +81,7 @@ $28\ \text{GB}$ 降到约 $7\ \text{GB}$，int4 再到约 $3.5\ \text{GB}$；但
 版本、范围统计和误差阈值必须成为 artifact metadata，否则同一权重的
 量化结果不可复查。
 
-固定版本 Burn 的 crate 文档明确写出：当前不支持 QAT，部分 backend 在
+Burn 的 crate 文档明确写出：当前不支持 QAT，部分 backend 在
 开发中的 PTQ 路径支持有限的低精度表示。这个事实不能外推为“任意
 `burn-onnx` 模型都能自动完成量化”。`burn-onnx` 中存在量化相关 ONNX
 node 代码，也只说明 importer 有对应节点实现入口；仍需针对具体模型、
@@ -108,7 +108,7 @@ $$
 
 ## 图级优化与算子级优化
 
-固定 `burn-onnx` 的 simplify/codegen 路径适合做一部分离线图简化：
+`burn-onnx` 的 simplify/codegen 路径适合做一部分离线图简化：
 常量折叠、死节点消除、公共子表达式和某些 reshape/permute pattern。
 部署阶段还可以做：
 

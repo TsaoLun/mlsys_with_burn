@@ -48,26 +48,14 @@ $$
 
 本版中的 DDP 不是 `burn-train` 自己实现一个网络协议，而是跨越多层：
 
-```text
-ExecutionStrategy::ddp
-        │
-DistributedContext::init
-        │
-Dispatch / backend DistributedOps
-        │
-autodiff distributed registration
-        │
-backend all_reduce + sync_collective
-        │
-runtime / device collective implementation
-```
+![DDP 六层分工：从 ExecutionStrategy::ddp 到 runtime/device collective，每层各自的职责](../img/ch06-ddp-layers.svg)
 
 `ExecutionStrategy::ddp(devices, DistributedConfig)` 创建
 `DistributedContext`。context 的生命周期负责启动和关闭该 backend 的
-通信协调器；`DistributedConfig` 在本版中至少包含 `Sum` 或 `Mean`
-这样的 `ReduceOperation` 选择。
+通信协调器；`DistributedConfig` 至少包含 `Sum` 或 `Mean` 这样的
+`ReduceOperation` 选择。
 
-### 源码导读顺序（固定版本）
+### 源码导读顺序
 
 即使默认实验不跑 DDP，也应按下面顺序把“数据面期望什么”读进脑子：
 
@@ -85,7 +73,7 @@ GPU 阅读时额外问：梯度字节是否经过 PCIe/NVLink/跨机柜？`sync_
 
 ## DDP worker 的生命周期
 
-固定 `burn-train` 的 DDP 代码可以按以下步骤阅读：
+`burn-train` 的 DDP 代码可以按以下步骤阅读：
 
 1. `DdpTrainingStrategy` 对每个本地 device 启动一个 `DdpWorker`；
 2. train loader 用 `split_dataloader` 分给各 worker；
@@ -97,7 +85,7 @@ GPU 阅读时额外问：梯度字节是否经过 PCIe/NVLink/跨机柜？`sync_
 7. `sync_collective` 形成可访问结果的同步边界；
 8. 主 worker 承担 validation、event processing、checkpoint 和最终 model。
 
-第 6 步不是“把 Rust channel 中的几个 Tensor 相加”。固定
+第 6 步不是“把 Rust channel 中的几个 Tensor 相加”。
 `burn-backend/src/backend/distributed/server.rs` 会跟踪 parameter ID、
 各设备登记次数和待归约 tensor；底层 backend 决定真正的 collective 实现。
 
@@ -114,7 +102,7 @@ GPU 阅读时额外问：梯度字节是否经过 PCIe/NVLink/跨机柜？`sync_
 
 ## DDP 的范围与参与责任
 
-固定 `burn-train` 的 DDP README 明确说明：
+`burn-train` 的 DDP README 明确说明：
 
 - 每个本地 device 有一个线程和模型 replica；
 - 每个节点都要由用户启动 DDP；
@@ -129,16 +117,16 @@ GPU 阅读时额外问：梯度字节是否经过 PCIe/NVLink/跨机柜？`sync_
 - pipeline stage 调度、micro-batch 编排和 activation recomputation；
 - 跨节点 checkpoint 原子提交。
 
-这些是系统设计问题，可以在 OpenMLSys 的框架无关叙事中学习，但不能包
-装成固定 Burn API 已经提供。
+这些是系统设计问题，本章按框架无关原理讲解；上面的 DDP 入口并未实现
+它们。
 
-## 固定后端的验证边界
+## 各后端的实现现状
 
 `burn-flex/src/ops/transaction.rs` 的注释明确写出 Flex 不支持 collective
 operations，因此 `Device::flex().autodiff()` 适合本章 CPU 训练循环，不适合
 运行 DDP AllReduce。`burn-cubecl/src/ops/distributed.rs` 提供 CubeCL
-backend 的 all-reduce 调用；固定 CubeCL CUDA server 使用 NCCL，但这条
-路径需要 CUDA/NCCL、多个可用设备和匹配的运行时配置。
+backend 的 all-reduce 调用；CUDA server 使用 NCCL，这条路径需要
+CUDA/NCCL、多个可用设备和匹配的运行时配置。
 
 `burn-communication` 的 WebSocket/channel 和 tensor data service 也不能
 直接当成 DDP 梯度同步：前者是网络传输抽象，后者是远程 tensor 数据服务；
@@ -159,8 +147,8 @@ worker pull parameters
 ```
 
 异步版本允许不同 worker 使用不同参数版本，换来较少等待但增加 stale
-gradient 和收敛分析难度。固定 Burn `burn-train` 源码没有相应的
-parameter-server strategy；本章只把它作为对照协议。
+gradient 和收敛分析难度。`burn-train` 没有内置 parameter-server
+strategy；本章把它作为对照协议讲解。
 
 ## 产业对照（概念对齐，不是性能对等）
 
@@ -169,7 +157,7 @@ parameter-server strategy；本章只把它作为对照协议。
 | `DistributedContext` + `all_reduce` | PyTorch DDP / Horovod 数据面 | 共同调用、归约语义、完成边界 | Flex 无实现 ≠ API 不存在 |
 | CubeCL CUDA + NCCL 入口 | NCCL AllReduce | GPU 集合通信 runtime | 默认示例未跑通；需匹配驱动 |
 | `ExecutionStrategy::ddp` | 多进程/多线程 launcher | 策略与 backend 组合点 | 不含集群调度/弹性成员 |
-| 参数服务器对照 | PS / 异步 SGD 文献 | push/pull、版本与陈旧梯度 | 非固定 `burn-train` strategy |
+| 参数服务器对照 | PS / 异步 SGD 文献 | push/pull、版本与陈旧梯度 | `burn-train` 未内置该 strategy |
 
 如果把一次异步更新写成：
 

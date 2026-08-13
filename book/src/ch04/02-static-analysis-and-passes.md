@@ -96,7 +96,7 @@ Fusion 实现了全部传统编译器优化。Burn Fusion 的核心目标是发�
 反向模式自动微分读取前向依赖并构造梯度计算。它可以实现为运行时 tape、
 源到源变换或 IR 变换，但目标是产生导数程序，不是单纯让原程序更快。
 
-固定 Burn 快照使用动态 autodiff tape；Fusion 则记录可延迟的 Tensor 操作。
+Burn 使用动态 autodiff tape；Fusion 则记录可延迟的 Tensor 操作。
 两者可以叠加，却有不同生命周期：
 
 - tape 保存反向所需节点和状态；

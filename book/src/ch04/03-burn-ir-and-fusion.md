@@ -35,7 +35,7 @@ Tensor op
 与第 6 章 `burn-train` 的 `ExecutionStrategy`（MultiDevice/DDP 装配）
 只是同名，不要当成同一个类型。
 
-Fusion 按 stream 保存队列。固定实现中的 `StreamId::current()` 与注册操作
+Fusion 按 stream 保存队列。当前实现中的 `StreamId::current()` 与注册操作
 的线程/任务上下文相关。跨 stream 共享 Tensor 时，系统必须建立别名和顺序
 关系，必要时先 drain 来源 stream；否则重排可能在值产生前读取或在使用前
 释放。

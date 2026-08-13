@@ -27,7 +27,7 @@ GPU 仿真、多环境异步或多智能体通信——先把机制看清楚，�
 
 ## 1. 实现环境边界
 
-环境通过固定 `burn-rl::Environment` trait 表达状态、动作和 step 结果：
+环境通过`burn-rl::Environment` trait 表达状态、动作和 step 结果：
 
 ```rust,ignore
 {{#include ../../../examples/ch08-rl-rollout/src/lib.rs:environment}}
@@ -50,7 +50,7 @@ GPU 仿真、多环境异步或多智能体通信——先把机制看清楚，�
 
 示例把 state 编成 `[position, step]`，把 action 编成一列 `-1/1`。这个
 编码只是实验协议，不是通用 observation 设计。`TransitionBuffer` 的
-state/action 类型是 `Tensor<2>`，因此固定版本已经有对应的
+state/action 类型是 `Tensor<2>`，因此 Burn 已经有对应的
 `SliceAccess` 实现。
 
 调用 replay 前先验证应用配置：
@@ -82,7 +82,7 @@ $$
 它不是 Burn optimizer 的替代品，而是一个可以在不引入网络的情况下观察
 bootstrap 的对照实现。若把它改成 DQN，需要将 `q_values` 替换为
 `Module`，用 `gather` 选择 action value，计算 loss，调用 backward 和
-optimizer，并另外维护 target network；固定 DQN example 展示了这条扩展。
+optimizer，并另外维护 target network；上游 DQN example 展示了这条扩展。
 
 ## 4. 用 replay batch 驱动更新
 

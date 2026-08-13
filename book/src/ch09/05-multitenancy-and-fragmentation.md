@@ -32,7 +32,7 @@ tenant → quota → lease → placement → usage → release
 - **性能隔离**：一个租户的跨机柜 burst 不应无上限挤占其他租户；
 - **故障隔离**：一个作业的错误、OOM 或重试不能拖垮整个调度器。
 
-固定 Burn/CubeCL 源码中的 memory pool 和 `MemoryUsage` 是设备 runtime
+Burn/CubeCL 源码中的 memory pool 和 `MemoryUsage` 是设备 runtime
 级别的内存管理；它们不等于租户配额。设备 backend 也不能从一个
 `DeviceId` 推出租户身份、租约期限或跨作业网络预算。
 

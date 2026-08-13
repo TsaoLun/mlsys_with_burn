@@ -1,7 +1,7 @@
 # CubeCL Lowering、JIT 与缓存
 
 Burn Fusion 决定一个可执行优化块后，CubeCL 还要把 Kernel 描述变成目标
-Runtime 可执行的产物。本节沿固定源码追踪这条链，不假设所有后端共享同一
+Runtime 可执行的产物。本节沿源码追踪这条链，不假设所有后端共享同一
 最终 IR。
 
 ## 1. 从 `#[cube]` 到 Scope
@@ -24,7 +24,7 @@ Runtime 可执行的产物。本节沿固定源码追踪这条链，不假设所
 ## 2. 优化管线并不唯一
 
 SPIR-V、CPU MLIR 和 CPP 类后端不会简单调用完全相同的一组 Pass。
-固定源码中可以观察到两类路径：
+源码中可以观察到两类路径：
 
 - `cubecl-opt::Optimizer` 把 Scope 转为 CFG/SSA 风格表示并执行分析/优化；
 - CPP 编译器还使用 shared-memory 分析、visitor 与 Scope post-processing。
@@ -67,7 +67,7 @@ launch
 benchmark 要分开报告编译/autotune 与稳态执行，不能只选第二次运行并省略
 预热事实。
 
-固定 CPU Runtime 使用进程内编译缓存，部分 CUDA/HIP/Metal/WGPU-SPIR-V
+CPU Runtime 使用进程内编译缓存，部分 CUDA/HIP/Metal/WGPU-SPIR-V
 路径还可按配置使用持久化缓存。CubeCL 仍以 JIT 为主；本书不把这些有条件
 的能力扩张为跨所有后端统一、可离线部署的完整 AOT 工具链。
 

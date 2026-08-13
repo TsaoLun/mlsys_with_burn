@@ -21,7 +21,7 @@
 
 ## `TrainStep` 表达应用模型
 
-固定 Burn 的 `burn-train/src/learner/train_val.rs` 没有假设所有模型都使用
+Burn 的 `burn-train/src/learner/train_val.rs` 没有假设所有模型都使用
 同一个输入或输出。`TrainStep` 由应用为自己的模型定义：
 
 - `Input: Send + 'static`：可以由 DataLoader 跨线程发送；

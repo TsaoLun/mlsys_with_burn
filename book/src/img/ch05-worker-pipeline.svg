@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 300" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <defs>
+    <marker id="arr5" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+  <rect width="720" height="300" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <g font-size="13" text-anchor="middle">
+    <rect x="24" y="110" width="110" height="60" fill="#dbeafe" stroke="#3b82f6" rx="4"/>
+    <text x="79" y="136" fill="#1e3a8a">Dataset</text>
+    <text x="79" y="154" font-size="10" fill="#1e40af">（可选）预 shuffle</text>
+    <rect x="168" y="110" width="120" height="60" fill="#f3f4f6" stroke="#9ca3af" rx="4"/>
+    <text x="228" y="136" fill="#374151">PartialDataset</text>
+    <text x="228" y="154" font-size="11" fill="#4b5563">split / split_chunks</text>
+    <rect x="322" y="42"  width="150" height="44" fill="#dcfce7" stroke="#16a34a" rx="4"/>
+    <text x="397" y="61" fill="#14532d">worker 0 线程</text>
+    <text x="397" y="78" font-size="11" fill="#166534">get + batch</text>
+    <rect x="322" y="118" width="150" height="44" fill="#dcfce7" stroke="#16a34a" rx="4"/>
+    <text x="397" y="137" fill="#14532d">worker 1 线程</text>
+    <text x="397" y="154" font-size="11" fill="#166534">get + batch</text>
+    <rect x="322" y="194" width="150" height="44" fill="#f3f4f6" stroke="#9ca3af" stroke-dasharray="4 3" rx="4"/>
+    <text x="397" y="221" fill="#6b7280">worker N−1 …</text>
+    <rect x="506" y="110" width="80" height="60" fill="#fef9c3" stroke="#ca8a04" rx="4"/>
+    <text x="546" y="134" font-size="12" fill="#854d0e">mpsc 通道</text>
+    <text x="546" y="152" font-size="11" fill="#854d0e">容量 100</text>
+    <rect x="614" y="96" width="86" height="88" fill="#ffedd5" stroke="#f97316" rx="4"/>
+    <text x="657" y="126" font-size="12" fill="#7c2d12">主迭代器</text>
+    <text x="657" y="144" font-size="11" fill="#9a3412">Batch / Done</text>
+    <text x="657" y="160" font-size="11" fill="#9a3412">/ Error</text>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" fill="none">
+    <line x1="134" y1="140" x2="166" y2="140" marker-end="url(#arr5)"/>
+    <line x1="288" y1="128" x2="320" y2="70"  marker-end="url(#arr5)"/>
+    <line x1="288" y1="140" x2="320" y2="140" marker-end="url(#arr5)"/>
+    <line x1="288" y1="152" x2="320" y2="212" marker-end="url(#arr5)"/>
+    <line x1="472" y1="70"  x2="504" y2="126" marker-end="url(#arr5)"/>
+    <line x1="472" y1="140" x2="504" y2="140" marker-end="url(#arr5)"/>
+    <line x1="472" y1="212" x2="504" y2="154" marker-end="url(#arr5)"/>
+    <line x1="586" y1="140" x2="612" y2="140" marker-end="url(#arr5)"/>
+  </g>
+  <text x="24" y="278" font-size="12" fill="#6b7280">通道提供有限背压；消息按到达顺序被消费——到达顺序不是全局样本顺序</text>
+</svg>

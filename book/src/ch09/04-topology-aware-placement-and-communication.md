@@ -85,7 +85,7 @@ $$
 
 ## Burn 的 collective 边界
 
-固定 `burn-backend` 的 `DistributedOps` 定义了：
+`burn-backend` 的 `DistributedOps` 定义了：
 
 - 启动和关闭通信 server；
 - 注册需要同步的参数；
@@ -96,7 +96,7 @@ $$
 `CollectiveTensor`；调用 `resolve` 才建立可继续使用的张量。这个完成边界
 对解释“提交”与“可读”很重要。
 
-固定 `burn-cuda`/CubeCL CUDA 路径中可以看到 NCCL collective 的实现入口，
+`burn-cuda`/CubeCL CUDA 路径中可以看到 NCCL collective 的实现入口，
 但这只说明该 backend 有设备通信实现。它不自动提供：
 
 - 集群作业队列和 rank/world rendezvous；
@@ -109,7 +109,7 @@ cluster membership service。
 
 ## Flex CPU 不能作为 collective 实验
 
-固定 `burn-flex/src/ops/transaction.rs` 为 `Flex` 实现了默认的
+`burn-flex/src/ops/transaction.rs` 为 `Flex` 实现了默认的
 `DistributedOps`，并明确说明 Flex 不支持 collective operations。因而
 第 9 章 CPU 实验不调用 Flex DDP，也不以“API 能编译”证明 AllReduce
 运行成立。模拟器中的 rank、链路和 AllReduce 只是纯 Rust 协议模型。

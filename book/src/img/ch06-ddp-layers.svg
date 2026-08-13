@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 330" font-family="system-ui, 'PingFang SC', 'Noto Sans CJK SC', sans-serif">
+  <defs>
+    <marker id="arr6" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+      <path d="M0,0 L8,4 L0,8 z" fill="#6b7280"/>
+    </marker>
+  </defs>
+  <rect width="720" height="330" fill="#ffffff" stroke="#d1d5db" rx="6"/>
+  <g font-size="13" text-anchor="middle">
+    <rect x="40" y="20"  width="300" height="34" fill="#dbeafe" stroke="#3b82f6" rx="4"/><text x="190" y="42" fill="#1e3a8a">ExecutionStrategy::ddp</text>
+    <rect x="40" y="70"  width="300" height="34" fill="#dbeafe" stroke="#3b82f6" rx="4"/><text x="190" y="92" fill="#1e3a8a">DistributedContext::init</text>
+    <rect x="40" y="120" width="300" height="34" fill="#dcfce7" stroke="#16a34a" rx="4"/><text x="190" y="142" fill="#14532d">Dispatch / backend DistributedOps</text>
+    <rect x="40" y="170" width="300" height="34" fill="#dcfce7" stroke="#16a34a" rx="4"/><text x="190" y="192" fill="#14532d">autodiff distributed registration</text>
+    <rect x="40" y="220" width="300" height="34" fill="#ffedd5" stroke="#f97316" rx="4"/><text x="190" y="242" fill="#7c2d12">backend all_reduce + sync_collective</text>
+    <rect x="40" y="270" width="300" height="34" fill="#ede9fe" stroke="#8b5cf6" rx="4"/><text x="190" y="292" fill="#5b21b6">runtime / device collective</text>
+  </g>
+  <g stroke="#6b7280" stroke-width="1.5" fill="none">
+    <line x1="190" y1="54"  x2="190" y2="68"  marker-end="url(#arr6)"/>
+    <line x1="190" y1="104" x2="190" y2="118" marker-end="url(#arr6)"/>
+    <line x1="190" y1="154" x2="190" y2="168" marker-end="url(#arr6)"/>
+    <line x1="190" y1="204" x2="190" y2="218" marker-end="url(#arr6)"/>
+    <line x1="190" y1="254" x2="190" y2="268" marker-end="url(#arr6)"/>
+  </g>
+  <g font-size="12" fill="#4b5563">
+    <text x="360" y="42">每个本地设备一个 worker，切分 loader</text>
+    <text x="360" y="92">启动/关闭该 backend 的通信协调器</text>
+    <text x="360" y="142">注册参数、提交梯度的契约</text>
+    <text x="360" y="192">反向传播时登记待归约的分布式参数</text>
+    <text x="360" y="242">聚合执行与「结果可读」的完成边界</text>
+    <text x="360" y="292">真实集合通信实现（如 CUDA + NCCL）</text>
+  </g>
+  <text x="40" y="322" font-size="12" fill="#6b7280">Flex CPU 后端没有 collective 实现：上三层可读，下三层在 CPU 默认实验中不会发生</text>
+</svg>

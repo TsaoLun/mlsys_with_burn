@@ -71,7 +71,7 @@ $$
 
 ## 本版 Burn 能说明什么
 
-固定 Burn 源码中，`burn-train` 的 `ExecutionStrategy` 有：
+Burn 源码中，`burn-train` 的 `ExecutionStrategy` 有：
 
 - `SingleDevice`：单设备训练；
 - `MultiDevice`：单进程内的多设备数据并行，可选择主设备优化或分片优化；

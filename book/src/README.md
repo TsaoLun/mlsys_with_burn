@@ -23,7 +23,8 @@ Burn 是贯穿全书的可执行案例，不是机器学习系统的全部。分
 Burn `0.22.0-pre.1`。
 
 运行示例见[如何运行本书示例](running-examples.md)，术语见
-[术语表](glossary.md)。与 OpenMLSys 的对照、版本边界和来源总录见附录
+[术语表](glossary.md)，各章论文与教材出处见[参考文献](references.md)。
+与 OpenMLSys 的对照、版本边界和来源总录见附录
 [范围、证据与对照](appendix-scope-and-evidence.md) 与
 [来源与改编总录](appendix-sources.md)。公式由 MathJax 渲染，浏览器阅读
 时需要访问相应的 CDN 资源。

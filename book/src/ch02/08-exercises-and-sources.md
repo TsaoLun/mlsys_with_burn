@@ -28,7 +28,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+[「Tensor、Device 与运行时后端」](02-tensor-device-backend.md)开头
+写明类型只固定秩与类别；把 shape、dtype、Device 逐项排查，各自的
+不匹配在哪一刻暴露？shape 兼容的判定规则在同页「广播」小节。
 
 </details>
 
@@ -37,7 +39,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」打开本书固定版本的对应路径。
+[「Device 与 Dispatch」](02-tensor-device-backend.md)一节区分了
+「编译进哪些后端变体」与「运行时选中哪个实例」两件事；问：只改
+Device 工厂方法，能用到没编译进程序的后端吗？
 
 </details>
 
@@ -46,7 +50,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch07-record-roundtrip`；ONNX/HTTP 另属可选边界。
+[「Module、参数与模型状态」](03-module-and-state.md)的 ModuleRecord
+流程图显示 `load_record()` 除了 record 还需要一个新 Module；
+`examples/ch07-record-roundtrip` 恢复前就先用同一 Config 重建模型。
 
 </details>
 
@@ -56,7 +62,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-回看第 2 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「计算图的构成与生成」](04-computational-graph.md)开篇画的正是它；
+仿照[「自动微分」](05-autodiff.md)的带数字推演从根伴随值 1 反推，
+留意 y 被加法和乘法同时消费，两条路径的贡献要相加。
 
 </details>
 
@@ -65,7 +73,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+[「tape 的生命周期」](05-autodiff.md)：Step 被 backward 逐个移除、
+用完即弃；[「Burn IR 与运行时融合」](../ch04/03-burn-ir-and-fusion.md)
+里的计划则可被缓存命中。问：一次性结构与可复用计划各为谁服务？
 
 </details>
 
@@ -75,7 +85,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+[「自动微分」](05-autodiff.md)的带数字推演以根伴随值 1 起步；实验
+函数 `multiply_with_gradients` 对向量输出直接 backward，全 1 根梯度
+等价于先对输出做哪种归约再求导？成本小节解释了标量输出的优势。
 
 </details>
 
@@ -88,7 +100,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+广播判定规则在[「广播」](02-tensor-device-backend.md)小节：从尾部
+维度对齐，相等或为 1。改 `broadcast_rows_and_columns` 及其测试时，
+秩从 2 变 3，`Tensor<2>` 和 `[usize; 2]` 都要跟着改。
 
 </details>
 
@@ -98,7 +112,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+可在 `multiply_with_gradients` 里去掉 `left.clone()`：乘法按值拿走
+`left`，编译器会在后面的 `left.grad(&gradients)` 处报错。对照
+[「所有权与 clone」](02-tensor-device-backend.md)解释是谁拿走了值。
 
 </details>
 
@@ -107,7 +123,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-回看第 2 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「Module、参数与模型状态」](03-module-and-state.md)「Module derive」
+给出了 Linear 参数量的口算方法；新层输入维要衔接第一层输出维 2，
+并同步更新 `module_registers_parameters_and_preserves_batch_shape`。
 
 </details>
 
@@ -118,7 +136,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-回看第 2 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+把 `detached_leaf_gradient` 当模板，把 detach 施加到 `right` 上；
+[「detach 与 inner」](05-autodiff.md)写明固定版本的 detach 保留
+require-grad 意图。问：`set_require_grad(false)` 关掉的又是什么？
 
 </details>
 
@@ -128,7 +148,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+在 `inspect_device_modes` 里补第三个读数即可动手；
+[「detach 与 inner」](05-autodiff.md)写明 `device.inner()` 去除的
+是 Device 的 autodiff 包装。先预测 `.autodiff().inner()` 再断言。
 
 </details>
 
@@ -138,7 +160,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+期望输出与梯度可对照测试 `autodiff_tape_follows_executed_branch_only`；
+解释部分用[「控制流」](04-computational-graph.md)小节的事实：tape
+只登记本次真正执行过的算子，未执行的 Rust 语句不会留痕。
 
 </details>
 
@@ -149,7 +173,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+[「从工作流到编程接口」](01-interface-and-workflow.md)的七阶段表已
+列好输入/输出/卡点，`examples/ch06-training-loop` 是现成的标注对象；
+[「训练状态与梯度状态」](03-module-and-state.md)末段给出判断起点。
 
 </details>
 
@@ -161,7 +187,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」打开本书固定版本的对应路径。
+在 `burn/crates/burn-dispatch/src/device.rs` 的 `DispatchDevice`
+枚举定义上逐个找 `#[cfg(feature = ...)]` 属性，和
+[「Device 与 Dispatch」](02-tensor-device-backend.md)的变体图互核。
 
 </details>
 
@@ -170,7 +198,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+沿 `burn/crates/burn-tensor/src/device.rs` 里 `settings()` 的返回
+类型找默认 float/int dtype 的来源；结果可与
+[「实验：探测执行栈」](../ch01/06-stack-probe-lab.md)打印的输出对照。
 
 </details>
 
@@ -179,7 +209,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+[「叶子、非叶子与 require_grad」](05-autodiff.md)给出 API 约束；到
+`burn/crates/burn-tensor/src/tensor/api/autodiff.rs` 里搜
+`require_grad`，看哪个分支报错、它如何判定张量已是图的中间结果。
 
 </details>
 
@@ -189,7 +221,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+从 `burn/crates/burn-core/src/module/base.rs` 找 `num_params` 依赖
+的 visitor；对照[「Param 与普通 Tensor」](03-module-and-state.md)
+想：visitor 识别的是 `Param` 字段类型，还是任何 Tensor 值？
 
 </details>
 
@@ -199,7 +233,9 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+先重温[「广播」](02-tensor-device-backend.md)里 [3,1] 与 [1,2] 的
+梯度归约推演；再在 `burn/crates/burn-backend-tests/tests/autodiff/`
+挑一个输入 shape 不同的二元操作，核对梯度断言归到哪个输入的 shape。
 
 </details>
 
@@ -209,13 +245,16 @@ graph capture 记录相似操作，却服务于求导、优化和重放等不同
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+[「参数 visitor 是状态边界」](03-module-and-state.md)列出了新增
+字段的三个判断问题；在 `burn/crates/burn-core/src/module/` 里对比
+visitor 对 `Param` 与普通字段的处理，再拿 BatchNorm 统计量自测。
 
 </details>
 
 
 ## 延伸阅读
 
+接口与自动微分的论文见附录[参考文献](../references.md#第-2-章-编程接口与计算图)。
 本书固定版本源码中的权威入口：
 
 - `burn/crates/burn-tensor/src/tensor/api/base.rs`

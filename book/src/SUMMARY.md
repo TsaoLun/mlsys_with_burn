@@ -101,5 +101,6 @@
 # 附录
 
 - [术语表](glossary.md)
+- [参考文献](references.md)
 - [范围、证据与对照](appendix-scope-and-evidence.md)
 - [来源与改编总录](appendix-sources.md)

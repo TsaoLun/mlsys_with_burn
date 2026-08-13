@@ -18,8 +18,8 @@ compute peer
        └── Flex / WGPU / CUDA / other backend
 ```
 
-固定 `burn-remote` 的新路径以 Iroh 为主：endpoint 有 identity，peer 通过
-地址和发现机制连接；在不能直连时可以使用配置的 relay。固定源码也保留
+`burn-remote` 的新路径以 Iroh 为主：endpoint 有 identity，peer 通过
+地址和发现机制连接；在不能直连时可以使用配置的 relay。源码也保留
 WebSocket transport，`Device::remote_websocket` 主要是兼容入口。
 
 Remote server 的 `RemoteServerBuilder` 接受一个具体 backend 的设备列表，
@@ -38,7 +38,7 @@ Remote 把计算位置和应用进程分离，可能带来：
 - 模型 artifact 仍要在客户端或 peer 的某一侧加载，不能把“远端计算”
   与“远端模型注册中心”混为一谈。
 
-固定源码对跨 Iroh peer 的 tensor movement 使用有认证能力的短期 token；
+跨 Iroh peer 的 tensor movement 使用有认证能力的短期 token；
 这保护传输操作的授权边界，但不替代应用层的用户认证、模型访问控制和
 审计。若模型服务要求请求级隔离，仍需在 Remote 外层建立 policy。
 
@@ -49,7 +49,7 @@ Remote 也可以和 Fusion feature 组合，把重复的 operation group 在 ser
 
 ## WASM 客户端为什么需要异步连接
 
-浏览器主线程不能执行阻塞式网络连接。固定 `burn-tensor/src/device.rs`
+浏览器主线程不能执行阻塞式网络连接。`burn-tensor/src/device.rs`
 为 Iroh remote device 提供 native 的 `remote_iroh`，并为 WASM 提供
 `remote_iroh_async`；`burn-remote` 的 client service 在 wasm 条件下用
 浏览器 event loop/future，而 native 路径可以使用线程和 Tokio runtime。
@@ -62,15 +62,15 @@ Remote 也可以和 Fusion feature 组合，把重复的 operation group 在 ser
 4. Remote tensor operation；
 5. 输出 future 完成后的 UI 更新。
 
-固定 Burn 仓库的 `remote-inference-web` 示例展示了这种架构：浏览器侧
+Burn 仓库的 `remote-inference-web` 示例展示了这种架构：浏览器侧
 持有 model definition/weights，tensor operations 发送给 Iroh compute
-peer。它需要 native peer、浏览器构建工具、网络/relay 配置和匹配的 topic，
-不能当作本书默认 CPU 示例。
+peer。它需要 native peer、浏览器构建工具、网络/relay 配置和匹配的
+topic，属于有环境读者的可选路径。
 
 ## `no_std` 的范围
 
 `no_std` 只表示某个 crate 不依赖 Rust 标准库；它不自动提供文件系统、
-线程、浏览器 API 或一个可用 backend。固定源码中的：
+线程、浏览器 API 或一个可用 backend。在本书使用的版本中：
 
 - `burn-core`、`burn-tensor` 和核心 `ModuleRecord` 使用 `alloc` 方向；
 - `burn-store` 的核心 snapshot 设计标注了 no_std/embedded 方向，但
@@ -79,7 +79,7 @@ peer。它需要 native peer、浏览器构建工具、网络/relay 配置和匹
   code generation 和带 `std` 的 store；
 - 生成 model 的 `LoadStrategy::Bytes` 或 `Embedded` 可以避免运行时
   `File` loader，前提是目标 backend 和依赖 feature 也支持该目标；
-- `LoadStrategy::File` 生成的 `from_file` 使用 `std::path::Path`，固定
+- `LoadStrategy::File` 生成的 `from_file` 使用 `std::path::Path`，
   源码为这个生成代码显式加入 `extern crate std`。
 
 所以“转换器在 host 上运行”和“生成的 model 在 no_std 固件里运行”是
@@ -101,6 +101,5 @@ Remote transport、WASM binary、Burnpack/SafeTensors 和模型混淆解决的
 server 有 `PeerAuthorizer` 扩展点，就声称项目已经提供完整的模型安全
 产品。先写清威胁模型，再选择机制和验证方法。
 
-本书将 Remote、WASM 和 no_std 作为固定源码可核验的扩展路径；CPU
-往返保存与恢复实验只需要本地内存和 Flex，故把网络、浏览器和固件前提留在
-本节及练习中。
+本书把 Remote、WASM 和 no_std 作为可从源码核验的扩展路径；本章实验
+只需要本地内存和 Flex，网络、浏览器和固件前提留在本节及练习中。

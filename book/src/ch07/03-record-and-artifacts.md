@@ -26,7 +26,7 @@ shape 和 dtype 必须能加载，目标 module 的结构还必须存在。
 
 ## 核心 `ModuleRecord`
 
-固定版本的 `burn-core/src/store/mod.rs` 给出的最小 API 是：
+`burn-core/src/store/mod.rs` 给出的最小 API 是：
 
 - `Module::into_record` 遍历 module 参数；
 - `ModuleRecord::into_bytes` 将记录序列化为内存 Burnpack；
@@ -66,7 +66,7 @@ layout 会在保存和加载时做转置。只看一个 tensor 的 shape 而不�
 
 ## `burn-store` 提供的更大边界
 
-当核心 `ModuleRecord` 不够用时，固定 `burn-store` 提供
+当核心 `ModuleRecord` 不够用时，`burn-store` 提供
 `ModuleSnapshot`/`ModuleStore` 抽象。它把 module traversal 与具体存储格式
 分开，并支持：
 

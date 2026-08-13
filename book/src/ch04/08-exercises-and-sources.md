@@ -28,7 +28,11 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+两者的生命周期差异列在
+[「静态信息、Pass 与自动微分边界」](02-static-analysis-and-passes.md)
+第 4 节；tape 的构造背景见第 2 章[「自动微分」](../ch02/05-autodiff.md)。
+从“各自被谁消费、何时失效”入手：`backward()` 读 tape 生成梯度，
+`Device::sync()` 只 drain Fusion stream，两个动作互不蕴含。
 
 </details>
 
@@ -37,7 +41,10 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「编译栈与中间表示」](01-stack-and-ir.md)第 2 节写了三种形态各自
+擅长的分析，第 3 节的分层表格是现成对照素材。想一想：Tensor 级
+子图搜索为什么落在 OperationIr 这类图表示，而 unit 级指令优化要
+转成 CFG/SSA 风格做局部数据流分析；答案取决于各优化需要的信息。
 
 </details>
 
@@ -46,7 +53,10 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-见第 4 章 Pass 契约与同步边界节。
+把[「静态信息、Pass 与自动微分边界」](02-static-analysis-and-passes.md)
+第 2 节那段中性伪 IR 亲手推两遍：先折叠/传播再 DCE，与颠倒顺序，
+各自还能删掉哪些值？关键在于常量传播会制造新的“不可观察”事实，
+顺序决定这些事实在 DCE 运行前是否已经暴露。
 
 </details>
 
@@ -55,7 +65,10 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-运行/阅读 `examples/ch04-fusion-inspector` 与第 4 章 Fusion 节。
+[「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 5 节先算出
+融合把全局内存流量从 20N 字节降到 12N 字节，又在结尾列出反向代价
+（寄存器压力、编译时间、过大 Kernel）。想清楚“省流量约等于省时间”
+依赖低算术强度这一前提，再构造一个前提不成立的场景。
 
 </details>
 
@@ -64,8 +77,10 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-对照第 4 章「内存、Stream 与异步执行」中的生命周期、别名和 stream 依赖；
-`ReadWrite` 只说明访问模式，不说明没有其他 handle 仍可能读它。
+[「内存、Stream 与异步执行」](06-memory-streams-execution.md)第 2 节
+列出了与 `ReadWrite` 并列的其他条件：shape、dtype、别名、Kernel
+语义与是否仍有其他读者。逐项构造一个“状态是 ReadWrite 却不能原地
+覆盖”的反例，就能说明它为什么只是必要条件之一。
 
 </details>
 
@@ -74,9 +89,10 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 <details>
 <summary>提示</summary>
 
-对照第 4 章「CubeCL Lowering、JIT 与缓存」：编译缓存避免重新 lowering/
-codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pipeline 的
-执行状态混为一谈。
+[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
+第 5 节列出四类缓存。按三个维度比较：key 编码什么，value 是编译
+产物、候选选择还是已加载对象，失效条件是什么；该节还提醒“调优
+命中不保证编译产物已加载”，这句话适合用来检验你的答案。
 
 </details>
 
@@ -85,7 +101,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「内存、Stream 与异步执行」](06-memory-streams-execution.md)第 4 节：
+launch 是向 stream 提交，host 返回不代表设备完成，错误还可能拖到
+read/sync 才报告。再对照
+[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
+第 4.1 节因果链的最后一步，说明哪一刻起耗时才算已观察事实。
 
 </details>
 
@@ -94,7 +114,10 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 4 章 Pass 契约与同步边界节。
+判据在[「内存、Stream 与异步执行」](06-memory-streams-execution.md)
+第 6 节末段的对比句。回答时分三层核对：各自的输入对象是什么、
+复用后省掉的是哪部分工作、失效条件有何不同；再解释同文第 3 节里
+capture 窗口为什么要求 persistent pool 一类分配约束。
 
 </details>
 
@@ -104,7 +127,10 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-运行/阅读 `examples/ch04-fusion-inspector` 与第 4 章 Fusion 节。
+套用[「静态信息、Pass 与自动微分边界」](02-static-analysis-and-passes.md)
+第 2.1 节的四元组模板：输入不变量、分析条件、输出不变量、不能变换
+时的处理。回退场景可从该文第 5 节的随机数、I/O、原地更新中挑；
+融合一条对照第 2.1 节末尾的 fuser 条件写，别只写泛泛的“不安全”。
 
 </details>
 
@@ -114,7 +140,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 4 章 Pass 契约与同步边界节。
+沿[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
+第 4.1 节的因果链逐箭头标注“必然重来/可能重来/不受影响”。shape
+何时只是运行时元数据、何时进入编译键，参考
+[「静态信息、Pass 与自动微分边界」](02-static-analysis-and-passes.md)
+第 3 节；记住 cache 命中只表示某一层结果可复用，不代表下游全部跳过。
 
 </details>
 
@@ -127,7 +157,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+`examples/ch04-fusion-inspector` 的 `inspect_add_exp` 已示范切分写法：
+`split_by_sync` 分支里的 `device.sync()` 就是可移动的边界。把同样的
+调用分别插到 `inspect_add_mul_exp` 的 add 之后、mul 之后，比较
+`reports` 数与各块 `operations` 计数怎样变化；预期形态参考
+[「实验：观察 Fusion 执行计划」](07-fusion-inspector-lab.md)第 7 节。
 
 </details>
 
@@ -136,7 +170,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 4 章 Pass 契约与同步边界节。
+把 `inspect_add_exp` 某个输入改成可广播的 shape（例如 `[1, 4]`），
+先手算预期数值再运行。计划方面不要预设结论：
+[「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 4 节说明
+broadcast 是 fuser 可以拒绝候选的条件之一，接受与否都用
+`BlockSummary` 的 fuser 名称和 operations 数如实记录。
 
 </details>
 
@@ -146,7 +184,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+背景在[「实验：观察 Fusion 执行计划」](07-fusion-inspector-lab.md)
+第 5 节与[「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 7 节。
+对照点放在 `to_data()` 读回的数值上；解释报告缺失时，想清楚
+Inspector 安装在哪条 Fusion stream 上、Flex 的 eager 路径有没有向
+它注册过任何 OperationIr。
 
 </details>
 
@@ -155,7 +197,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+先看 `examples/ch04-fusion-inspector` 中 `StreamId::allocate()`、
+`stream.executes(...)` 与 `FusionInspector::install(stream)` 的配合：
+Inspector 按 stream 安装。给两个测试各自分配 stream、各装各的
+Inspector，断言 `drain()` 结果互不包含对方的操作；stream 隔离的
+背景见[「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 2 节。
 
 </details>
 
@@ -164,7 +210,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 4 章 Pass 契约与同步边界节。
+`FusionSummary` 本身就是示范：只保留 fuser 名称、operations 计数等
+稳定字段，而不是内部结构的 Debug 文本。沿同样思路做字段级序列化，
+并说明理由——[「实验：观察 Fusion 执行计划」](07-fusion-inspector-lab.md)
+第 2、6 节解释了 test-util 不是长期稳定接口、完整日志文本会随版本
+漂移，不适合当作快照比对对象。
 
 </details>
 
@@ -176,7 +226,10 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+在本书固定版本源码 `burn/crates/burn-fusion/src/ops/` 下搜索
+`float_add`，看它构造 `BinaryOpIr` 后把描述交给谁；对照
+[「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 1 节的注册
+链路，把“Tensor 操作到 client”的每一跳落到具体函数上。
 
 </details>
 
@@ -186,7 +239,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+`HandleContainer` 定义在本章列出的 `burn/crates/burn-ir/src/` 里，
+找到按 `TensorStatus` 分支取 handle 的方法，比较两种状态下 handle
+的所有权去向与容器内条目的变化；再回到
+[「内存、Stream 与异步执行」](06-memory-streams-execution.md)第 2 节，
+核对“最后使用者可取得所有权”对应哪几行代码。
 
 </details>
 
@@ -195,7 +252,10 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+从本章列出的 `burn/crates/burn-fusion/src/stream/` 入手，在多 stream
+管理模块里搜索 `drain`，记录哪些调用方会触发它；再对照
+[「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 6 节列出的
+物化边界，确认同步、读回与跨 stream 共享各自走到哪条路径。
 
 </details>
 
@@ -204,7 +264,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+注册点在本章列出的 `burn/crates/burn-cubecl/src/fusion.rs`（搜索
+`fusers`），五个实现体在 `burn/crates/burn-cubecl-fusion/src/optim/`
+的子模块里。选一类后带着问题读：什么样的 shape、broadcast、layout
+或 dtype 会让它拒绝候选？检索关键词可用
+[「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 4 节的条件清单。
 
 </details>
 
@@ -213,7 +277,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+`KernelDefinition` 的字段就在本章列出的
+`cubecl/crates/cubecl-runtime/src/kernel.rs`。先抄下字段清单，再反查
+`KernelBuilder` 从哪里收集它们，与
+[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
+第 1 节列出的输入（Scope、参数、CubeDim、设置）逐项对上。
 
 </details>
 
@@ -222,7 +290,11 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+以[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
+第 2 节为地图：两条路径都会用到本章列出的
+`cubecl/crates/cubecl-opt/`，但接入位置与额外步骤不同。分别在两个
+Compiler 的源码里搜索对 Optimizer 的调用，再确认 CPP 侧多出的
+shared-memory 分析与 Scope post-processing 挂在哪一步。
 
 </details>
 
@@ -231,7 +303,10 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+分类先看[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
+第 5 节。源码从 `cubecl/crates/cubecl-runtime/src/` 入手，分别搜索
+编译产物的存取与 `tune` 相关模块，比较两边的 key 各编码了什么、
+value 是可执行产物还是“哪个候选胜出”的记录，失效条件有何不同。
 
 </details>
 
@@ -243,7 +318,12 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+首次成本的构成见
+[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
+第 4 节；计时终点必须落在 read/sync 之后，理由见
+[「内存、Stream 与异步执行」](06-memory-streams-execution.md)第 4 节。
+报告写明是第几次运行、同步放在哪一行、缓存冷热，并把结果当作
+环境相关测量，不外推为普适结论。
 
 </details>
 
@@ -252,7 +332,12 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+结构与数值证据可直接扩展 `examples/ch04-fusion-inspector` 的
+`observes_fusion_and_sync_boundary` 测试：用 `blocks` 固定两版计划、
+断言输出逐位相等。之后的计时才是新增部分，按
+[「实验：观察 Fusion 执行计划」](07-fusion-inspector-lab.md)第 1 节
+列出的污染源（首次 JIT、Fusion 搜索、调度）设计预热与重复，并把
+计划结构差异与墙钟差异分开报告，不要用一方去证明另一方。
 
 </details>
 
@@ -261,7 +346,10 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+模板就是[「内存、Stream 与异步执行」](06-memory-streams-execution.md)
+第 2 节的两张条带图：横轴时间、纵轴 allocation，同步会拉长中间值
+寿命。贪心可按创建顺序扫描，把新 Tensor 放进“最后读取已结束”的
+旧槽；再用该节的 shape、dtype、别名条件说明哪些复用必须放弃。
 
 </details>
 
@@ -270,13 +358,18 @@ codegen，autotune cache 保存候选测量结果；不要把二者与硬件 pip
 <details>
 <summary>提示</summary>
 
-回看第 4 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「内存、Stream 与异步执行」](06-memory-streams-execution.md)第 5 节
+末段点了题：并发块的生命周期重叠。给同一组操作画“单 stream 串行”
+与“双 stream 并行”两张条带图，数每个时刻同时存活的 allocation；
+再联系第 2 节的复用条件，解释重叠为什么取消了原本可行的复用。
 
 </details>
 
 
 ## 延伸阅读
 
+TVM、MLIR、Halide 等编译系统论文见附录
+[参考文献](../references.md#第-4-章-ai-编译器与运行时系统)。
 本书固定版本源码中的权威入口：
 
 - `burn/crates/burn-ir/src/`

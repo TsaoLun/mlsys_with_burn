@@ -27,7 +27,10 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+仿照[「工作负载与加速器设计」](01-workloads-and-design.md)对
+`scale_kernel` 的算术强度演算，数一数逐元素加法每搬运一字节能做
+几次运算，再想想这个强度落在 roofline 拐点的哪一侧：在带宽屋顶
+之下，更高的峰值算力帮不上忙。
 
 </details>
 
@@ -36,7 +39,10 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+对照[「GPU 并行与存储模型」](02-gpu-machine-model.md)的层次配图与
+CubeCL–CUDA 术语对照表，分别说清三者内部能共享什么、在哪一级同步；
+再想想该表为何强调「认知映射而非 ABI」，CPU Runtime 的 plane 能力
+与真实 GPU 的差别对「写死 32」意味着什么。
 
 </details>
 
@@ -45,7 +51,10 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+收益侧对照[「GEMM 与优化阶梯」](05-gemm-optimization.md)的加载计数
+推导与 `examples/ch03-tile-loads` 打印的 8192 对 1024；成本侧对照
+[「GPU 并行与存储模型」](02-gpu-machine-model.md)的共享内存正确性
+条件，想想 tile 增大时共享内存、寄存器与可驻留 cube 数如何变化。
 
 </details>
 
@@ -54,7 +63,11 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「CubeCL 编程模型」](03-cubecl-programming.md)「边界检查与安全责任」
+指出 `BufferArg::from_raw_parts` 是 `unsafe fn`；再读
+`examples/ch03-cubecl-kernel` 中 `run_scale` 的 SAFETY 注释，想想
+checked 模式做检查时依据的长度从哪里来、Runtime 有没有办法反向核实
+这个声明。
 
 </details>
 
@@ -63,7 +76,9 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)「为什么必须保留
+fallback」列出了五种触发情形，挑三种并说明各自在哪一层被检测出来；
+谈职责时留意正文的提醒：fallback 正确性相同不代表成本相同。
 
 </details>
 
@@ -72,7 +87,10 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「算子编译、调优与生态」](06-compilation-and-tuning.md)把 autotune
+定义为「在当前设备上测量候选并按 tune key 缓存」；顺着该节候选过滤、
+测量、缓存的流程走一遍，想想候选集合、测量数值与缓存键各自绑定了
+哪些只属于这台机器的事实。
 
 </details>
 
@@ -82,7 +100,10 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-对照 `examples/ch03-tile-loads` 与 GEMM 节的加载计数推导。
+按[「GEMM 与优化阶梯」](05-gemm-optimization.md)「Tiling 与共享内存」
+的加载计数推导代入数字，并与 `examples/ch03-tile-loads` 测试注释里
+的手算核对；第二问看同页「先用 Roofline 判断优化方向」对元素版强度
+的限定：想想它没计入哪些真实成本、式子里有没有任何实测量。
 
 </details>
 
@@ -92,7 +113,12 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+沿[「GEMM 与优化阶梯」](05-gemm-optimization.md)第 1–5 节逐级整理：
+每级新增的存储形态（共享 tile、寄存器累加、双份 stage、矩阵
+fragment）都带来新的同步或填充规则，双缓冲一节已列出四条流水线
+正确性条件；回退条件可借
+[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)的策略过滤视角
+反推：设备缺哪种能力时这一级不可用。
 
 </details>
 
@@ -105,7 +131,11 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-从 `examples/ch03-cubecl-kernel` 与第 3 章实验节入手。
+先在 `examples/ch03-cubecl-kernel/src/lib.rs` 里改 `scale_reference`
+把语义定下来，再动 Kernel 与测试；顺序依据是
+[「CubeCL 编程模型」](03-cubecl-programming.md)「从正确 Kernel 到
+高性能 Kernel」。bias 若也用 `#[comptime]`，会遇到实验节讲过的
+特化键可哈希约束——先想清楚它该是编译期还是运行时参数。
 
 </details>
 
@@ -114,7 +144,11 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+`run_scale` 用 `div_ceil` 计算 cube 数，本就允许 unit 数超过元素数；
+CubeDim 固定为 8 后，想想编号 5–7 的 unit 拿到的 `ABSOLUTE_POS`
+是什么、Kernel 里哪一行挡住了它们，再用与 `scale_reference` 的对比
+测试验证。背景是[「GPU 并行与存储模型」](02-gpu-machine-model.md)
+说的「launch 的 unit 数可能大于元素数」。
 
 </details>
 
@@ -123,7 +157,11 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-对照 `examples/ch03-tile-loads` 与 GEMM 节的加载计数推导。
+`tile_load_counts` 把 tiled 加载拆成 tile 网格数、K 方向 stage 数、
+每 stage 加载量三个因子，现有测试注释里有 16/8 情形的完整手算可以
+仿照；新尺寸必须通过整除检查（见 `rejects_non_divisible_tiles`），
+推导在[「GEMM 与优化阶梯」](05-gemm-optimization.md)「Tiling 与
+共享内存」。
 
 </details>
 
@@ -132,7 +170,12 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-从 `examples/ch03-cubecl-kernel` 与第 3 章实验节入手。
+前提、命令与预期输出都在
+[「实验：CPU 上运行 CubeCL Kernel」](07-cpu-kernel-lab.md)「可选
+GPU 路径」：需要 Metal/Vulkan/DX12 等可用 adapter，对应测试是
+`wgpu_kernel_matches_reference_when_requested`。通过只说明同一
+Kernel 在两类 Runtime 上与 host reference 一致，不含带宽或占用率
+结论。
 
 </details>
 
@@ -144,7 +187,12 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+先对比 `scale_kernel` 签名里 `#[comptime] scale: u32` 与普通参数在
+launch 调用处的传法；
+[「实验：CPU 上运行 CubeCL Kernel」](07-cpu-kernel-lab.md)第 1、6 节
+解释了 scale 为何取 `u32`、修改它为何产生新特化。改为运行时标量后
+`f32` 不再受特化键约束，宏生成的 launch 入口如何接收这个参数、
+重复 launch 是否仍触发新编译，正是要记录的差异。
 
 </details>
 
@@ -153,7 +201,12 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+`run_scale` 的 SAFETY 注释给出要证明的事实：两个 BufferArg 描述的
+分配恰好容纳 `input.len()` 个 `f32`，Kernel 在索引前有 guard。让
+helper 的签名把「handle 与长度出自同一个 slice」变成类型保证，
+调用者便无法分别传入不匹配的 handle 与长度；对照
+[「CubeCL 编程模型」](03-cubecl-programming.md)「边界检查与安全责任」
+检查两项不变量是否都被覆盖。
 
 </details>
 
@@ -162,8 +215,10 @@ CubeK。
 <details>
 <summary>提示</summary>
 
-对照 `examples/ch03-cubecl-kernel` 的边界检查与第 3 章「Slice、Vector 与
-Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
+对照 `examples/ch03-cubecl-kernel` 的边界 guard 与
+[「CubeCL 编程模型」](03-cubecl-programming.md)「Slice、Vector 与
+Tensor 参数」：向量宽度必须与 buffer 布局和元素总数一致；先决定
+余数元素由谁处理，尾部访问不得越过 raw buffer 的长度不变量。
 
 </details>
 
@@ -172,7 +227,11 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-对照 `examples/ch03-tile-loads` 与 GEMM 节的加载计数推导。
+协作骨架按[「GEMM 与优化阶梯」](05-gemm-optimization.md)「Tiling 与
+共享内存」的五步流程写；写入后、读取前的 cube 级同步按
+[「GPU 并行与存储模型」](02-gpu-machine-model.md)的四条正确性条件
+自查。对照时先用可整除尺寸对齐 `tile_load_counts` 的计数——该模型
+自己声明忽略 bank conflict、边界 tile 与缓存，别用它预测耗时。
 
 </details>
 
@@ -185,7 +244,10 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+定义在 `cubecl/crates/cubecl-core/src/frontend/topology.rs`；把
+[「GPU 并行与存储模型」](02-gpu-machine-model.md)列出的
+`CUBE_POS_X/Y/Z`、`UNIT_POS_X/Y/Z` 与 CubeDim 形状摆在一起，先猜
+一个「三维坐标扁平化后再组合」的表达式，再回源码核对展开顺序。
 
 </details>
 
@@ -194,7 +256,11 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+Safety 文档随定义在
+`cubecl/crates/cubecl-core/src/frontend/container/slice/launch.rs`；
+逐条抄下调用者责任后，对照 `examples/ch03-cubecl-kernel` 中
+`run_scale` 的 SAFETY 注释，看它对每条责任分别拿什么事实作答、
+哪一条要靠 Kernel 里的 guard 兜底。
 
 </details>
 
@@ -204,8 +270,9 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-对照[CubeK 与 Burn 算子路径](04-cubek-and-burn.md)的「逐层走查」小节，
-按其中的文件路径在本书固定版本源码里各读一遍。
+对照[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)的「逐层走查」
+小节，按其中的文件路径在本书固定版本源码里各读一遍；每到一层，
+先用一句话回答该层要解决的问题，再找出支撑这句话的函数或注释。
 
 </details>
 
@@ -214,7 +281,11 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+策略枚举在 `cubek/crates/cubek-matmul/src/strategy/strategy.rs`，
+统一入口的转发在同 crate 的 `launch.rs`；比较时沿
+[「GPU 并行与存储模型」](02-gpu-machine-model.md)「矩阵单元不是
+通用乘法器」给的约束轴（Runtime、dtype、tile shape、设备 feature）
+逐项过——正文提醒过，不能由 crate 名推断一定用上矩阵单元。
 
 </details>
 
@@ -223,7 +294,11 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+从 `burn/crates/burn-cubecl/src/kernel/attention/` 入手，找策略
+选择处对 bias、softcap 与自定义 scale 的条件分支；
+[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)的「覆盖范围与
+边界」「为什么必须保留 fallback」说明这类判断为何存在，以及
+fallback 路径可能多付出的中间 Tensor 与 Kernel。
 
 </details>
 
@@ -233,7 +308,11 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)「覆盖范围与边界」
+点名逐元素、索引与 mask 类算子直接用 burn-cubecl 里的 CubeCL
+Kernel；在 `burn/crates/burn-cubecl/src/kernel/` 下挑一个这样的
+实现，与同目录 `matmul/` 经 CubeK 的路径对比策略选择、autotune 与
+fallback 的有无。
 
 </details>
 
@@ -245,7 +324,12 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+差异来源对照
+[「实验：CPU 上运行 CubeCL Kernel」](07-cpu-kernel-lab.md)「观察
+编译边界」与[「算子编译、调优与生态」](06-compilation-and-tuning.md)
+的编译与缓存讨论：首次运行含 IR 构建与 Runtime 编译，而长度经
+CubeDim 参与编译配置，某些长度变化可能再次触发编译；计时要在真实
+同步后停止，这类耗时观察也不能替代 GPU 带宽或吞吐结论。
 
 </details>
 
@@ -254,7 +338,11 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-需要额外 GPU 环境：记录设备与同步边界，勿外推为默认示例的性能结论。
+推理工具在[「GPU 并行与存储模型」](02-gpu-machine-model.md)「合并、
+向量化与同步」：步长增大时，同样多的请求散布到更宽的地址区间，
+事务数随之增长；有效带宽应当用实际搬运的字节数除以同步后测得的
+时间来算。本题需要额外 GPU 环境，记录设备与同步边界，勿外推为
+默认 CPU 示例的性能结论。
 
 </details>
 
@@ -266,13 +354,20 @@ Tensor 参数」；尾部元素不要越过 raw buffer 的长度不变量。
 <details>
 <summary>提示</summary>
 
-回看第 3 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+默认策略在哪一层注入，看
+[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)走查的第 2 步
+（`burn/crates/burn-cubecl/src/ops/tensor.rs` 的 `float_matmul`）；
+报告体例按[「算子编译、调优与生态」](06-compilation-and-tuning.md)
+「测试、Benchmark 与性能声明」的五条来，尤其写明 autotune 搜索是否
+计入首次计时、结论覆盖哪些 shape。
 
 </details>
 
 
 ## 延伸阅读
 
+Roofline、CUDA 与 tile 编译器的论文见附录
+[参考文献](../references.md#第-3-章-ai-加速器与编程)。
 本书固定版本源码中的权威入口：
 
 - `cubecl/README.md`

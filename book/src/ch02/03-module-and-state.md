@@ -80,7 +80,7 @@ Module
 
 ## ModuleRecord
 
-固定版本使用非泛型 `ModuleRecord` 保存 Module 状态。典型流程是：
+Burn 使用非泛型 `ModuleRecord` 保存 Module 状态。典型流程是：
 
 ```text
 Module

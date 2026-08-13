@@ -30,23 +30,16 @@ observation $o\_i$，获得自己的 reward $r\_i$，并通过通信或环境间
 
 一个常见架构划分是：
 
-```text
-actors / environments ── observations ──► inference
-        ▲                                  │
-        │ actions                          ▼
-        └────────────── learner ◄──── trajectories
-                         │
-                 policy versions / league
-```
+![Actor–Learner 架构：环境与 Actor、批量推理服务、Replay 队列与 Learner 之间的观测、动作、轨迹与参数版本流](../img/ch08-actor-learner.svg)
 
 Actor 负责与环境交互，learner 负责更新参数；它们之间需要定义 policy
 version、trajectory schema、backpressure、checkpoint 和失败重试。多人
 self-play 还需要 opponent sampling、模型评估、选择和防止策略循环的
 机制。这个系统问题远大于把一个 `Policy` clone 几次。
 
-## 固定 Burn 可以组合什么
+## Burn 可以组合什么
 
-固定 `burn-train` 的 `MultiAgentEnvLoop` 能创建多个环境实例，并用
+`burn-train` 的 `MultiAgentEnvLoop` 能创建多个环境实例，并用
 `AsyncPolicy` 做 batched inference。这适合：
 
 - 同一 policy 在多个独立环境中并行采样；
@@ -54,23 +47,20 @@ self-play 还需要 opponent sampling、模型评估、选择和防止策略循�
 - 用 `env_id` 将 transition 归还到对应 runner；
 - 在 `OffPolicyStrategy` 中将多个环境的 transition 汇入一个 replay。
 
-这里的“多环境”不等于“多智能体”。固定 `burn-rl` 的
+这里的“多环境”不等于“多智能体”。`burn-rl` 的
 `Environment` 只有一个 `Action` 类型；`Policy` 也只定义一个 action
-batch。要表达 N 个有不同 observation、动作和 reward 的 agent，应用还
-需设计联合动作结构、各 agent 的 `ToObservation`/`ToAction`、credit
-assignment 和 episode 同步协议。
+batch。下表把「搭一个 MARL / 分布式 RL 系统需要什么」与「`burn-rl` /
+`burn-train` 已经给出什么」对齐；第三列就是应用要自己设计的部分：
 
-同样，固定 `AsyncPolicy` 的 inference server 是进程内 native thread，
-不是：
+| 系统需要 | 已提供 | 应用要补的设计 |
+|---|---|---|
+| 多环境并行采样 | `MultiAgentEnvLoop` + `AsyncPolicy` 合批 | 环境数、batch 上限与背压调优 |
+| 各 agent 的观察/动作 | 单一 `Observation`/`Action` 类型 | 联合动作结构与各 agent 的转换 |
+| credit assignment | 单一标量 reward 通道 | 共享标量 / 奖励向量 / CTDE 的选择 |
+| 跨节点 actor 组网 | 进程内 channel 与 thread | transport、发现、鉴权与重试 |
+| 策略版本与 league | policy record 保存/恢复 | version 协议、opponent sampling、评估 |
 
-- 跨节点 actor discovery；
-- 参数服务器或 learner consensus；
-- league manager；
-- RPC 鉴权和重试；
-- 多智能体通信网络。
-
-这些模块可以复用 Burn tensor/model，但不应从 `burn-rl` trait 名称推导
-其已经存在。
+这些缺口模块可以复用 Burn 的 tensor/model，但要由应用自己实现。
 
 ## 非平稳性与版本
 
@@ -99,11 +89,11 @@ Actor–Learner:   actor → trajectory/replay → learner → policy version
 ```
 
 Actor–Learner 需要考虑数据陈旧、采样公平、队列背压和 worker 退出；
-DDP 需要 collective participant、同步和梯度归一化。固定 Burn 的
+DDP 需要 collective participant、同步和梯度归一化。Burn 的
 `OffPolicyStrategy` 是单进程编排入口，不能替代集群调度、服务发现、
 跨节点授权、elastic membership 或故障恢复。
 
-如果未来实现分布式 RL，应先记录这些可验证条件：
+动手搭分布式 RL 时，先把这六个条件写成可验证的设计决定：
 
 1. actor 与 learner 的 transport 和序列化格式；
 2. policy version 与 replay item 的一致性；
@@ -112,9 +102,12 @@ DDP 需要 collective participant、同步和梯度归一化。固定 Burn 的
 5. 环境、策略和评估 worker 的随机种子；
 6. metrics 如何区分采样吞吐、learner 吞吐和端到端 reward。
 
+Ape-X、IMPALA 和 Ray 对这六个问题都有公开的工程答案，出处见附录
+[参考文献](../references.md#第-8-章-强化学习系统)。
+
 ## 本节小结
 
-固定 Burn 快照提供的是可组合的单进程环境、policy、batching 和 learner
+Burn 提供的是可组合的单进程环境、policy、batching 和 learner
 接口，以及多个环境的 rollout 编排。多智能体联合决策、league/self-play、
 Actor–Learner 跨节点协议和容错仍是应用系统与后续章节的工作；把多个
 environment worker 称为 MARL 会掩盖这些真正的复杂度。

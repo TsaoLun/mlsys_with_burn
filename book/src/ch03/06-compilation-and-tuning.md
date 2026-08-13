@@ -61,7 +61,7 @@ MLIR 的深入比较放到第 4 章；厂商专用 TBE/AKG 只作为生态历史
 
 ## 4. CUDA、Triton 与 CUTLASS 对照
 
-OpenMLSys v2 将 CUDA、Triton 和 CUTLASS 列入第 3 章，但固定 v2 快照没有
+OpenMLSys v2 将 CUDA、Triton 和 CUTLASS 列入第 3 章，但 v2 快照没有
 正文。本书只建立概念坐标：
 
 - **CUDA C++** 直接暴露 NVIDIA 线程、内存和指令生态；

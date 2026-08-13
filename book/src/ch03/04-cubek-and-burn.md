@@ -44,7 +44,7 @@ CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单�
 
 ### 逐层走查：一次 `matmul` 经过的六个决策点
 
-把上面的箭头像绳子一样拉直，固定版本里每一层都在回答一个确定的问题。
+把上面的箭头像绳子一样拉直，每一层都在回答一个确定的问题。
 建议对照源码各读一遍（路径见章末源码入口）：
 
 1. **用户 API 层**（`burn-tensor/src/tensor/api/numeric.rs` 的
@@ -85,7 +85,7 @@ CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单�
 
 ## 3. 覆盖范围与边界
 
-固定 Burn 快照会调用 CubeK 的 matmul、implicit-GEMM convolution、
+Burn 会调用 CubeK 的 matmul、implicit-GEMM convolution、
 reduce、attention forward、pool、interpolate、FFT、random 和 quantization
 等模块。但这不表示所有算子都通过 CubeK：
 

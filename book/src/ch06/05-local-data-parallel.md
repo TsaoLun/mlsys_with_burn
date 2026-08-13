@@ -23,7 +23,7 @@
 
 ## `ExecutionStrategy::MultiDevice`
 
-固定 `burn-train` 的 `ExecutionStrategy` 用
+`burn-train` 的 `ExecutionStrategy` 用
 `MultiDevice(Vec<Device>, MultiDeviceOptim)` 表达本机多设备训练。它与
 DDP 的区别首先在于：这里的策略把 device 列表和 loader 切分放在一个进程
 内处理，不要求用户另行启动每个节点。
@@ -53,7 +53,7 @@ DDP 的区别首先在于：这里的策略把 device 列表和 loader 切分放
 
 每个设备保留自己的 `GradientsParams` 和设备信息，最后调用
 `optimizer_step_multi`。`ModuleOptimizer::step_multi` 在参数 mapper 中
-选择一个梯度来源，并把其他来源迁到同一设备后累积。固定源码中的
+选择一个梯度来源，并把其他来源迁到同一设备后累积。源码中的
 `MultiGradientsParams::remove` 还按 parameter ID 在多个梯度容器中选择起点，
 所以它不是“所有参数永久放在编号相同的设备”这一简单约定。
 
@@ -67,7 +67,7 @@ DDP 的区别首先在于：这里的策略把 device 列表和 loader 切分放
 - **流水线并行**：模型阶段分片，再用 micro-batch 重叠阶段执行；
 - **混合并行**：组合上述协议，并定义张量重新布局和同步时机。
 
-固定版本的 `ExecutionStrategy` 明确实现了单设备、本机 `MultiDevice` 和
+`ExecutionStrategy` 明确实现了单设备、本机 `MultiDevice` 和
 DDP 路径；它没有因为存在 `MultiDevice` 就自动提供通用模型并行或
 pipeline scheduler。`Learner::grad_sharded()` 是 DDP 相关的梯度同步标记，
 不是任意模型切分 DSL。
@@ -95,7 +95,7 @@ $$
 重计算可以降低内存，却增加算力。阶段之间还要定义
 通信 tensor 的 layout、dtype、stream 和失败恢复点。
 
-固定 Burn 的 `ExecutionStrategy` 没有在源码中提供上述 stage scheduler、
+Burn 的 `ExecutionStrategy` 没有在源码中提供上述 stage scheduler、
 micro-batch 编排或 activation recomputation 协议。这个时间线是框架无关
 的系统模型，不应从 `MultiDevice` 或 `grad_sharded()` 推导出 pipeline
 并行已实现。
@@ -123,6 +123,6 @@ micro-batch 编排或 activation recomputation 协议。这个时间线是框架
 - worker 错误能否终止训练而不是静默丢 batch。
 
 这些测试比只比较 `num_devices = 1` 和 `num_devices = 2` 的墙钟时间更有
-解释力。固定 CPU Flex 实验选择单设备路径，因为 Flex 没有可运行的
+解释力。CPU Flex 实验选择单设备路径，因为 Flex 没有可运行的
 collective；本节的 `MultiDevice` API 来自固定源码对照，不是本实验的运行
 结果。

@@ -82,6 +82,6 @@ shape 和设备后编译；autotune 通过真实执行反过来影响选择；�
 - **延迟执行**：先注册操作，遇到策略决定或物化边界再执行。
 
 这些模式可以组合。Burn Flex 是 eager 路径；Burn Fusion 延迟 Tensor
-操作并搜索执行块；CubeCL 对实际 Kernel 变体执行 JIT。固定 CubeCL 快照
+操作并搜索执行块；CubeCL 对实际 Kernel 变体执行 JIT。CubeCL
 支持编译缓存，但没有可概括为“完整统一 AOT 产品”的一等 API。
 

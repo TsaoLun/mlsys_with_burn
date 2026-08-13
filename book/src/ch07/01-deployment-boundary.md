@@ -111,11 +111,11 @@ backend、dtype、校准集摘要和 schema version 写入发布元数据。
 
 ## Burn 的位置
 
-本书示例使用的固定版本 Burn 中，`ModuleRecord` 记录 module 参数和
+在本书示例使用的 Burn 版本中，`ModuleRecord` 记录 module 参数和
 `ParamId`，可以用内存 Burnpack bytes 恢复到一个新 module。它是一个很小、
 可测试的 artifact 边界，不等于完整部署 manifest。更丰富的 `burn-store`
 再提供 `ModuleSnapshot`、SafeTensors/PyTorch adapter、过滤和 remap，但
 这些能力要按 feature 启用并单独验证。
 
 下一节转向更大的转换边界：ONNX 图如何变成 Burn 的 Rust source，以及
-为什么固定 `burn-onnx` 的依赖 revision 必须先对齐。
+为什么 `burn-onnx` 的依赖 revision 必须先对齐。

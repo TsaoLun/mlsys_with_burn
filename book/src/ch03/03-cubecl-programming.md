@@ -95,7 +95,7 @@ if ABSOLUTE_POS < input.len() {
 - `Vector<F, N>` 表达连续的 N 个元素，供向量化使用；
 - CubeCL Tensor 参数还携带 shape 与 stride，适合多维寻址。
 
-当前固定版本使用 `Vector`，不是旧资料中的 `Line` 类型名。向量宽度必须与
+当前版本使用 `Vector`，不是旧资料中的 `Line` 类型名。向量宽度必须与
 buffer 布局、元素总数和 Runtime 能力一致。多维 Tensor 的 raw shape 和
 stride 同样属于 unsafe 合约的一部分。
 

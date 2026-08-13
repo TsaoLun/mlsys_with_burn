@@ -31,7 +31,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-回看第 6 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+Adam 的一阶/二阶矩也是需要恢复的训练状态。见
+[「优化器、学习率与检查点」](04-optimizer-and-checkpoint.md)，
+想一想只恢复参数后，优化器第一步会与原轨迹差在哪里。
 
 </details>
 
@@ -41,7 +43,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+把每个设备的梯度写成「本地样本损失和 ÷ 本地样本数」，再对设备做无权
+平均，比较它与全局样本平均的差别。见
+[「本机多设备与数据并行」](05-local-data-parallel.md)的加权讨论。
 
 </details>
 
@@ -51,7 +55,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-从 `examples/ch05-data-pipeline` 与第 5 章对应小节观察。
+梯度累积不增加单步激活内存但降低 optimizer step 频率；增大 batch 则
+相反。对照[「训练状态、迭代与成本模型」](01-training-state-and-cost.md)
+的内存预算，再想 metric 按 step 还是按样本归一。
 
 </details>
 
@@ -60,7 +66,10 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 6 章集合通信节与 Flex CPU 无 collective 的边界。
+集合通信要求全体参与者共同到达；step 时间近似
+「最慢设备的计算时间 + 通信时间」。见
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的
+AllReduce 语义段。
 
 </details>
 
@@ -70,7 +79,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 6 章集合通信节与 Flex CPU 无 collective 的边界。
+两者都把「提交操作」与「结果可读」拆成不同时间点。对照
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的完成语义段
+与第 4 章[「内存、Stream 与异步执行」](../ch04/06-memory-streams-execution.md)。
 
 </details>
 
@@ -79,7 +90,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-回看第 6 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+异步 push/pull 意味着梯度可能基于旧参数版本计算。见
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)末尾的版本
+协议四问。
 
 </details>
 
@@ -100,7 +113,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-回看第 6 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+三种策略分别要求 server 记住什么才能在重启后不重复应用同一梯度？从
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的版本协议
+四问逐条推。
 
 </details>
 
@@ -113,7 +128,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+在 `examples/ch06-training-loop` 里改模型定义；`#[derive(Module)]` 的
+参数注册规则见第 2 章
+[「Module、参数与模型状态」](../ch02/03-module-and-state.md)。
 
 </details>
 
@@ -123,7 +140,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-回看第 6 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+`valid()` 返回不带 autodiff 的 inner model。见
+[「burn-train 的 Learner 与训练装配」](03-burn-train-orchestration.md)
+中训练/验证路径的区分。
 
 </details>
 
@@ -133,7 +152,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-回看第 6 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+optimizer record 的保存/恢复模式见
+[「优化器、学习率与检查点」](04-optimizer-and-checkpoint.md)；
+record 往返的代码样板可参考 `examples/ch07-record-roundtrip`。
 
 </details>
 
@@ -143,7 +164,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+入口在本章源码清单的
+`burn-optim/src/lr_scheduler/module_lr_scheduler.rs`；scheduler 语义见
+[「优化器、学习率与检查点」](04-optimizer-and-checkpoint.md)。
 
 </details>
 
@@ -153,7 +176,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+metric 在事件处理线程上被惰性物化，输出因此要能跨线程存活。见
+[「burn-train 的 Learner 与训练装配」](03-burn-train-orchestration.md)
+的事件与 metric 段。
 
 </details>
 
@@ -163,7 +188,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+与概念题 2 是同一个问题的实现版。见
+[「本机多设备与数据并行」](05-local-data-parallel.md)的 Mean/Sum
+与样本数讨论。
 
 </details>
 
@@ -176,7 +203,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+关注 model 是被移动还是被借用、在哪一步被替换成新 model。所有权与
+训练循环的关系见
+[「前向、反向与自定义训练循环」](02-forward-backward-loop.md)。
 
 </details>
 
@@ -186,7 +215,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+先猜一个顺序再对照源码验证；scheduler 先于还是后于 optimizer step
+会改变有效学习率的含义，见
+[「优化器、学习率与检查点」](04-optimizer-and-checkpoint.md)。
 
 </details>
 
@@ -196,7 +227,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+三个分支的差异集中在 loader 如何切分、梯度在哪里聚合。对照
+[「本机多设备与数据并行」](05-local-data-parallel.md)与
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)。
 
 </details>
 
@@ -206,7 +239,8 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-运行 `examples/ch06-training-loop` 并对照第 6 章训练循环节。
+两种模式决定梯度在主设备集中更新还是分片更新。背景见
+[「本机多设备与数据并行」](05-local-data-parallel.md)。
 
 </details>
 
@@ -217,7 +251,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-从 `examples/ch05-data-pipeline` 与第 5 章对应小节观察。
+按[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的
+DDP 分层图逐层对应：参数注册、梯度提交、`all_reduce`、
+`sync_collective` 各发生在哪个文件。
 
 </details>
 
@@ -228,7 +264,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+Flex 的注释明确写出不支持 collective。对照
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的
+「各后端的实现现状」一节，区分「API 层存在」与「backend 有实现」。
 
 </details>
 
@@ -241,7 +279,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+`into_scalar` 是同步读回点，计时器夹住的段落决定你测到什么。异步
+提交与读取的区分见第 4 章
+[「内存、Stream 与异步执行」](../ch04/06-memory-streams-execution.md)。
 
 </details>
 
@@ -251,7 +291,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-从 `examples/ch05-data-pipeline` 与第 5 章对应小节观察。
+在 `examples/ch05-data-pipeline` 的 map 里加入可调延迟，分别计时
+生产与消费两侧；生产/消费预算模型见第 5 章
+[「数据路径、语义与成本模型」](../ch05/01-data-pipeline-and-cost.md)。
 
 </details>
 
@@ -261,7 +303,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+用相同 seed 与确定性初始化，让单设备跑完整 batch、多设备各跑一半，
+比较聚合梯度。加权语义见
+[「本机多设备与数据并行」](05-local-data-parallel.md)。
 
 </details>
 
@@ -271,7 +315,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-见第 6 章集合通信节与 Flex CPU 无 collective 的边界。
+ring 的每设备流量近似 $2S$ 但延迟项按 $2(p-1)$ 步增长；小消息、多
+设备时树形占优。推导见
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的通信成本段。
 
 </details>
 
@@ -281,7 +327,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-回看第 6 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+对每一项都问同一个问题：丢了它，恢复后的哪一步会与原轨迹不一致？
+检查点状态清单见
+[「优化器、学习率与检查点」](04-optimizer-and-checkpoint.md)。
 
 </details>
 
@@ -291,7 +339,9 @@ CPU 单设备训练循环。
 <details>
 <summary>提示</summary>
 
-从 `examples/ch05-data-pipeline` 与第 5 章对应小节观察。
+同步 DDP 每步形成共同完成点，没有版本差；异步测试要围绕
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)版本协议
+四问设计断言。
 
 </details>
 
@@ -324,9 +374,9 @@ OpenMLSys v1：
 - `openmlsys/v1/zh_chapters/chapter_distributed_training/parameter_servers.md`
 - `openmlsys/v1/zh_chapters/chapter_distributed_training/cluster.md`
 
-可以把 PyTorch DDP、Horovod、NCCL、gPipe、ZeRO 和参数服务器论文作为
-对照阅读，但比较时必须记录版本、通信后端、进程模型、梯度归一化和
-checkpoint 协议；它们的 API 或性能不能自动转化为 本书所用的 Burn 版本事实。
+Horovod、GPipe、ZeRO、参数服务器等系统的论文集中在附录
+[参考文献](../references.md#第-6-章-训练系统)。对照阅读时记录版本、
+通信后端、进程模型、梯度归一化和 checkpoint 协议，比较才有意义。
 
 ## 本章系统结论
 

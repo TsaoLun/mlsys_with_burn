@@ -2,7 +2,7 @@
 
 ## `Dataset` 是按索引读取的契约
 
-固定 Burn 快照中的核心 trait 是：
+Burn 数据模块的核心 trait 是：
 
 ```rust,ignore
 pub trait Dataset<I, E = DatasetError>: Send + Sync
@@ -38,7 +38,7 @@ Burn 自己的 `DatasetIterator` 只保存当前索引和数据集引用，逐�
 
 ## 惰性组合
 
-固定 `burn-dataset` 提供多种 wrapper：
+`burn-dataset` 提供多种 wrapper：
 
 - `MapperDataset<D, M, I>` 在读取时调用 `Mapper::map`，不提前物化输出；
 - `SelectionDataset` 保存一组底层索引，可以重排、重复或选择子集；

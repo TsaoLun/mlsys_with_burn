@@ -23,7 +23,7 @@ $O(N)$ 排列；若改为复制样本本身（比如每条 1 KiB 的文本），
 ## 一个 loader 的 epoch 行为
 
 `DataLoaderBuilder::shuffle(seed)` 把 RNG 保存到 loader。每次调用
-`iter()` 时，固定版本会从 RNG 得到下一次排列。因此：
+`iter()` 时，实现会从 RNG 得到下一次排列。因此：
 
 ```text
 独立 loader + 相同 seed → 第一轮排列相同

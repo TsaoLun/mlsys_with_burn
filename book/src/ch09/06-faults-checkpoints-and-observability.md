@@ -55,7 +55,7 @@ $C^* \approx \sqrt{2 \times 60 \times 14400} \approx 1315\ \text{s} \approx 22\ 
 
 ## 本版 Burn 覆盖到哪里
 
-固定 Burn 的 `LearningCheckpointer`、文件 checkpoint 和异步 checkpointer
+Burn 的 `LearningCheckpointer`、文件 checkpoint 和异步 checkpointer
 可以保存 learner 的训练状态。它们没有实现：
 
 - 节点心跳和 failure detector；

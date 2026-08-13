@@ -91,7 +91,7 @@ $$
 
 ## Burn/CubeCL 的局部视角
 
-固定 Burn 的 `Device`/`DeviceOps` 能提供设备标识和 backend 设备操作，
+Burn 的 `Device`/`DeviceOps` 能提供设备标识和 backend 设备操作，
 但设备标识不包含 rack、ToR、Spine、NUMA 或链路容量。CubeCL 的
 `HardwareProperties` 描述的是单个 runtime 可见的硬件属性；CubeCL
 stream scheduler 负责本地 stream 的 interleave/sequential 策略。
@@ -118,5 +118,5 @@ stream scheduler 负责本地 stream 的 interleave/sequential 策略。
 ## 本节小结
 
 拓扑感知放置的核心是把通信域和链路容量写进成本模型。OpenMLSys
-提供了 rack/ToR/Spine 和超额认购的系统动机；固定 Burn/CubeCL 提供
+提供了 rack/ToR/Spine 和超额认购的系统动机；Burn/CubeCL 提供
 设备运行时和 collective 的局部入口，但不保存集群拓扑，也不负责放置。

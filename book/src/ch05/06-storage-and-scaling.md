@@ -37,7 +37,7 @@ logical index
 则会改变实际 $F$。因此 `Dataset::get` 的平均耗时不能单独代表文件格式
 的性能。
 
-固定 Burn 的 `InMemDataset`、CSV/JSON 构造器和 SQLite Dataset 能说明三种
+Burn 的 `InMemDataset`、CSV/JSON 构造器和 SQLite Dataset 能说明三种
 边界：完整预加载、解析后驻留内存，以及按 row id 查询。它们没有统一的
 跨格式分片、索引、压缩、远端重试或版本协议。生产系统需要在 Dataset
 外部定义 manifest、数据版本、校验和、shard assignment 与重试策略，再
@@ -45,7 +45,7 @@ logical index
 
 ## 缓存与预取的边界
 
-固定版本的 `Dataset`/`DataLoader` 核心 API 没有一个通用的
+`Dataset`/`DataLoader` 核心 API 没有一个通用的
 `prefetch(n)` 或跨 Dataset 的缓存协议。多 worker 通道会产生并发生产和
 有限背压，但不能据此声称存在可配置的磁盘预取、Pinned Host Memory、
 零拷贝设备传输或数据变换自动融合。
@@ -64,7 +64,7 @@ CubeCL/Fusion 优化不能直接作用于任意字符串或图像解码 map。
 
 当 $P$ 是瓶颈时，可以增加 worker、减少昂贵的重复变换、预计算特征，
 或者把明确的 Tensor 变换移到设备。但异构路径需要回答设备拷贝、队列
-容量、算子覆盖率和同步边界；固定 Burn 数据模块源码并没有一个通用的
+容量、算子覆盖率和同步边界；Burn 数据模块源码并没有一个通用的
 “把 Dataset map 自动卸载到 GPU”的接口。
 
 当单机无法满足生产率时，常见的横向扩展是离线预处理后共享结果、按

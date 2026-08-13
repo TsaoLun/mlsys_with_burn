@@ -18,7 +18,7 @@ $$
 
 ## `ModuleOptimizer` 的参数映射
 
-固定 `burn-optim/src/optim/module/module_optimizer.rs` 的
+`burn-optim/src/optim/module/module_optimizer.rs` 的
 `ModuleOptimizer` 用动态 optimizer 保存每个参数的上下文。参数在
 `ModuleMapper` 遍历时以 `ParamId` 和路径匹配 optimizer group，然后：
 
@@ -64,7 +64,7 @@ global step / epoch
 
 ## 检查点包含哪些 record
 
-固定 `burn-train` 的默认 checkpointer 会分开保存：
+`burn-train` 的默认 checkpointer 会分开保存：
 
 ```text
 checkpoint/
@@ -78,7 +78,7 @@ burnpack record。加载 model 时，参数保留已有 module 的设备；加�
 后，state 在下一次更新时迁移到参数/梯度的设备。这种设计避免把一个特定
 设备的句柄硬编码到 checkpoint 文件中。
 
-但 device-free 不代表“什么都可以恢复”。固定 `LearningCheckpointer`
+但 device-free 不代表“什么都可以恢复”。`LearningCheckpointer`
 只组合上述三类训练状态，并由 epoch 和 checkpointing strategy 决定保存/
 删除。数据 loader 的文件偏移、sampler RNG、当前 shard、外部数据版本和
 集群成员列表需要应用或作业层另行记录。

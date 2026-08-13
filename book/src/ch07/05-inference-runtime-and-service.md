@@ -95,7 +95,7 @@ queue wait 和 forward time，不能说明模型算得更快。
 layout 与算子优化也要放在端到端路径中判断。NCHW→NHWC、transpose、
 padding 或 token packing 可能使单个 kernel 更适合向量化，却增加一次完整
 内存搬运。只有当 layout 转换成本小于后续算子节省的时间，计划才可能
-收益；这与第 4 章的 fusion、lifetime 和 fallback 条件相同。固定 Burn
+收益；这与第 4 章的 fusion、lifetime 和 fallback 条件相同。Burn
 提供 Tensor/Device/backend 的执行入口，但没有一个统一的生产线程池、
 动态 batch 服务或自动 layout planner。
 
@@ -121,12 +121,14 @@ Burn 提供 Tensor、Module、Device、backend 和部分 Remote server/client
 生成式 LLM 服务在上述问题之外还有一层自回归（autoregressive）特有的
 系统问题：逐 token 解码使 KV cache 成为主要内存对象，请求长度差异
 极大，需要 continuous batching、paged KV 管理和前缀缓存（prefix
-caching）才能维持吞吐。本书首版不展开这些机制：固定 Burn 主线快照
+caching）才能维持吞吐。本书首版不展开这些机制：Burn 主线
 没有现成的 paged attention 或 continuous batching **服务** runtime；
 `burn-onnx` 中 Attention 节点对 `past_k`/`past_v` 张量的图转换，也不
 等于服务端的分页 KV 管理或连续批处理。把它们写成“Burn 能力”会越过
 本书的证据纪律。本节的 artifact、batching、队列和 worker 边界仍然是
-LLM 服务的基础层；KV cache 专题属于规划中的后续版本。
+LLM 服务的基础层；KV cache 专题属于规划中的后续版本。想现在就深入
+这些机制，可从附录[参考文献](../references.md#第-7-章-模型服务)中的
+Orca（continuous batching）与 PagedAttention（vLLM）两篇论文开始。
 
 ## 产业对照（概念对齐，不是性能对等）
 

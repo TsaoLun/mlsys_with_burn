@@ -18,9 +18,9 @@ backend 数量增长。ONNX（Open Neural Network Exchange）提供一种交换
 `Split`/`Slice` 组合相对应；训练框架中的融合节点可能需要拆开或重写。
 如果两边的算子集合或语义没有交集，转换必须报错或由人工提供替代实现。
 
-## `ModelGen` 的固定源码路线
+## `ModelGen` 的转换路线
 
-固定 `burn-onnx` 的 `ModelGen` 代码把转换分成几个有明确边界的阶段：
+`burn-onnx` 的 `ModelGen` 把转换分成几个有明确边界的阶段：
 
 ```text
 ONNX file
@@ -47,13 +47,13 @@ output 也被注册。`BurnGraph::codegen` 最终生成可读的 Rust source，�
 - 生成成功不等于 reference 数值、动态 shape 或所有目标 backend 都已
   通过验证。
 
-固定源码还支持大图 partition。`partition(true)` 时，超过阈值的图可能被
+`burn-onnx` 还支持大图 partition。`partition(true)` 时，超过阈值的图可能被
 拆成多个 submodule，每个 submodule 有自己的 `forward`；这主要帮助生成
 代码保持可编译和可读，不应直接解释成 runtime 的模型并行。
 
 ## 图简化与第 4 章的关系
 
-`ModelGen` 的 simplify 选项属于导入前后的图处理入口，固定 README 和
+`ModelGen` 的 simplify 选项属于导入前后的图处理入口，README 和
 源码注释列出的方向包括常量折叠、公共子表达式消除、死代码消除、恒等元素
 消除和部分 reshape/permute 识别。它们的共同条件是保持输入输出语义。
 
@@ -69,7 +69,7 @@ capture/register、analysis、lowering 和 device sync 仍然适用于部署推�
 
 ## 生成代码如何加载权重
 
-固定 `BurnGraph::register_burnpack_loaders` 为生成的 `Model` 安排不同入口。
+`BurnGraph::register_burnpack_loaders` 为生成的 `Model` 安排不同入口。
 `LoadStrategy` 不是“性能等级”，而是权重生命周期和宿主环境选择：
 
 - `File`：权重留在独立 `.bpk` 文件；生成 `from_file`、`from_bytes` 和
@@ -85,16 +85,16 @@ capture/register、analysis、lowering 和 device sync 仍然适用于部署推�
 因此“生成了 Rust model”与“权重已经在设备上”是两个事件：后者发生在
 loader 应用 snapshot 时，还可能触发 dtype 转换、设备分配和 backend copy。
 
-## 为什么本书默认示例不直接依赖固定 `burn-onnx`
+## 为什么本书默认示例不直接依赖 `burn-onnx`
 
-本书示例使用的 Burn revision 是 `976aa9...`，而固定 `burn-onnx` 的
+本书示例使用的 Burn revision 是 `976aa9...`，而 `burn-onnx` 的
 manifest 把 `burn`、`burn-flex` 和 `burn-store` 指向 `78f10a...`。依赖图中
 即使出现相同的 package name，Rust 也会把不同 revision 的类型视为不同
 类型；例如旧 `burn::Tensor` 不能自动传给当前示例里的 `burn::Tensor`。
 
 所以本章分两条阅读线：
 
-1. 读取固定 `burn-onnx` 源码，对照 ONNX graph、codegen、Burnpack 和
+1. 读取 `burn-onnx` 源码，对照 ONNX graph、codegen、Burnpack 和
    `LoadStrategy` 的行为；
 2. 用本书示例里的 Burn `ModuleRecord` 做 CPU 往返保存与恢复，观察当前
    参数状态 API。

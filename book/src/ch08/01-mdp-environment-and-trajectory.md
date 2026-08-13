@@ -78,7 +78,7 @@ $\max\_a Q(s',a)$；时间截断是否 bootstrap 则取决于算法和环境协�
 
 ## Burn 的环境 trait
 
-固定 `burn-rl` 用关联类型把环境的状态和动作写进实现：
+`burn-rl` 用关联类型把环境的状态和动作写进实现：
 
 ```rust,ignore
 {{#include ../../../examples/ch08-rl-rollout/src/lib.rs:environment}}
@@ -91,7 +91,7 @@ $\max\_a Q(s',a)$；时间截断是否 bootstrap 则取决于算法和环境协�
 2. policy 如何消费该状态，要通过 `ToObservation<O>` 显式转换，而不是
    在环境 trait 内偷偷绑定某个神经网络。
 
-`EnvironmentInit<E>` 负责创建环境实例。固定实现允许一个 `Fn() -> E`
+`EnvironmentInit<E>` 负责创建环境实例。当前实现允许一个 `Fn() -> E`
 直接充当 initializer，因此多个 rollout worker 可以各自拥有一个可变
 环境；它们不需要共享同一个 `&mut E`。这是 Rust 所有权在系统设计上的
 直接收益：每个 worker 的环境状态有明确 owner，跨线程传递的是消息或

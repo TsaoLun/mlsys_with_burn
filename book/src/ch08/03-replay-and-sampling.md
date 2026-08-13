@@ -21,7 +21,7 @@ $$
 出语义错误的 target。工程上应把环境版本、policy version、seed 和
 normalization 规则看作数据协议的一部分。
 
-固定 `burn-rl` 的 `Transition<S, A>` 保存 state、next_state、action 和
+`burn-rl` 的 `Transition<S, A>` 保存 state、next_state、action 和
 一维 reward/done tensors；`TransitionBatch<SB, AB>` 则将 observation/
 action 作为批量类型，reward/done 变为二维 tensor。它没有要求 state 或
 action 必须是 tensor，因此环境原始 transition 可以先使用结构化 Rust
@@ -40,7 +40,7 @@ write_head
                 oldest data
 ```
 
-固定实现的行为是：
+当前实现的行为是：
 
 1. 构造时只保存 capacity、device 和空 storage；
 2. 第一次 `push` 根据 `SliceAccess::zeros_like` 分配 state/action/reward/
@@ -106,7 +106,7 @@ Q-learning 可以通过 bootstrap 使用这类数据，但 policy gradient 通�
 需要 importance ratio、近端约束或其他校正。Burn 的 buffer 只负责存取，
 不会替应用判断算法是否允许这样的数据分布。
 
-固定实现还有两个必须写进配置校验的边界：
+当前实现还有两个必须写进配置校验的边界：
 
 - `sample` 的 batch size 不能大于当前 `len`，否则会 panic；
 - capacity 为零时第一次 push 会在取模处失败，不是有效配置。

@@ -21,29 +21,13 @@ Runtime 约束影响。view 可能共享 allocation；非连续 Tensor 也不能
 设备内存。一般图中的最佳静态内存规划很难，动态 shape 和异步 stream 又
 让精确生命周期更复杂，所以运行时常使用池化和启发式。
 
-用条带图表示时间（横轴）与 allocation（纵轴）。连续 `add → exp` 且中间
-结果不被同步读回时，中间值的寿命可以很短，甚至落入同一融合块内部：
+用条带图表示时间（横轴）与 allocation（纵轴）。上半部分：连续
+`add → exp` 且中间结果不被同步读回时，中间值 `mid` 的寿命可以很短，
+甚至落入同一融合块内部。下半部分：若在 `add` 后 `Device::sync()`
+（本章 FusionInspector 实验的切分路径），中间结果必须在同步点可观察，
+寿命被拉长，复用窗口也被切开：
 
-```text
-时间 →
-t0   t1        t2
-left ████
-right ████
- mid      ██                 （仅块内临时，可能不单独暴露）
- out         ████████
-```
-
-若在 `add` 后 `Device::sync()`（本章 FusionInspector 实验的切分路径），
-中间结果必须在同步点可观察，寿命被拉长，复用窗口也切开：
-
-```text
-时间 →
-t0   sync    t1
-left ████
-right ████
- mid      ████████           （同步边界强制物化）
- out              ████████
-```
+![融合执行与中途同步的生命周期对比：融合时 mid 只活在块内，插入 sync 后 mid 被强制物化且寿命拉长](../img/ch04-lifetime-sync.svg)
 
 Burn IR 的 `TensorStatus` 提供局部依据：
 

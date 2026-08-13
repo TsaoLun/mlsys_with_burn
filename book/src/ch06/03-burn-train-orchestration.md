@@ -12,7 +12,7 @@
 - module、optimizer、scheduler 的 checkpoint；
 - 单设备、本机多设备或 DDP 的 execution strategy。
 
-固定 Burn 快照把这些职责放进 `burn-train`，而不是让 `Module` 自己负责
+Burn 把这些职责放进 `burn-train`，而不是让 `Module` 自己负责
 文件、线程和 UI。
 
 ## `Learner` 的组合
@@ -42,7 +42,7 @@ Learner<M>
 
 ## `SupervisedTraining` 负责装配
 
-固定 `burn-train/src/learner/supervised/paradigm.rs` 的
+`burn-train/src/learner/supervised/paradigm.rs` 的
 `SupervisedTraining::new` 接受训练和验证 loader，然后以 builder 方法配置：
 
 ```text
@@ -65,7 +65,7 @@ checkpointer，并把训练交给 `SingleDeviceTrainingStrategy`、
 
 ## 单设备 epoch 的顺序
 
-固定 `single/epoch.rs` 的循环可以压缩成：
+`single/epoch.rs` 的循环可以压缩成：
 
 ```text
 for item in train_loader:
@@ -80,7 +80,7 @@ for item in train_loader:
 更新。epoch 结束后，runner 可以写 checkpoint，并根据 event store 判断
 early stopping。
 
-注意学习率前进的位置：固定单设备策略在每个训练 item 前调用 `lr_step`。
+注意学习率前进的位置：单设备策略在每个训练 item 前调用 `lr_step`。
 如果自定义策略改变调用次数，scheduler 曲线也会改变；这不是一个只影响
 日志的字段。
 

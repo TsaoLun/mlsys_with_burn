@@ -27,7 +27,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+按[「机器学习应用与系统负载」](01-applications-and-loads.md)的四组
+提问逐项作答，或直接填该节的四行负载卡片。判断「能否从模型结构看出」
+时，想想尾延迟目标、数据来源和恢复点写在模型定义的哪个位置。
 
 </details>
 
@@ -37,7 +39,10 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+素材在[「Burn 技术栈」](04-burn-stack.md)的「分派与后端契约」与
+「能力边界」两段：融合路径、量化支持都因后端而异；同步的例子是
+[「实验：探测执行栈」](06-stack-probe-lab.md)里 `sync()` 对 Flex
+很轻量、对异步后端才是真正等待点的注解。
 
 </details>
 
@@ -46,7 +51,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-运行/阅读 `examples/ch04-fusion-inspector` 与第 4 章 Fusion 节。
+[「从编程接口到硬件」](03-system-architecture.md)的「张量执行与计算
+表示」把两种记录分开：tape 记录反向依赖，Fusion 把操作注册为 Burn IR
+再搜索执行计划。问自己：去掉各自的记录，哪个丢正确性，哪个只丢性能？
 
 </details>
 
@@ -56,7 +63,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+[「机器学习系统的设计目标」](02-design-goals.md)末尾的系统层次表是
+答案骨架：第三列写着每类系统需要外部补充的能力。为两种混用各找出
+被遗漏的条目，比如张量语义与梯度、调度与集群治理。
 
 </details>
 
@@ -65,7 +74,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-见第 3 章 GPU 并行层次节与配图。
+[「Burn 技术栈」](04-burn-stack.md)分别用两节介绍 CubeCL（语言、IR、
+运行时）与 CubeK（其上的高性能算子），`cubecl/README.md` 与
+`cubek/README.md` 的自述可对照；Flex 的去向写在「分派与后端契约」末段。
 
 </details>
 
@@ -75,7 +86,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+模板在[「机器学习应用与系统负载」](01-applications-and-loads.md)的
+负载卡片一节：训练要计入梯度、优化器状态与恢复点，在线服务不再需要
+梯度却新增尾延迟与失败重试。逐行问：换一张卡，这一行为什么会变？
 
 </details>
 
@@ -85,7 +98,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+仿照[「机器学习应用与系统负载」](01-applications-and-loads.md)中
+负载卡片一节的两条预算式填一组数字，看 min 卡在哪一项。再问：更快
+的 Kernel 或更多副本各自抬高哪一项？副本又会挤占可用内存的哪一项？
 
 </details>
 
@@ -98,7 +113,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-见第 2 章自动微分节与 `burn-autodiff` 导读清单。
+按 `pins.toml` 检出仓库后读 `[features]` 表：等号右边混着依赖名与
+feature 引用（如 `train` 还引用 `optim`、`dataset`），间接项要再追
+一层；[「Burn 技术栈」](04-burn-stack.md)「可组合能力」一节可核对。
 
 </details>
 
@@ -108,7 +125,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」打开本书固定版本的对应路径。
+打开本章列出的 `burn/crates/burn-dispatch/src/device.rs`，每个变体
+上方都有 `#[cfg(feature = ...)]` 属性；再对照根 `Cargo.toml` 里 burn
+依赖实际启用的 feature，想想条件编译在编译期会留下哪些变体。
 
 </details>
 
@@ -117,7 +136,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」阅读本书固定版本的源码，不要跟着在线最新文档改 API。
+[「实验：探测执行栈」](06-stack-probe-lab.md)「沿源码追踪」的清单里
+有 `burn/crates/burn-flex/src/backend.rs`：找到该关联类型被赋成哪个
+类型，类型名本身就在回答问题。再联系「图捕获因后端而异」这句边界。
 
 </details>
 
@@ -127,7 +148,9 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」打开本书固定版本的对应路径。
+对照根目录 `pins.toml` 与 `burn-onnx/Cargo.toml` 各自 pin 的 Burn
+commit；[「Burn 技术栈」](04-burn-stack.md)「训练、状态与模型交换」
+一段指出两者不同。问自己：预发布期一个版本号对应多少个 commit？
 
 </details>
 
@@ -140,7 +163,10 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-回看第 1 章与本题对应的小节；需要实现时优先改本章 `examples/` 测试。
+照 `examples/ch01-stack-probe/src/lib.rs` 里 `float_dtype` 的写法在三处
+扩展：`StackReport` 字段、`probe_execution_stack` 读取 `settings()`、
+测试断言；布尔项的命名可沿本章列出的
+`burn/crates/burn-tensor/src/device.rs` 找到。
 
 </details>
 
@@ -150,7 +176,10 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-按章节末「源码入口」打开本书固定版本的对应路径。
+根 `Cargo.toml` 的 burn 依赖已带 `autodiff` feature；照
+`reports_pinned_flex_execution` 的写法对 `Device::flex()` 与其
+`.autodiff()` 包装各断言一次 `is_autodiff()`；两种设备为何不能用
+相等性区分，见[「Burn 技术栈」](04-burn-stack.md)「可组合能力」。
 
 </details>
 
@@ -160,14 +189,18 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-见第 2 章对应小节与 `examples/ch02-tensor-basics`。
+以 `examples/ch01-stack-probe` 为模板换用
+[「Burn 技术栈」](04-burn-stack.md)里的其他 Device 工厂方法，前置
+环境见[如何运行本书示例](../running-examples.md)。观察两点：device
+字符串的分派变体，以及 `sync()` 从轻量调用变成真正的等待点。
 
 </details>
 
 
 ## 延伸阅读
 
-以下路径均相对于本书固定版本的源码仓库（如何获取见
+原理与产业背景的论文见附录[参考文献](../references.md#第-1-章-导论)。
+源码阅读入口如下，路径均相对于本书固定版本的源码仓库（如何获取见
 [如何运行本书示例](../running-examples.md) 的「阅读固定源码」）：
 
 - `burn/crates/burn/src/lib.rs`：Burn 能力总览与限制；
@@ -192,7 +225,10 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-回看第 1 章应用与负载小节；范围边界见[范围、证据与对照附录](../appendix-scope-and-evidence.md)。
+卡片四行模板在[「机器学习应用与系统负载」](01-applications-and-loads.md)，
+「进入哪一章」可对照该节的生命周期路径图；哪些字段需要真实 GPU、
+网络或外部系统才能验证，判定口径见
+[范围、证据与对照附录](../appendix-scope-and-evidence.md)。
 
 </details>
 

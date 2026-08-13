@@ -77,7 +77,7 @@ autodiff 自动进入 Fusion。
 
 ## tape 的生命周期
 
-固定源码可以回答“tape 里的步骤何时存在、何时消失”：
+源码可以回答“tape 里的步骤何时存在、何时消失”：
 
 - 前向时，每个需要梯度的算子向 tape 登记一个反向步（`Step`）。`Step`
   契约（`burn-autodiff/src/graph/base.rs`）要求它携带父节点列表和深度，
@@ -101,7 +101,7 @@ $6\ \text{MiB}$；而矩阵乘的反向同时需要两个输入，实际每层�
 还要计入输入激活，总激活内存很容易达到参数本身的数倍。层数或 batch
 翻倍，这部分线性增长。
 
-固定源码中与此对应的机制有两处：
+源码中与此对应的机制有两处：
 
 - `runtime/memory_management.rs` 用引用计数（`NodeRefCount`）跟踪每个
   节点的状态，最后一个消费者完成后即可释放或复用其存储——反向并不
@@ -121,7 +121,7 @@ require-grad 叶子不符合当前 API 约束。
 
 ## `detach` 与 `inner`
 
-- `tensor.detach()` 切断旧图并形成新叶子；固定版本会保留原来的
+- `tensor.detach()` 切断旧图并形成新叶子；实现会保留原来的
   require-grad 意图；
 - autodiff Tensor 的 `inner()` 去除自动微分元数据，返回底层数值 Tensor；
 - `device.inner()` 去除 Device 的 autodiff 包装。
@@ -145,7 +145,7 @@ autodiff tape ──backward──► Gradients
 本章实验只验证梯度数值。参数更新、梯度清理、混合精度和训练循环留到
 第 6 章。
 
-## 固定源码导读
+## 源码导读
 
 想亲自核对本节描述，建议按以下顺序阅读本书固定版本的
 `burn/crates/burn-autodiff/src/`：

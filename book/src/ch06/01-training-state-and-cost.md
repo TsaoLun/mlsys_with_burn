@@ -119,7 +119,7 @@ $$
 ## 对 Burn 的定位
 
 OpenMLSys v1 `overview.md` 和 `methods.md` 使用“切分—并行—合并”的
-分而治之框架。本书保留这个框架，但把它映射到固定 Burn 的明确层次：
+分而治之框架。本书保留这个框架，但把它映射到 Burn 的明确层次：
 
 - 数据进入 batch 的边界在第 5 章 `DataLoader`/`Batcher`；
 - forward/backward 与 `GradientsParams` 属于 autodiff 和 `TrainStep`；

@@ -41,7 +41,7 @@ load 成功不等于服务已经上线。
 module，再调用 `try_load_record`。
 
 这里选择 `try_load_record` 而不是 `load_record`，因为服务启动时应把损坏
-或不匹配的 artifact 变成可报告的错误。固定源码中的 validation 会检查
+或不匹配的 artifact 变成可报告的错误。源码中的 validation 会检查
 shape 和缺失 tensor；生产系统还应在加载前验证 checksum 和版本 metadata。
 
 ## 3. 打开 Burnpack 字节
@@ -72,7 +72,7 @@ tensor data：起点对齐到 256 字节，每个 tensor 的起点也按 256 对
 两个参数总共只有 12 字节（weight 8 + bias 4），但因为每个 tensor 各占
 一段 256 对齐的区域，容器总长是 `256（header+metadata 对齐）+ 256
 （weight）+ 4（bias）= 516` 字节。小 artifact 上对齐开销巨大；参数以
-GB 计时它又可以忽略——这个比例本身就说明格式在为谁优化。固定源码还
+GB 计时它又可以忽略——这个比例本身就说明格式在为谁优化。源码还
 内置了防滥用的上限（metadata ≤ 100 MB、tensor 数 ≤ 100 000、CBOR 递归
 ≤ 128 层），加载不可信文件时这些上限就是第一道防线。
 
@@ -100,7 +100,7 @@ record_tensors=2 output_shape=[3, 1] max_abs_error=0.000000e0
 burnpack magic=NRUB version=1 metadata_bytes=133 data_section_start=256 total_bytes=516
 ```
 
-小数形式可能随 backend 变化；`metadata_bytes` 与 `total_bytes` 由固定
+小数形式可能随 backend 变化；`metadata_bytes` 与 `total_bytes` 由当前
 版本的 CBOR 字段决定，升级版本线时应重新核对。请抓住“参数数目、shape、
 误差边界和头部契约”，不要把 bytes 长度当成性能结论。
 

@@ -23,7 +23,7 @@ DataLoader 或用户实现的职责。
 {{#include ../../../examples/ch05-data-pipeline/src/lib.rs:batcher}}
 ```
 
-固定 Burn 源码中的 `HousingBatcher`、MNIST batcher 等示例会在同一位置
+Burn 源码中的 `HousingBatcher`、MNIST batcher 等示例会在同一位置
 构造 `Tensor`。因此“数据何时成为 Tensor”不是 Dataset trait 的要求，
 而是应用选择的边界。
 

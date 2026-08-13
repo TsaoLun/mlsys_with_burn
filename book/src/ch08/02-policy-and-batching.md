@@ -4,7 +4,7 @@
 
 一个 policy 可以表示动作分布、确定性函数、带探索的包装器，甚至一个
 调用远端 inference 服务的客户端。它不等于 DQN、PPO 或某种损失函数。
-固定 `burn-rl` 的 `Policy` trait 把最小职责拆成：
+`burn-rl` 的 `Policy` trait 把最小职责拆成：
 
 ```text
 forward(observation batch) → action distribution
@@ -57,7 +57,7 @@ Burn 的 `Policy` 使用关联类型定义 `Observation`、`ActionDistribution`�
 `Batchable` 时必须把“第 0 维是样本维”写进测试，而不能只依赖一次
 `cat` 恰好成功。
 
-`PolicyInferenceServer`/`AsyncPolicy` 在固定源码中利用这个接口做进程内
+`PolicyInferenceServer`/`AsyncPolicy` 在源码中利用这个接口做进程内
 自动 batching：请求先经 mpsc channel 进入 server，server 收集到足够
 请求后调用一次 `action` 或 `forward`，再把结果按请求顺序发送回去。
 活跃 agent 数小于最大 batch 时，server 也有 flush 路径，避免最后几个
@@ -84,7 +84,7 @@ steps/s 和 p95/p99，而不是只看一次 forward 的平均时间。
 epsilon schedule 的 step、normalizer、recurrent hidden state 或 target
 network 是否保存，则由应用的 `PolicyState` 决定。
 
-固定 `burn-rl::AsyncPolicy::load_record` 直接标记为未实现，并要求先在
+`burn-rl::AsyncPolicy::load_record` 直接标记为未实现，并要求先在
 inner policy 上加载 record，再创建 async wrapper。这是一个有用的边界：
 线程化 inference wrapper 不应该偷偷决定模型恢复协议。启动服务或
 训练进程时，先完成 topology/config/record 的兼容性检查，再把可运行
