@@ -1,6 +1,8 @@
 # 来源与改编总录
 
-本附录汇总各章对 OpenMLSys v1 的文件级改编说明。正文练习页只保留一句指针。许可见[许可、来源与独立性声明](attribution.md)；逐文件总账见[范围、证据与对照](appendix-scope-and-evidence.md)。
+本附录汇总各章对 OpenMLSys v1 的文件级改编说明。正文练习页只保留一句指针。逐文件总账见[范围、证据与对照](appendix-scope-and-evidence.md)。
+
+许可统一声明一次：OpenMLSys 原作及各章改编正文采用 CC BY-NC-SA 4.0，本书新增的 Rust 示例与实验代码采用 MIT OR Apache-2.0；完整署名见[许可、来源与独立性声明](attribution.md)和仓库根目录 `NOTICE.md`。
 
 ## 第 1 章
 
@@ -24,13 +26,11 @@
 - 新增固定源码快照方法、实验与练习。
 
 本章没有复用 OpenMLSys 的 `framework-architecture.png` 和
-`system-ecosystem.png` 图面；文本架构图是基于通用分层思想重新设计，并与
-第 2、4 章与[术语表](glossary.md)使用同一套层名。
+`system-ecosystem.png` 图面；本书的系统分层图（`ch01-system-layers.svg`
+等）基于通用分层思想重新绘制，并与第 2、4 章与
+[术语表](glossary.md)使用同一套层名。
 
 未迁入：原书以 Python/MindSpore/Ascend 为默认栈的图示与生态叙述。
-
-OpenMLSys 原作及本章改编正文采用 CC BY-NC-SA 4.0。完整署名与许可证见
-本书的“许可、来源与独立性声明”和仓库根目录 `NOTICE.md`。
 
 ## 第 2 章
 
@@ -76,8 +76,7 @@ OpenMLSys 原作及本章改编正文采用 CC BY-NC-SA 4.0。完整署名与许
 Rust 类型分工和全部可运行示例。
 
 本章没有复制 OpenMLSys 图面。完整逐文件映射见
-[范围、证据与对照附录](appendix-scope-and-evidence.md)。OpenMLSys 原作和本章改编正文采用
-CC BY-NC-SA 4.0，原创 Rust 示例采用 MIT OR Apache-2.0。
+[范围、证据与对照附录](appendix-scope-and-evidence.md)。
 
 ## 第 3 章
 
@@ -105,8 +104,6 @@ unsafe 合约、CubeK 分层、Burn 集成、fallback、autotune，以及 host �
 OpenMLSys v2 固定版本只列出 GPU/CUDA/Triton/CUTLASS TODO，没有可迁移
 正文。完整逐文件与源码事实映射见
 [范围、证据与对照附录](appendix-scope-and-evidence.md)。
-OpenMLSys 原作和改编正文采用 CC BY-NC-SA 4.0，原创 Rust 示例采用
-MIT OR Apache-2.0。
 
 ## 第 4 章
 
@@ -150,14 +147,12 @@ CubeCL lowering/JIT/stream 内容，以及常量传播→DCE 手推、生命周�
 未迁入：MindSpore Graph Kernel / SOMAS 实现细节、Ascend task 下沉、长
 TVM schedule 教程（仅延伸阅读对照）。
 
-Rust 实验参考固定 Burn `fusion_shape.rs` 的 add→exp 与同步切分回归模式，
+Rust 实验参考 Burn `fusion_shape.rs` 的 add→exp 与同步切分回归模式，
 重新设计了独立 Stream、可传播错误、稳定 summary、教学输出和双重结构/数值
 断言。
 
 完整逐文件和固定源码映射见
 [范围、证据与对照附录](appendix-scope-and-evidence.md)。
-OpenMLSys 原作和改编正文采用 CC BY-NC-SA 4.0，原创 Rust 示例采用
-MIT OR Apache-2.0。
 
 ## 第 5 章
 
@@ -184,8 +179,7 @@ OpenMLSys v2 固定版本的第 5 章仍是 TODO；本章依据 v1 中文文件�
 图片或 MindSpore/PyTorch/C++ 示例，结构关系使用原创文本图。
 
 完整逐文件映射、固定 Burn 源码定位和不作出的能力承诺见
-[范围、证据与对照附录](appendix-scope-and-evidence.md)。OpenMLSys 原作和本章改编正文采用
-CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
+[范围、证据与对照附录](appendix-scope-and-evidence.md)。
 
 ## 第 6 章
 
@@ -200,15 +194,14 @@ CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
 - `collective.md`：保留集合通信算子、$\alpha+\beta l$ 成本和梯度平均，
   以 `DistributedContext`、backend `all_reduce` 和同步边界重写；
 - `parameter_servers.md`：保留同步/异步、straggler、热点和副本一致性，
-  明确固定 Burn 没有对应的 `burn-train` strategy；
+  明确 Burn 没有对应的 `burn-train` strategy；
 - `cluster.md`：保留通信层次和带宽瓶颈，将调度、遥测、容错后移第 9 章；
 - `summary.md`：重写为经过源码核验的能力清单。
 
 没有复制 OpenMLSys 的 MindSpore、TensorFlow、PyTorch、Gloo、NCCL 代码或
 章节图片；跨系统代码只在解释接口边界时以文字提及。完整逐文件核验、
 Burn 版本定位和未承诺能力见
-[范围、证据与对照附录](appendix-scope-and-evidence.md)。OpenMLSys 改编正文采用
-CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
+[范围、证据与对照附录](appendix-scope-and-evidence.md)。
 
 ## 第 7 章
 
@@ -217,7 +210,7 @@ CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
 - `index.md`：保留训练到部署的主问题和学习目标，改为 artifact/runtime/
   service/policy 四层路线；
 - `model_deployment_introduction.md`：保留转换、常量折叠、融合、数据
-  排布和安全的系统动机，删除未经固定 Burn 验证的厂商实现结论；
+  排布和安全的系统动机，删除未在 Burn 源码中核验过的厂商实现结论；
 - `model_converter_and_optimizer.md`：保留 ONNX 图/算子映射和离线优化，
   以 `ModelGen`、`BurnGraph`、Rust codegen 和 Burnpack 重写；
 - `model_compression.md`：保留 PTQ/QAT、稀疏、剪枝和蒸馏的原理，明确
@@ -230,8 +223,7 @@ CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
 
 没有复制 OpenMLSys 的 MindSpore/PyTorch/ARM 汇编代码、图片或 Mate30
 性能数字。完整 revision 关系、逐文件核验和不作出的能力承诺见
-[范围、证据与对照附录](appendix-scope-and-evidence.md)。本书把 burn-onnx 与当前 workspace 的 Burn 版本分开验证，避免混用未对齐依赖。OpenMLSys 改编正文采用 CC BY-NC-SA 4.0；新增 Rust
-示例采用 MIT OR Apache-2.0。
+[范围、证据与对照附录](appendix-scope-and-evidence.md)。本书把 burn-onnx 与当前 workspace 的 Burn 版本分开验证，避免混用未对齐依赖。
 
 ## 第 8 章
 
@@ -247,17 +239,15 @@ CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT OR Apache-2.0。
   online/offline 和多环境采样，改为 `burn-rl` traits、`TransitionBuffer`
   和 `burn-train` off-policy pipeline；
 - `marl.md`：保留联合动作、奖励向量、合作/竞争/self-play 与非平稳性，
-  明确固定 Burn 当前没有通用 MARL API；
+  明确 Burn 当前没有通用 MARL API；
 - `marl_sys.md`：保留 Actor/Learner、league、模型评估/选择和 inference
   server 的系统问题，改为能力边界与未来协议，而不是现成 Burn runtime；
 - `summary.md`：重写为采样吞吐、设备协同、checkpoint 和可复现性的核验
   清单。
 
 没有复制 OpenMLSys 的图、框架专用代码、外部 simulator 或硬件性能数字。
-[范围、证据与对照附录](appendix-scope-and-evidence.md) 记录逐文件来源、固定 Burn 路径和
+[范围、证据与对照附录](appendix-scope-and-evidence.md) 记录逐文件来源、Burn 源码路径和
 实验范围。本章实验停在确定性环境与 replay/TD，不扩展成完整 DQN/MARL。
-OpenMLSys 改编正文采用 CC BY-NC-SA 4.0；新增 Rust 示例采用 MIT
-OR Apache-2.0。
 
 ## 第 9 章
 
@@ -271,5 +261,4 @@ OR Apache-2.0。
 问题，重写为“workload card → control plane → collective data plane →
 device runtime”的路线。Burn 部分改为固定源码证据和限制清单；没有把
 `ExecutionStrategy`、`DistributedContext` 或 `ComputeClient` 称为集群
-调度器。实验和新增 Rust 代码采用 MIT OR Apache-2.0；正文采用
-CC BY-NC-SA 4.0。
+调度器。

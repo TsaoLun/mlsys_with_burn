@@ -79,12 +79,6 @@ autodiff tape：宿主循环展开为多次算子调用，每次调用产生新�
 
 在本版中至少要区分（与第 1、4 章地图同一套名字）：
 
-```text
-autodiff tape          反向依赖与中间值     ← 本章
-Burn IR / Fusion 计划  子图搜索与执行块     ← 第 4 章
-device graph capture   设备命令重放         ← 第 4 章（按 Runtime）
-```
-
 ![autodiff tape 与 Fusion IR：目的、节点与生命周期不同，不能混称一张「Burn 计算图」](../img/ch02-tape-vs-fusion.svg)
 
 | 表示 | 目的 | 本书位置 |

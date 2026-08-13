@@ -40,16 +40,22 @@ cargo test -p ch01-stack-probe --locked --offline
 | 示例 crate | 对应章节 | 观察什么 |
 |---|---|---|
 | `ch01-stack-probe` | 第 1 章 | Device → Backend → Tensor 的执行栈路径 |
+| `ch02-mini-autodiff` | 第 2 章 | 一百行反向模式 tape：拓扑序、梯度累加、分支与 detach |
 | `ch02-tensor-basics` | 第 2 章 | 广播、Module 参数统计、autodiff 梯度 |
 | `ch03-cubecl-kernel` | 第 3 章 | 在 CPU 上运行 CubeCL Kernel，并对照主机参考实现（host reference） |
+| `ch03-gemm-ladder` | 第 3 章 | 纯 Rust 分块 GEMM 语义验证；可选 `wgpu` 实测朴素/tiled 差距 |
 | `ch03-tile-loads` | 第 3 章 | tile 加载计数与算术强度模型 |
 | `ch04-fusion-inspector` | 第 4 章 | Fusion 执行计划、数值等价与同步边界 |
+| `ch04-mini-pass-pipeline` | 第 4 章 | 亲手写常量折叠/DCE/CSE，含浮点非法变换反例 |
 | `ch05-data-pipeline` | 第 5 章 | 数据守恒、固定 seed、多 worker 边界 |
 | `ch06-training-loop` | 第 6 章 | CPU autodiff 训练循环、loss 下降 |
+| `ch07-ptq-calibration` | 第 7 章 | PTQ 校准交易：min-max vs 百分位、per-channel、int8 GEMM |
 | `ch07-record-roundtrip` | 第 7 章 | ModuleRecord/Burnpack 参数往返保存与恢复 |
+| `ch07-serving-queue-sim` | 第 7 章 | 静态批 vs 连续批处理、KV 预算约束的虚拟时间队列模型 |
 | `ch08-rl-rollout` | 第 8 章 | 确定性环境 rollout、replay、表格 TD 更新 |
 | `ch09-cluster-simulator` | 第 9 章 | 集群调度与故障的确定性虚拟时间模拟 |
 | `ch05-ch07-capstone` | [综合实验](capstone.md) | Dataset → 训练 → Record → 推理的端到端路径 |
+| `ch02-ch04-op-anatomy` | [算子解剖](op-anatomy.md) | tanh 逐层源码事实的数值断言（前向/反向/组合） |
 
 ## 运行某个示例
 
@@ -86,6 +92,7 @@ git -C burn checkout 976aa9c5ec1d2dd3412710f99759e3c44bdff03d
 | 路径 | 何时用 | 入口命令（摘要） |
 |---|---|---|
 | `wgpu` | 有图形驱动，巩固第 3 章同一 Kernel | `cargo test -p ch03-cubecl-kernel --features wgpu --locked` |
+| `wgpu`（GEMM 阶梯） | 想实测共享内存 tile 的差距 | `cargo run -p ch03-gemm-ladder --features wgpu --release --locked` |
 | ONNX 对照 | 阅读 burn-onnx 边界（依赖版本与本书示例不同） | 独立环境；不要混进本书默认示例依赖 |
 | CUDA / 集合通信 | 本机驱动与固定源码均允许时 | 先读第 3/6/9 章源码入口，再自建实验 |
 

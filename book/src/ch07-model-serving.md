@@ -8,8 +8,7 @@
 
 ## 本章问题
 
-训练产物如何转换、验证、优化并部署到服务器、浏览器或受限设备？固定 Burn
-快照中的 `ModuleRecord`、`burn-onnx`、Remote 和 WASM/no_std 分别解决哪一
+训练产物如何转换、验证、优化并部署到服务器、浏览器或受限设备？本书固定快照中的 `ModuleRecord`、`burn-onnx`、Remote 和 WASM/no_std 分别解决哪一
 段问题，又没有解决什么？
 
 ## 学习目标

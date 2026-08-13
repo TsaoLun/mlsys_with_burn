@@ -97,6 +97,7 @@
 # 贯穿实验
 
 - [综合实验：数据到推理](capstone.md)
+- [算子解剖：tanh 的完整一生](op-anatomy.md)
 
 # 附录
 

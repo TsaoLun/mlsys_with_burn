@@ -22,6 +22,60 @@ fn inner<F: Float>(value: F) -> F {
 `#[comptime]` 参数在 Kernel 构造期已知，可用于选择算法、展开循环或固定
 tile。这样能产生特化代码，也可能增加编译数量；它不是普通运行时标量。
 
+### 宏在替你写什么
+
+对本章 GEMM 阶梯实验的 `gemm_naive_kernel` 运行 `cargo expand`，可以
+看到 `#[cube(launch_unchecked)]` 生成了三样东西（本书固定版本，
+节选并简化）：
+
+**第一，展开函数**：与原函数同名的模块里出现一个 `expand`，签名中
+每个类型都换成了它的 `ExpandType`，函数体不再计算数值，而是向
+`Scope` 里**登记 IR**——`row * k + i` 变成一串
+`__expand_mul_method`/`__expand_add_method` 调用：
+
+```rust,ignore
+mod gemm_naive_kernel {
+    pub fn expand<F: Float>(
+        scope: &cubecl::prelude::Scope,
+        a: &<[F] as CubeType>::ExpandType,
+        // …每个参数都是 ExpandType…
+    ) { /* __expand_* 调用链，把表达式写进 scope */ }
+}
+```
+
+这解释了第 1 节的论断：`#[cube]` 函数在 host 上"执行"一次的产物是
+IR，不是结果。也解释了为什么循环里的 Rust `if`/泛型/`#[comptime]`
+能自然工作——它们在展开期就是普通 Rust 控制流，走过哪条分支，哪条
+分支的 IR 才被登记（与第 2 章 tape 只记录执行路径同构）。
+
+**第二，Kernel 类型**：`struct GemmNaiveKernel<F, R>` 实现
+`CubeKernel`，它的 `define()` 创建 `KernelBuilder`、注入 Runtime 与
+设备属性、调用上面的 `expand`，产出 `KernelDefinition`：
+
+```rust,ignore
+impl<F: Float, __R: Runtime> CubeKernel for GemmNaiveKernel<F, __R> {
+    fn define(&self) -> KernelDefinition {
+        let mut builder = KernelBuilder::default();
+        builder.runtime_properties(__R::target_properties());
+        builder.device_properties(self.client.properties());
+        // …注册类型与参数，运行 expand，收束成 KernelDefinition
+    }
+}
+```
+
+第 4 章讲的 JIT 编译缓存，键的来源就在这里：设备属性、类型注册与
+comptime 值都参与 `define()`，任何一项变化都是一个新的特化。
+
+**第三，launch 入口**：`pub unsafe fn launch_unchecked(client,
+cube_count, cube_dim, 参数…)` 把 `RuntimeArg` 逐个注册进
+`KernelLauncher` 再提交。实验里调用的那个"函数"，其实是宏写好的
+装配代码。
+
+三件产物对应三个时刻：expand 在 **Kernel 构造期**运行（host 普通
+Rust），define 在**首次编译期**运行（产出 JIT 输入），launch 入口
+在**每次提交时**运行。想亲眼看全文，运行
+`cargo expand -p ch03-gemm-ladder --lib --features wgpu`。
+
 ## 2. Runtime 与 ComputeClient
 
 `Runtime` 关联设备、编译器和计算服务。host 通过

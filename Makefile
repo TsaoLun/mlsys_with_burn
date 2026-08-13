@@ -5,13 +5,19 @@ CARGO_LOCKED = --locked
 CARGO_OFFLINE = --locked --offline
 CPU_EXAMPLES = \
 	ch01-stack-probe \
+	ch02-ch04-op-anatomy \
+	ch02-mini-autodiff \
 	ch02-tensor-basics \
 	ch03-cubecl-kernel \
+	ch03-gemm-ladder \
 	ch03-tile-loads \
 	ch04-fusion-inspector \
+	ch04-mini-pass-pipeline \
 	ch05-data-pipeline \
 	ch06-training-loop \
+	ch07-ptq-calibration \
 	ch07-record-roundtrip \
+	ch07-serving-queue-sim \
 	ch08-rl-rollout \
 	ch09-cluster-simulator
 

@@ -172,8 +172,9 @@
 - Yu et al., *Orca: A Distributed Serving System for
   Transformer-Based Generative Models*, OSDI 2022。
   [usenix.org](https://www.usenix.org/conference/osdi22/presentation/yu)
-  ——continuous batching 的出处；本书第 7 章标注为未覆盖的大模型
-  服务主题，可从这篇开始。
+  ——continuous batching 的出处；第 7 章的队列模拟实验
+  `ch07-serving-queue-sim` 演示的正是这一机制，工程实现可从这篇
+  读起。
 - Kwon et al., *Efficient Memory Management for Large Language Model
   Serving with PagedAttention*, SOSP 2023。
   [arXiv:2309.06180](https://arxiv.org/abs/2309.06180)

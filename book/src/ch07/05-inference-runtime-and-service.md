@@ -121,14 +121,53 @@ Burn 提供 Tensor、Module、Device、backend 和部分 Remote server/client
 生成式 LLM 服务在上述问题之外还有一层自回归（autoregressive）特有的
 系统问题：逐 token 解码使 KV cache 成为主要内存对象，请求长度差异
 极大，需要 continuous batching、paged KV 管理和前缀缓存（prefix
-caching）才能维持吞吐。本书首版不展开这些机制：Burn 主线
-没有现成的 paged attention 或 continuous batching **服务** runtime；
-`burn-onnx` 中 Attention 节点对 `past_k`/`past_v` 张量的图转换，也不
-等于服务端的分页 KV 管理或连续批处理。把它们写成“Burn 能力”会越过
-本书的证据纪律。本节的 artifact、batching、队列和 worker 边界仍然是
-LLM 服务的基础层；KV cache 专题属于规划中的后续版本。想现在就深入
-这些机制，可从附录[参考文献](../references.md#第-7-章-模型服务)中的
-Orca（continuous batching）与 PagedAttention（vLLM）两篇论文开始。
+caching）才能维持吞吐。这两个机制的**原理**可以在下面的队列模型里
+亲手跑出来；但要分清模型与能力：Burn 主线没有现成的 paged attention
+或 continuous batching **服务** runtime；`burn-onnx` 中 Attention
+节点对 `past_k`/`past_v` 张量的图转换，也不等于服务端的分页 KV 管理
+或连续批处理。把它们写成“Burn 能力”会越过本书的证据纪律。完整的
+LLM 专章（训练、投机采样、MoE 等）仍属于规划中的后续版本；工程实现
+可从附录[参考文献](../references.md#第-7-章-模型服务)中的
+Orca（continuous batching）与 PagedAttention（vLLM）两篇论文进入。
+
+### 动手版：连续批处理与 KV 预算的队列模型
+
+`examples/ch07-serving-queue-sim` 用与第 9 章集群模拟器同类的虚拟
+时间协议模型，把「为什么需要 continuous batching」变成三张可复现的
+表。成本模型只有两项：每步固定开销 α 与本步处理 token 数的线性项 β；
+KV 预算限制同时驻留的序列（按 prompt + decode 预留）：
+
+```rust,ignore
+{{#include ../../../examples/ch07-serving-queue-sim/src/lib.rs:model}}
+```
+
+对 64 条混合长度请求（prompt 32–512、decode 16–256），运行
+`cargo run -p ch07-serving-queue-sim --locked`：
+
+```text
+          调度       平均 ms      p95 ms      总时长 ms     tok/s      空转槽步
+      静态批(8)       268.2       459.7       551.5     16992      5646
+       连续批处理        90.0       128.9       206.6     45372         0
+
+对照：decode 长度全部相同时，静态批空转槽步 = 0，平均延迟差距收窄为 1.99 倍
+```
+
+差距的来源被「空转槽步」直接点名：静态批里先完成的序列占着槽位等
+批内最长序列结束，5646 个 token 槽位在空转；长度方差消失时收益也
+随之收窄——continuous batching 的价值来自**长度方差**，不是魔法。
+KV 预算扫描则把「KV cache 决定并发」变成单调曲线：
+
+```text
+    预算 tok      总时长 ms       tok/s      峰值驻留 tok
+      2048       616.2       15210          2044
+      8192       260.6       35969          8188
+     32768       179.6       52195         27158
+```
+
+两点刻意简化必须记住：prefill 在接纳步一次完成（真实系统有 chunked
+prefill，长 prompt 会被切片以免拖慢整步）；KV 按 prompt+decode 全额
+预留，没有 vLLM 式的分页与抢占。模型解释机制方向，不预测任何真实
+runtime 的数字。
 
 ## 产业对照（概念对齐，不是性能对等）
 
@@ -150,6 +189,5 @@ Orca（continuous batching）与 PagedAttention（vLLM）两篇论文开始。
 - **load test**：并发、batch、queue delay、p95/p99 和错误率；
 - **recovery test**：模型 reload、worker 重启和 backend error。
 
-本章的 CPU 实验只覆盖第一层以及一次小型 numerical test。它没有伪装
-成服务 load test，下一节也不会通过启动远端 server 来掩盖网络环境和
-设备前提。
+本章的 CPU 实验只覆盖第一层以及一次小型 numerical test。load test 与
+远端 server 依赖真实网络和设备环境，不在默认路径。

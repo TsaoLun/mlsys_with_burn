@@ -130,20 +130,24 @@ $$
 CMMA/MMA 类指令一次处理固定 shape 的 fragment，并要求特定 dtype 与布局。
 高性能 GEMM 因而需要在全局 tile、共享 stage、unit/plane tile 与矩阵
 fragment 之间转换。CubeK 的 component、routine 和 blueprint 正是为组合
-这些层次而设计。
+这些层次而设计——本阶梯的每一级在那里都是显式的类型，见
+[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)的「第七层」小节。
 
-## 6. 本章实验停在哪一步
+## 6. 本章实验走到哪一步
 
-本章有两类实验，职责不同：
+本章有三类实验，职责不同：
 
 | 实验 | 验证什么 | 不验证什么 |
 |---|---|---|
 | `scale_kernel`（`ch03-cubecl-kernel`） | `#[cube]`、拓扑、raw BufferArg、unchecked launch、CPU/可选 WGPU 正确性 | tiling、共享内存、GEMM 性能 |
 | `tile_load_counts`（`ch03-tile-loads`） | 朴素与 tiled 全局加载次数的数量级差异 | 真实 cube 共享内存、同步或带宽 |
+| GEMM 阶梯（`ch03-gemm-ladder`，可选 `wgpu`） | 阶梯第 1、2 级的真实 Kernel：共享内存 tile 的正确性与本机相对耗时 | 跨设备性能、向量化、双缓冲、矩阵指令、autotune |
 
-也就是说：优化阶梯 1–5 节是概念地图；可执行最小步目前是“用加载计数理解
-tiling 为何减少全局读”，而不是在 CubeCL 里重写完整共享内存 GEMM。真正的
-共享内存 Kernel 与 CubeK 策略对照留给练习和后续扩展。
+默认路径的最小步是“用加载计数理解 tiling 为何减少全局读”，任何
+机器都能跑；有图形驱动的读者可以再进一步，用可选 GEMM 阶梯实验把
+第 2 级真正跑起来并测出差距（见实验节第 8 节）。阶梯第 3–5 级
+（thread tile、双缓冲、矩阵指令）与 CubeK 策略对照仍留给练习和
+后续扩展。
 
 ## 7. 评价一个实现
 

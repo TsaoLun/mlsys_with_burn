@@ -10,12 +10,9 @@
 固定 Burn 快照提供单设备、本机多设备和 DDP 的不同入口。`MultiDevice`
 在一个进程内切分 loader 并聚合多设备梯度；DDP 为每个本地设备启动 worker，
 通过 backend `DistributedOps` 进行梯度 collective，并要求用户在每个节点
-启动且保持配置一致。Flex CPU 没有 collective 实现，所以本章实验只验证
-CPU 单设备训练循环。
-
-参数服务器、流水线并行、跨节点故障恢复、集群调度和网络性能仍是系统
-设计主题，而不是本版中已经由 `burn-train` 实现并被本章实验验证
-的功能。
+启动且保持配置一致。DDP 入口之外还差哪几层才是完整的分布式训练系统，见
+[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)中
+「DDP 的范围与参与责任」的分工表。
 
 ## 练习
 

@@ -56,6 +56,11 @@
 |---|---|---|---|
 | artifact 清单 | artifact manifest | version/payload length/checksum 等元数据 | [第 7 章](ch07-model-serving.md) |
 | 动态批处理 | dynamic batching | 同 shape 请求按容量成批 | [第 7 章](ch07-model-serving.md) |
+| 训练后量化 | post-training quantization, PTQ | 训练后用校准集确定量化参数，不改训练过程 | [第 7 章](ch07-model-serving.md) |
+| 校准 | calibration | 用代表性数据估计张量数值范围，决定 scale/zero-point | [第 7 章](ch07-model-serving.md) |
+| 量化参数 | scale / zero-point | 浮点区间到整数网格的仿射映射参数 | [第 7 章](ch07-model-serving.md) |
+| 连续批处理 | continuous batching | 逐 token 调度：请求完成即退出、新请求随时并入 batch | [第 7 章](ch07-model-serving.md) |
+| KV 缓存 | KV cache | 生成式推理保存注意力键值以免重算；容量构成 KV 预算 | [第 7 章](ch07-model-serving.md) |
 | 终止语义 | `done` / `truncated` | 自然终止与外部/时间截断，bootstrap 语义不同 | [第 8 章](ch08-rl-systems.md) |
 | 策略关系 | behavior / target policy | $\mu$ 采样、$\pi$ 学习；on/off-policy 的区分依据 | [第 8 章](ch08-rl-systems.md) |
 | 策略新鲜度 | policy freshness | behavior/target 的版本差 | [第 8 章](ch08-rl-systems.md) |

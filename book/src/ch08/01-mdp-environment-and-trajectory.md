@@ -72,7 +72,7 @@ $\gamma$ 因而同时决定算法要看多远、轨迹要存多长、价值估�
 
 二者在 bootstrap 时可能有不同含义。自然 terminal 通常不再使用
 $\max\_a Q(s',a)$；时间截断是否 bootstrap 则取决于算法和环境协议。如果
-系统把两个标志过早合并，就失去了之后修正这个选择的机会。固定 Burn
+系统把两个标志过早合并，就失去了之后修正这个选择的机会。Burn
 训练 runner 在写入 replay transition 时将它们合并为 `done` tensor，
 所以环境 adapter 仍应保留原始字段并在文档中写清楚这一损失。
 

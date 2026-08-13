@@ -100,17 +100,7 @@ shape、dtype 与偏移元数据。
 （`DispatchDevice`）；张量经分派桥（`BridgeTensor` → Dispatch）到达具体
 后端——桥接层负责路由，不另定一套数学语义：
 
-```text
-Tensor<D, K>
-    │ BridgeTensor
-    ▼
-Dispatch + DispatchDevice
-    ├── Flex
-    ├── CUDA / WGPU / ROCm
-    ├── LibTorch / NdArray
-    ├── Remote
-    └── Autodiff(内部设备)
-```
+![Tensor 经 BridgeTensor 与 Dispatch/DispatchDevice 分派到 Flex、CubeCL 后端、LibTorch/NdArray、Remote 或 Autodiff 变体（与第 1 章为同一张图）](../img/ch01-dispatch-tree.svg)
 
 Cargo feature 决定哪些分派变体被编译进程序，Device 工厂方法选择其中一个
 实例。教材默认使用 `Device::flex()`（纯 Rust eager CPU，不走

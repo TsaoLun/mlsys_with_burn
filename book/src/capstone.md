@@ -25,7 +25,7 @@
 3. `items_processed`、batch 数、loss、参数变化和所有浮点输出有限；
 4. 训练后 loss 低于同一初始模型在第一次更新前的 loss；
 5. record tensor 数、恢复后输出 shape 和最大绝对误差；
-6. 将 record 加载到错误 topology 时，固定 Burn 返回
+6. 将 record 加载到错误 topology 时，Burn 返回
    `RecordError::Validation`，而不是静默截断或“看起来能运行”。
 
 这里的 `initial_loss` 和 `final_loss` 都是同一组训练参数在训练集上的

@@ -105,7 +105,7 @@ cache 命中只表示某一层结果可复用，不表示设备 module 已加载
 
 ## 6. 可以观察什么
 
-固定 API 允许在 host 上：
+CubeCL API 允许在 host 上：
 
 - 调用宏生成的 expand 构造 Scope；
 - 格式化 Scope；

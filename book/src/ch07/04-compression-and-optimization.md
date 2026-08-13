@@ -81,6 +81,37 @@ $28\ \text{GB}$ 降到约 $7\ \text{GB}$，int4 再到约 $3.5\ \text{GB}$；但
 版本、范围统计和误差阈值必须成为 artifact metadata，否则同一权重的
 量化结果不可复查。
 
+### 动手验证：可运行的校准实验
+
+上面的演算在 `examples/ch07-ptq-calibration` 里是可执行代码：int8
+仿射参数、min-max 与百分位校准、per-channel 粒度和一个 i32 累加的
+int8 矩阵乘，全部纯 Rust，运行
+`cargo run -p ch07-ptq-calibration --locked` 即可复现下列数字。参数
+推导与正文公式逐行对应：
+
+```rust,ignore
+{{#include ../../../examples/ch07-ptq-calibration/src/lib.rs:params}}
+```
+
+对 8192 个近正态样本注入 1% 的 ±80 离群值后，两种校准策略给出一笔
+明码标价的交易：
+
+```text
+  min-max  scale=0.62745  主体 MSE=0.03350717  整体 MSE=0.03416
+  p99.5    scale=0.02797  主体 MSE=0.00006506  整体 MSE=58.47926
+```
+
+百分位校准把主体分辨率提高约 500 倍（scale 缩小 22 倍），代价是被
+裁剪的离群值让**整体** MSE 反而劣化三个数量级。单看整体 MSE 会选
+min-max，单看主体会选百分位——校准指标必须与任务对齐：注意力 logits
+这类离群值携带信息的场景不能随便裁剪，而多数卷积激活可以。粒度的
+收益同样要按通道看：两行动态范围差 100 倍的权重里，per-tensor 让
+窄行 MSE 停在 `3.2e-5`，per-channel 把它压到 `4.3e-9`——差距全部
+来自被宽行拖大的 scale。实验的测试还断言了 round-trip 误差的半步
+上界、实数 0 的精确表示（zero-point 的存在意义）和 int8 GEMM 相对
+f32 参考的误差上界。这些都是协议层演算，不代表任何低精度 backend
+的执行路径。
+
 Burn 的 crate 文档明确写出：当前不支持 QAT，部分 backend 在
 开发中的 PTQ 路径支持有限的低精度表示。这个事实不能外推为“任意
 `burn-onnx` 模型都能自动完成量化”。`burn-onnx` 中存在量化相关 ONNX
@@ -159,6 +190,9 @@ reference model + fixed inputs
 保存校准集版本或摘要。一个在 CPU Flex 上变快的结果不能自动外推到
 WebGPU、CUDA 或嵌入式目标。
 
-本章默认示例没有量化 benchmark：优先把 Record artifact 的恢复语义写清楚。
-压缩方案适合作为练习或后续扩展；在缺少目标 backend 和 reference 数据时，
-不要把它写成已经验证的部署能力。
+本章的两个默认实验各管一段：`ch07-record-roundtrip` 把 Record
+artifact 的恢复语义写清楚，`ch07-ptq-calibration` 把校准与误差的
+**协议层**（scale/zero-point、粒度、离群值交易、int8 累加误差）变成
+可复现数字。仍然缺席的是低精度 backend 上的延迟/内存 benchmark——
+在缺少目标 backend 和 reference 数据时，不要把协议层结论写成已经
+验证的部署能力。

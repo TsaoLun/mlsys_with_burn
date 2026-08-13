@@ -916,6 +916,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch02-ch04-op-anatomy"
+version = "0.1.0"
+dependencies = [
+ "burn",
+]
+
+[[package]]
+name = "ch02-mini-autodiff"
+version = "0.1.0"
+
+[[package]]
 name = "ch02-tensor-basics"
 version = "0.1.0"
 dependencies = [
@@ -924,6 +935,13 @@ dependencies = [
 
 [[package]]
 name = "ch03-cubecl-kernel"
+version = "0.1.0"
+dependencies = [
+ "cubecl",
+]
+
+[[package]]
+name = "ch03-gemm-ladder"
 version = "0.1.0"
 dependencies = [
  "cubecl",
@@ -940,6 +958,10 @@ dependencies = [
  "burn",
  "burn-fusion",
 ]
+
+[[package]]
+name = "ch04-mini-pass-pipeline"
+version = "0.1.0"
 
 [[package]]
 name = "ch05-ch07-capstone"
@@ -963,11 +985,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch07-ptq-calibration"
+version = "0.1.0"
+
+[[package]]
 name = "ch07-record-roundtrip"
 version = "0.1.0"
 dependencies = [
  "burn",
 ]
+
+[[package]]
+name = "ch07-serving-queue-sim"
+version = "0.1.0"
 
 [[package]]
 name = "ch08-rl-rollout"

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="330" viewBox="0 0 720 330" role="img" aria-label="Tensor 操作经 bridge 与 dispatch 到达各后端">
+  <style>
+    .box { fill:#f7f7f5; stroke:#2c2c2c; stroke-width:1.5; }
+    .box2 { fill:#eef3f8; stroke:#2c2c2c; stroke-width:1.5; }
+    .box3 { fill:#f3efe8; stroke:#2c2c2c; stroke-width:1.5; }
+    .t { font-family: system-ui, sans-serif; font-size:13px; fill:#1a1a1a; }
+    .h { font-family: system-ui, sans-serif; font-size:14px; font-weight:600; fill:#1a1a1a; }
+    .s { font-family: system-ui, sans-serif; font-size:11px; fill:#444; }
+    .arr { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="24" y="24" width="220" height="44" rx="4"/>
+  <text class="t" x="36" y="50">Tensor 操作（Tensor&lt;D,K&gt;）</text>
+
+  <path class="arr" d="M134 68 V96"/>
+  <rect class="box2" x="24" y="100" width="220" height="44" rx="4"/>
+  <text class="t" x="36" y="120">burn-tensor bridge</text>
+  <text class="s" x="36" y="136">BridgeTensor：只路由，不定义数学语义</text>
+
+  <path class="arr" d="M134 144 V172"/>
+  <rect class="box2" x="24" y="176" width="220" height="44" rx="4"/>
+  <text class="t" x="36" y="196">burn-dispatch::Dispatch</text>
+  <text class="s" x="36" y="212">+ DispatchDevice（feature 决定变体）</text>
+
+  <text class="h" x="330" y="44">后端变体（枚举）</text>
+  <path class="arr" d="M244 198 H310 V80 H326"/>
+  <path class="arr" d="M244 198 H310 V128 H326"/>
+  <path class="arr" d="M244 198 H326"/>
+  <path class="arr" d="M244 198 H310 V246 H326"/>
+  <path class="arr" d="M244 198 H310 V294 H326"/>
+
+  <rect class="box" x="330" y="60" width="360" height="38" rx="4"/>
+  <text class="t" x="342" y="84">Flex —— 纯 Rust eager CPU（本书默认实验）</text>
+  <rect class="box3" x="330" y="108" width="360" height="38" rx="4"/>
+  <text class="t" x="342" y="132">CubeCL 后端 —— CUDA / WGPU / ROCm / CPU</text>
+  <rect class="box" x="330" y="178" width="360" height="38" rx="4"/>
+  <text class="t" x="342" y="202">LibTorch / NdArray</text>
+  <rect class="box" x="330" y="226" width="360" height="38" rx="4"/>
+  <text class="t" x="342" y="250">Remote —— tensor 操作远端执行</text>
+  <rect class="box" x="330" y="274" width="360" height="38" rx="4"/>
+  <text class="t" x="342" y="298">Autodiff —— 包装内部设备，记录反向 tape</text>
+</svg>

@@ -67,6 +67,59 @@ output 也被注册。`BurnGraph::codegen` 最终生成可读的 Rust source，�
 融合仍取决于 Burn feature、backend 和设备运行时。第 4 章讨论的
 capture/register、analysis、lowering 和 device sync 仍然适用于部署推理。
 
+## 一个算子的旅程：Gemm
+
+上面的阶段图落到单个算子上是什么样？以 `Gemm`
+（$Y=\alpha A'B'+\beta C$）为例，按本书 burn-onnx 版本走一遍：
+
+**第 1 站：注册。** `onnx-ir/src/registry.rs` 把每种 ONNX 节点类型
+绑定到一个处理器——算子在词汇表里有名字，解析器才认识它：
+
+```rust,ignore
+// onnx-ir/src/registry.rs
+registry.register(NodeType::Gemm, Box::new(crate::node::gemm::GemmProcessor));
+```
+
+**第 2 站：属性与形状。** `onnx-ir/src/node/gemm.rs` 的
+`GemmProcessor` 提取属性并做类型推断：`GemmConfig { alpha, beta,
+trans_a, trans_b }`，缺省值按 ONNX 规范取 `alpha = 1.0`、
+`beta = 1.0`；`infer_types` 根据输入秩推出输出形状。第 2 节说的
+「算子语义问题」在这里变成具体字段。
+
+**第 3 站：模式识别（图级 lowering）。** `onnx-ir` 的
+node_conversion 阶段会识别特例：`Gemm(alpha=1, beta=1, transB=1)`
+被转换成 Burn 专有的 `Linear` 节点（`MatMul + Add` 序列也会融合成
+它）。`onnx-ir/src/node/linear.rs` 的注释同时记下了一个精细的语义
+问题：Gemm 来源的权重是 `[out_features, in_features]` 布局，需要
+`transpose_weight` 标志，MatMul 来源的不需要——**同名参数在不同
+来源下布局不同**，这正是转换器必须携带元数据的原因。
+
+**第 4 站：代码生成。** 没被特例吸收的一般 Gemm 走
+`burn-onnx/src/burn/node/gemm.rs` 的 `NodeCodegen::forward`，把
+配置拼成 Burn 张量 API 的 Rust token：
+
+```rust,ignore
+// burn-onnx/src/burn/node/gemm.rs（节选）
+let product = quote! { #a.matmul(#b) };            // 必要时先 .transpose()
+// alpha != 1 时： quote! { #product * #alpha }
+// 有 C 时：      quote! { … + (#c) * #beta }
+```
+
+生成的不是对 ONNX 的解释执行，而是普通 Rust 源码——这就是第 2 节
+「转换期做重活、运行时只剩 Burn API 调用」的含义。被识别成
+`Linear` 的那一支则生成 `nn::Linear` 模块，权重作为 snapshot 进入
+`.bpk`（下一节的装载入口）。
+
+**第 5 站：语义测试。** `onnx-tests/tests/gemm/` 里有一组
+`gemm*.py` 脚本生成的 `.onnx` fixture（含 `gemm_no_c`、
+`gemm_non_unit_alpha_beta` 等变体），Rust 测试把生成模型的输出与
+参考值比对——属性组合的每个分支都有 fixture 盯着。
+
+把 `Gemm` 换成任何算子，五站不变：注册、属性与形状推断、可选的
+模式识别、代码生成、fixture 测试。`SUPPORTED-ONNX-OPS.md` 列出的
+每个「已支持」算子背后都是这样一条链；表里的空档则意味着五站中
+至少缺一站。
+
 ## 生成代码如何加载权重
 
 `BurnGraph::register_burnpack_loaders` 为生成的 `Model` 安排不同入口。

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="330" viewBox="0 0 720 330" role="img" aria-label="从 autodiff tape 到 optimizer 更新的一次训练 step">
+  <style>
+    .box { fill:#f7f7f5; stroke:#2c2c2c; stroke-width:1.5; }
+    .box2 { fill:#eef3f8; stroke:#2c2c2c; stroke-width:1.5; }
+    .box3 { fill:#f3efe8; stroke:#2c2c2c; stroke-width:1.5; }
+    .t { font-family: system-ui, sans-serif; font-size:13px; fill:#1a1a1a; }
+    .s { font-family: system-ui, sans-serif; font-size:11px; fill:#444; }
+    .arr { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="24" y="24" width="200" height="44" rx="4"/>
+  <text class="t" x="36" y="44">Tensor operations</text>
+  <text class="s" x="36" y="60">forward + loss</text>
+
+  <path class="arr" d="M224 46 H288"/>
+  <text class="s" x="230" y="38">register</text>
+
+  <rect class="box2" x="292" y="24" width="180" height="44" rx="4"/>
+  <text class="t" x="304" y="44">autodiff tape</text>
+  <text class="s" x="304" y="60">只记录实际执行的路径</text>
+
+  <path class="arr" d="M472 46 H540"/>
+  <text class="s" x="478" y="38">loss.backward()</text>
+
+  <rect class="box2" x="544" y="24" width="150" height="44" rx="4"/>
+  <text class="t" x="556" y="44">Gradients</text>
+  <text class="s" x="556" y="60">按 NodeId 索引</text>
+
+  <path class="arr" d="M619 68 V116"/>
+  <text class="s" x="430" y="98">from_grads：与 Module 的 ParamId 对齐</text>
+
+  <rect class="box3" x="500" y="120" width="196" height="44" rx="4"/>
+  <text class="t" x="512" y="140">GradientsParams</text>
+  <text class="s" x="512" y="156">梯度与参数逐一配对</text>
+
+  <path class="arr" d="M500 142 H360"/>
+  <rect class="box3" x="164" y="120" width="192" height="44" rx="4"/>
+  <text class="t" x="176" y="140">ModuleOptimizer::step</text>
+  <text class="s" x="176" y="156">lr / weight decay / momentum</text>
+
+  <path class="arr" d="M260 164 V212"/>
+  <rect class="box" x="164" y="216" width="192" height="44" rx="4"/>
+  <text class="t" x="176" y="236">new Module</text>
+  <text class="s" x="176" y="252">所有权被消费，返回新值</text>
+
+  <text class="s" x="24" y="300">backward 只产生梯度容器，不修改参数；参数更新是 optimizer 的职责。</text>
+  <text class="s" x="24" y="318">buffer 是否复用、何时异步执行由 backend 决定；read / sync 才是完成边界。</text>
+</svg>

@@ -109,16 +109,17 @@ GPU 阅读时额外问：梯度字节是否经过 PCIe/NVLink/跨机柜？`sync_
 - 所有节点的 collective configuration 必须匹配；
 - 第一台 device 是 main device，负责 validation 和 UI/event。
 
-这提供了训练策略和后端 collective 的组合点，但没有从源码推出以下能力：
+这提供了训练策略和后端 collective 的组合点。把它放进一个完整的
+分布式训练系统，还差几层——每一层缺口都能反过来解释 DDP 入口的
+设计假设：
 
-- 集群调度、进程发现和认证；
-- 节点故障后的自动重试或 elastic membership；
-- 参数服务器的 push/pull、异步版本或副本共识；
-- pipeline stage 调度、micro-batch 编排和 activation recomputation；
-- 跨节点 checkpoint 原子提交。
-
-这些是系统设计问题，本章按框架无关原理讲解；上面的 DDP 入口并未实现
-它们。
+| 完整系统还需要 | 归属层 | 与 DDP 入口的关系 |
+|---|---|---|
+| 进程发现、认证与作业调度 | 集群控制面（第 9 章） | DDP 假设每个节点已被人启动，configuration 匹配由外部保证 |
+| 节点故障重试与 elastic membership | 控制面 + 通信层 | collective configuration 是静态的，成员变更意味着整组重建 |
+| 参数服务器 push/pull 与异步版本 | 另一种数据面架构 | DDP 走对等 AllReduce，两者是并列选项（见上一节对比） |
+| pipeline stage 调度与 activation recomputation | 训练策略层 | 需要新的切图与调度机制，与数据并行正交 |
+| 跨节点 checkpoint 原子提交 | 存储协议层（第 9 章成本模型） | 单机 checkpointer 不感知其它节点 |
 
 ## 各后端的实现现状
 

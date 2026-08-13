@@ -222,16 +222,19 @@ Tensor 参数」：向量宽度必须与 buffer 布局和元素总数一致；�
 
 </details>
 
-4. 【挑战】实现真实共享内存 tile Kernel，并与 `tile_load_counts` 的理想模型对照。
+4. 【挑战】把 `ch03-gemm-ladder` 的阶梯延伸一级：把 tile 尺寸从 16 改为 8 或
+   32 比较正确性与本机耗时，或让一个 unit 计算 2×2 输出（thread tile）。
 
 <details>
 <summary>提示</summary>
 
-协作骨架按[「GEMM 与优化阶梯」](05-gemm-optimization.md)「Tiling 与
-共享内存」的五步流程写；写入后、读取前的 cube 级同步按
-[「GPU 并行与存储模型」](02-gpu-machine-model.md)的四条正确性条件
-自查。对照时先用可整除尺寸对齐 `tile_load_counts` 的计数——该模型
-自己声明忽略 bank conflict、边界 tile 与缓存，别用它预测耗时。
+tiled Kernel 与计时协议的代码在
+[「实验：CPU 上运行 CubeCL Kernel」](07-cpu-kernel-lab.md)第 8 节；
+tile 尺寸受 max_units_per_cube 与共享内存容量约束（见
+[「GPU 并行与存储模型」](02-gpu-machine-model.md)），thread tile 的
+复用收益对应[「GEMM 与优化阶梯」](05-gemm-optimization.md)
+「Thread tile 与向量化」的 $2mn/(m+n)$。任何改动先通过非整除形状的
+正确性测试，再比较耗时。
 
 </details>
 

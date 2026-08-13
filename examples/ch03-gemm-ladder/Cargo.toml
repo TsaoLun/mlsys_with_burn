@@ -1,0 +1,26 @@
+[package]
+name = "ch03-gemm-ladder"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+# 与 ch03-cubecl-kernel 相同：CubeCL 的低层 launch API 要求调用者自证
+# raw buffer 长度，本 crate 是该章的第二个受控 unsafe 边界。
+[lints.rust]
+unsafe_code = "allow"
+
+[lints.clippy]
+dbg_macro = "deny"
+todo = "warn"
+
+[features]
+# 默认构建完全不依赖 CubeCL（也就不依赖 tracel-llvm 资产），任何机器
+# 都能运行纯 Rust 的正确性与模型测试；wgpu 特性才引入 GPU 路径。
+wgpu = ["dep:cubecl", "cubecl/wgpu"]
+
+[dependencies]
+# 与 pins.toml/workspace 相同的 revision；不启用 `cpu` 特性，避免把
+# cubecl-cpu 的 LLVM 构建依赖带进 wgpu 实验路径。
+cubecl = { git = "https://github.com/tracel-ai/cubecl", rev = "be278a1e76aed881e2cc6b165414ee6103ca4634", default-features = false, features = ["std", "stdlib"], optional = true }

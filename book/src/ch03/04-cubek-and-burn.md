@@ -83,6 +83,33 @@ CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单�
 这也解释了为什么第 4 章的 Pass 思维在 eager 路径上同样存在——它们
 只是写死在代码里的固定变换，而不是可配置的编译器管线。
 
+### 第七层：Routine 内部的四层组件
+
+Routine 生成的完整 matmul 由 `cubek-matmul/src/components/` 的四层
+组件装配而成。每层的职责，源码模块注释写得比任何转述都准：
+
+| 层 | 源码注释（意译） | 对应的机器模型概念 |
+|---|---|---|
+| `batch` | 执行多个独立的 global matmul，处理广播 | 一次 launch 覆盖 batch 维 |
+| `global` | 「把块装进共享内存来完成整条归约；负责数据搬运、边界检查、plane 特化」 | cube 级：全局内存 ↔ 共享内存 |
+| `stage` | 把共享内存中的 stage 分区给各 plane（`PartitionedStageMatmul`） | plane 级：分工与同步 |
+| `tile` | 每变体一套配置的最小乘法单元 | unit/矩阵指令级 |
+
+`tile` 层是五个变体的枚举——`Cmma`、`Mma`、`Register`、`PlaneVec`、
+`Interleaved`——并用 `requires_accelerator()` 区分哪些必须有矩阵
+单元。第 5 节优化阶梯在这里变成了**显式的类型**：阶梯第 1–2 级
+（朴素、共享内存 tile）对应 `global` 层的装载协议加 `tile` 层的
+`Register` 变体；第 5 级（矩阵指令）就是 `Cmma`/`Mma` 变体。本章
+GEMM 阶梯实验手写的 16×16 kernel，本质是把 `global` 装载与
+`Register` tile 压平在一个函数里的极简形态——CubeK 把它们拆成可
+独立替换的组件，才能让同一套装载协议组合五种 tile 后端。
+
+`routines/` 目录（`naive`、`gemm`、`cmma`、`gemv_unit_perpendicular`、
+`cpu_gemm`、`batch` 与 `selector`）负责按问题形状与设备能力选出
+一种装配。到这里，第 2 节的六层调用链有了完整的收尾：API 校验 →
+策略选择 →（可选 autotune，见第 6 节）→ Routine 装配四层组件 →
+CubeCL IR → Runtime 编译执行。
+
 ## 3. 覆盖范围与边界
 
 Burn 会调用 CubeK 的 matmul、implicit-GEMM convolution、

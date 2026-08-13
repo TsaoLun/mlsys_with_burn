@@ -209,7 +209,7 @@ commit；[「Burn 技术栈」](04-burn-stack.md)「训练、状态与模型交�
 - `burn/crates/burn-dispatch/src/device.rs`：运行时分派变体；
 - `cubecl/README.md`：CubeCL 的并行模型、IR 与多后端目标；
 - `cubek/README.md`：CubeK 算法范围；
-- `burn-onnx/SUPPORTED-ONNX-OPS.md`：固定导入器的算子边界。
+- `burn-onnx/SUPPORTED-ONNX-OPS.md`：导入器的算子边界。
 
 在线 Burn Book 可以辅助理解设计动机，但遇到 API 差异时，以本书固定版本
 的源码与示例为准。

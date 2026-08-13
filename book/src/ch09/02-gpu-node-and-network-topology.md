@@ -117,6 +117,8 @@ stream scheduler 负责本地 stream 的 interleave/sequential 策略。
 
 ## 本节小结
 
-拓扑感知放置的核心是把通信域和链路容量写进成本模型。OpenMLSys
-提供了 rack/ToR/Spine 和超额认购的系统动机；Burn/CubeCL 提供
-设备运行时和 collective 的局部入口，但不保存集群拓扑，也不负责放置。
+拓扑感知放置的核心是把通信域和链路容量写进成本模型。链路每往外
+跨一档（节点内互联 → ToR → Spine），可用带宽通常掉一到两个数量级，
+这正是后文放置策略按“同节点 → 同机柜 → 跨机柜”逐级放宽的物理依据。
+集群拓扑的保存与放置决策属于控制面；Burn/CubeCL 在这张图里只提供
+设备运行时和 collective 的数据面入口。

@@ -71,11 +71,22 @@ $(x + y) + z$ 与 $x + (y + z)$ 一般不逐位相等，重排归约顺序会改
   dtype，且生成 Kernel 的资源和同步成本可接受；不满足时回退到
   unfused operation。
 
-这组契约解释了为什么“经典 Pass 名称存在”不等于“固定 Burn 已实现
+这组契约解释了为什么“经典 Pass 名称存在”不等于“Burn 已实现
 该 Pass”。教材可以用中性 IR 说明必要条件，但 Burn Fusion 是否执行
 某个变换仍必须回到 fuser、策略和测试源码核对。
 
-OpenMLSys 对这些 Pass 给出通用介绍。本书保留原理，但不声称固定 Burn
+### 亲手写一个 Pass
+
+上面的契约可以在两百行代码里全部落地：本章配套实验
+`examples/ch04-mini-pass-pipeline` 用一个五算子表达式 IR 实现了
+常量折叠、DCE 和 CSE，每个 Pass 的测试都断言「优化前后输出按位
+一致」；还有一个**故意非法**的 fast-math 消去改写，正是上文
+$(10^{16}+1)-10^{16}$ 反例的可运行版——同一改写在小常量上看似
+无害，换成大常量后 `x = 1` 的结果从 $0$ 变成 $1$，测试用
+`assert_ne!` 把「样例碰巧通过不等于 Pass 合法」钉在代码里。代码
+与运行输出见[实验小节](07-fusion-inspector-lab.md)第 10 节。
+
+OpenMLSys 对这些 Pass 给出通用介绍。本书保留原理，但不声称 Burn
 Fusion 实现了全部传统编译器优化。Burn Fusion 的核心目标是发现可执行的
 融合块和安全顺序，CubeCL 各 Compiler 再运行自己的低层优化。
 

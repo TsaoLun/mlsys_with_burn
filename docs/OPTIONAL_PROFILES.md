@@ -36,6 +36,24 @@ cargo test -p ch03-cubecl-kernel --features wgpu --locked
   5. **不要**把本次结果写成全书 GPU GEMM 或占用率结论。
 - **正文位置**：第 3 章实验小节；多 Runtime 表见 `03-cubecl-programming.md`。
 
+## Profile：`wgpu` GEMM 阶梯（第 3 章）
+
+- **目的**：阶梯第 1、2 级（朴素 vs 共享内存 tiled）的正确性对照与
+  本机相对耗时；`ch03-gemm-ladder` 内置上文测量协议（预热 + 32 次
+  launch + 读回完成边界）。
+- **命令**：
+
+```bash
+cargo test -p ch03-gemm-ladder --features wgpu --locked
+cargo run  -p ch03-gemm-ladder --features wgpu --release --locked
+```
+
+- **前提**：同上；计时请用 `--release`。默认特性不依赖 CubeCL，
+  也就不受 `tracel-llvm` 平台资产影响（Intel macOS 上 cubecl-cpu
+  无法构建时，本 crate 的默认与 wgpu 路径仍可用）。
+- **边界**：输出为单机单次观测，仅用于两级阶梯的相对比较；跨设备
+  结论按上面的测量协议另行记录。
+
 ## Profile：`onnx-fixture`（第 7 章对照）
 
 - **目的**：阅读 `burn-onnx` 固定 revision 的 ONNX→BurnGraph→codegen

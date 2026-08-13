@@ -83,5 +83,5 @@ Burn `ModuleRecord`、`LearningCheckpointer` 和 CubeCL memory pool 解决
 ## 本节小结
 
 多租户系统要同时管理配额、租约、性能隔离、故障隔离和资源碎片。GPU
-总数、Burn 的 device abstraction 和 runtime memory usage 都只是局部
-事实；真正的租户调度需要外部控制面协议。
+总数、device abstraction 和 runtime memory usage 都只是节点内的局部
+事实；把它们聚合成租户视图与租约状态，正是控制面协议的工作。

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="360" viewBox="0 0 720 360" role="img" aria-label="GPU 存储层次：host 内存、device 全局内存、cube 共享内存、unit 私有寄存器">
+  <style>
+    .l1 { fill:#f3efe8; stroke:#2c2c2c; stroke-width:1.5; }
+    .l2 { fill:#f7f7f5; stroke:#2c2c2c; stroke-width:1.5; }
+    .l3 { fill:#eef3f8; stroke:#2c2c2c; stroke-width:1.5; }
+    .l4 { fill:#e8f0ea; stroke:#2c2c2c; stroke-width:1.5; }
+    .t { font-family: system-ui, sans-serif; font-size:13px; fill:#1a1a1a; }
+    .h { font-family: system-ui, sans-serif; font-size:14px; font-weight:600; fill:#1a1a1a; }
+    .s { font-family: system-ui, sans-serif; font-size:11px; fill:#444; }
+    .arr { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
+    </marker>
+  </defs>
+
+  <rect class="l1" x="40" y="24" width="480" height="52" rx="4"/>
+  <text class="h" x="56" y="46">host 内存 / 外部存储</text>
+  <text class="s" x="56" y="66">可见范围：host 或系统 · 跨总线/IO，代价通常最高</text>
+
+  <path class="arr" d="M280 76 V108"/>
+  <text class="s" x="292" y="98">总线或 I/O（通常最贵的一跳）</text>
+
+  <rect class="l2" x="80" y="112" width="440" height="52" rx="4"/>
+  <text class="h" x="96" y="134">device 全局内存</text>
+  <text class="s" x="96" y="154">可见范围：整个 device · 容量大、延迟高，连续访问才易利用带宽</text>
+
+  <path class="arr" d="M280 164 V196"/>
+  <text class="s" x="292" y="186">批量加载连续 tile</text>
+
+  <rect class="l3" x="120" y="200" width="400" height="52" rx="4"/>
+  <text class="h" x="136" y="222">cube 共享内存</text>
+  <text class="s" x="136" y="242">可见范围：同一 cube · 显式协作与 sync_cube，可复用 tile</text>
+
+  <path class="arr" d="M280 252 V284"/>
+
+  <rect class="l4" x="160" y="288" width="360" height="52" rx="4"/>
+  <text class="h" x="176" y="310">unit 私有值 / 寄存器</text>
+  <text class="s" x="176" y="330">可见范围：单个 unit · 容量最小、延迟最低，用量过大降低并发</text>
+
+  <text class="s" x="560" y="46">上：容量更大</text>
+  <text class="s" x="560" y="66">　　延迟更高</text>
+  <text class="s" x="560" y="310">下：容量更小</text>
+  <text class="s" x="560" y="330">　　延迟更低</text>
+</svg>

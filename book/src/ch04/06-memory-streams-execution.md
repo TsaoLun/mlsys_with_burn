@@ -42,7 +42,7 @@ Burn IR 的 `TensorStatus` 提供局部依据：
 
 ## 3. CubeCL 内存池
 
-固定 CubeCL Runtime 包含 sliced、exclusive、persistent 等内存池策略。
+CubeCL Runtime 包含 sliced、exclusive、persistent 等内存池策略。
 池化减少频繁向驱动申请/释放的成本，也会带来碎片、缓存上限和生命周期
 管理问题。
 

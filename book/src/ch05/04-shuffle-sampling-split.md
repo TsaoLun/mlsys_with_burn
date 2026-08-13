@@ -47,7 +47,7 @@ $O(N)$ 排列；若改为复制样本本身（比如每条 1 KiB 的文本），
 
 ## 多设备和 worker 的划分
 
-固定 Burn 提供两个相关但不同的划分点：
+Burn 提供两个相关但不同的划分点：
 
 1. `split_dataloader(dataloader, devices)` 按连续范围切分 loader，最后
    一个分片接收余数，再调用 `to_device`；

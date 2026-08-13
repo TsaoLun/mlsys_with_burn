@@ -38,20 +38,7 @@ Burn 的 `burn-train/src/learner/train_val.rs` 没有假设所有模型都使用
 
 第 2 章已经区分了 autodiff tape 和其他 IR。训练 step 中的具体关系是：
 
-```text
-Tensor operations
-      │ register
-      ▼
-autodiff tape ── loss.backward() ──► Gradients
-                                      │
-                    from_grads + Module ParamId
-                                      ▼
-                              GradientsParams
-                                      │
-                          ModuleOptimizer::step
-                                      ▼
-                              new Module
-```
+![Tensor 操作注册进 autodiff tape，backward 产生 Gradients，from_grads 与 Module 的 ParamId 对齐成 GradientsParams，交给 ModuleOptimizer::step 返回新 Module](../img/ch06-tape-to-optimizer.svg)
 
 `GradientsParams` 把梯度和 module 的 `ParamId` 对齐。它不是“按字段名字
 猜参数”，也不是直接把一组 Tensor 写回任意内存。优化器通过 module mapper

@@ -6,15 +6,6 @@
 
 ![训练态 → Artifact → 校验 → 推理 Device → 服务边界（batch/队列/版本）](../img/ch07-deploy-loop.svg)
 
-```text
-Module（训练态）
-  → ModuleRecord / Burnpack（artifact）
-  → 校验 path/shape/dtype + reference 数值
-  → 选择推理 Device（CPU / WGPU / CUDA…）
-  → forward（无训练 tape）
-  → batch / 队列 / 版本与回滚（服务边界）
-```
-
 **Device 选择不改写 artifact 字节**：同一份 Burnpack 可以加载到不同
 backend，只要 path/shape/dtype 与拓扑匹配。ONNX→Rust codegen→加载是
 独立对照轨（见下一节），不进入本书默认示例的依赖图，也不与主线

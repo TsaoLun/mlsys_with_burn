@@ -36,7 +36,8 @@
 
 ### 第 2 章 编程接口与计算图
 
-- `CPU 可运行验证`：Tensor、Module、autodiff 和分支 tape 实验；
+- `CPU 可运行验证`：Tensor、Module、autodiff、分支 tape 实验，以及
+  无依赖的迷你反向 tape（`ch02-mini-autodiff`）；
 - `源码核验`：`Tensor`/`Device`/`Module`、参数状态与一阶 autodiff；
 - `协议/成本模型`：workflow 输入/输出/状态/错误契约；
 - `可选平台实验`：完整静态图 runtime、device graph capture 与跨设备训练；
@@ -45,16 +46,20 @@
 
 ### 第 3 章 AI 加速器与编程
 
-- `CPU 可运行验证`：CubeCL CPU Kernel、host reference 和 tile load 模型；
+- `CPU 可运行验证`：CubeCL CPU Kernel、host reference、tile load 模型
+  和纯 Rust 分块 GEMM 语义验证（`ch03-gemm-ladder` 默认路径）；
 - `源码核验`：CubeCL/CubeK 的拓扑、buffer、算子与 backend 入口；
 - `协议/成本模型`：GEMM、算术强度和 Roofline 方向；
-- `可选平台实验`：`--features wgpu`（见 `docs/OPTIONAL_PROFILES.md`）、
-  共享内存、真实 GPU GEMM、autotune 性能和厂商设备比较；
+- `可选平台实验`：`--features wgpu`（scale Kernel 与 GEMM 阶梯实测，
+  见 `docs/OPTIONAL_PROFILES.md`）、真实 GPU GEMM 跨设备比较、
+  autotune 性能和厂商设备比较；
 - `未覆盖`：用 CPU 正确性结果替代 GPU 带宽、吞吐或 launch 结论。
 
 ### 第 4 章 AI 编译器与运行时系统
 
-- `CPU 可运行验证`：FusionInspector 的计划结构、数值等价和同步边界；
+- `CPU 可运行验证`：FusionInspector 的计划结构、数值等价和同步边界，
+  以及无依赖的迷你 Pass 流水线（`ch04-mini-pass-pipeline`，含浮点
+  非法变换反例）；
 - `源码核验`：OperationIr、Fusion stream、CubeCL Scope、编译和
   HandleContainer 的生命周期入口；
 - `协议/成本模型`：Pass、lowering、cache 和 launch/read 因果链；
@@ -86,12 +91,14 @@
 
 ### 第 7 章 模型服务
 
-- `CPU 可运行验证`：当前 workspace 的 `ModuleRecord`/Burnpack 参数往返保存与恢复，
-  以及恢复后的 inference；
+- `CPU 可运行验证`：当前 workspace 的 `ModuleRecord`/Burnpack 参数往返保存与恢复、
+  恢复后的 inference，以及纯 Rust 的 PTQ 校准与 int8 GEMM 误差实验
+  （`ch07-ptq-calibration`）；
 - `源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
   WASM/no_std 和当前 workspace 的 artifact 入口；
-- `协议/成本模型`：manifest、checksum、版本、rollback、batch/queue
-  和安全威胁模型；
+- `协议/成本模型`：manifest、checksum、版本、rollback、batch/queue、
+  安全威胁模型，以及连续批处理与 KV 预算的虚拟时间队列模型
+  （`ch07-serving-queue-sim`）；
 - `可选平台实验`：真实 ONNX fixture、服务治理、浏览器/Remote 部署和
   设备性能；
 - `未覆盖`：burn-onnx 旧 revision 与当前 workspace Burn 的端到端混用。
@@ -130,25 +137,30 @@
 - `可选平台实验`：GPU、分布式训练、ONNX fixture 和服务治理；
 - `未覆盖`：把二维回归或 CPU elapsed time 外推成生产性能。
 
+### 算子解剖：tanh 的完整一生
+
+- `CPU 可运行验证`：`ch02-ch04-op-anatomy` 的前向/反向/组合数值断言
+  （API→dispatch→Flex 与 autodiff 反向规则）；
+- `源码核验`：tanh 在 API、契约、dispatch、autodiff、Flex、CubeCL、
+  Fusion、IR、backend-tests 各层的固定源码位置；
+- `可选平台实验`：CubeCL/Fusion 层的实际执行（第 3 章 wgpu 路径与
+  第 4 章 FusionInspector 可部分观察）；
+- `未覆盖`：修改上游源码的演练；GPU 层默认不运行。
+
 ## 第 1 章与 OpenMLSys 导论的对照维度
 
-下列 C/S/R/L/E 维度用于项目对照矩阵，不是读者必读课程。第 1 章正文保留系统地图与实验；此处只归档证据维说明。
-
-
-这一节把本章的地图和 OpenMLSys v1 的导论文件逐项对齐。对照的对象是
-本书固定版本，而不是某个会变化的在线页面：
+这一节把第 1 章的系统地图和 OpenMLSys v1 的导论文件逐项对齐。对照的
+对象是本书固定版本，而不是某个会变化的在线页面：
 
 - 原作的应用、设计目标、架构和生态材料保留为框架无关的系统问题；
 - 本书把实现路径重写为 `Tensor → autodiff → IR/Fusion → Kernel → Runtime`；
 - 第 5–7 章继续把数据、训练、artifact 和推理连接成一个可运行 workflow；
 - 第 9 章补充控制面，但不把 Burn 的训练数据面说成集群 scheduler。
 
+表中五个维度（C/S/R/L/E）的定义见下文
+「对照矩阵的 C/S/R/L/E 字段」：
 
-本节使用本书定义的五个证据维度，不是 OpenMLSys 或 Burn 官方评级：
-C（Correctness，正确性）、S（Source，源码证据）、R（Runnable，可运行性）、
-L（Learning，学习路径）和 E（Engineering，工程可复核性）。
-
-| 维度 | 本章可核验内容 | 不能从本章推出的结论 |
+| 维度 | 第 1 章可核验内容 | 不能从第 1 章推出的结论 |
 |---|---|---|
 | C（正确性） | workload card、系统分层和 Burn/CubeCL/CubeK 职责 | 所有后端能力相同 |
 | S（源码） | 章末源码入口和 OpenMLSys 逐文件对照矩阵 | 最新版本 API |
@@ -166,15 +178,14 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 五个问题：原作讨论什么、当前本书用什么模型、固定源码在哪里、读者能
 运行什么观察、哪些能力和硬件条件不能直接比较。
 
-证据标签统一为：`源码核验`、`CPU 可运行验证`、`协议/成本模型`、
-`可选平台实验`、`未覆盖`。标签是本书的证据层级，不是平台能力对等
-（parity）承诺。
+卡片中的证据标签沿用上文「结论靠什么支撑」的五个定义，是本书的证据
+层级，不是平台能力对等（parity）承诺。
 这些卡片是横向摘要，不替代逐文件对照矩阵（入口见
 下文「逐文件对照矩阵」）；第 1–2 章的
 接口、计算图和编程模型对照仍以对应章节和逐文件对照矩阵为准。下列卡片聚焦第
 3–9 章中最容易把“概念、源码入口、协议模型”误读成“完整运行时”的主题。
 
-## 第 3 章：GEMM 与加速器
+### 第 3 章：GEMM 与加速器
 
 - **原作问题**：加速器架构、线程/存储层次、GEMM 优化阶梯和设备性能。
 - **OpenMLSys 文件**：`chapter_accelerator/accelerator_architecture.md`、
@@ -190,7 +201,7 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
   autotune 或厂商 GEMM benchmark。标签为 `源码核验 + CPU 可运行验证 +
   协议/成本模型`；真实 GPU 是 `可选平台实验`。
 
-## 第 4 章：IR、Fusion、cache 与 launch
+### 第 4 章：IR、Fusion、cache 与 launch
 
 - **原作问题**：前端 IR、Pass、kernel selection、编译、内存和运行时调度。
 - **OpenMLSys 文件**：`chapter_frontend_and_ir/intermediate_representation.md`、
@@ -205,10 +216,10 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
   `add → mul → exp`，比较计划结构和数值；`BURN_FUSION_LOG=full` 是
   可选日志观察。
 - **不可直接比较**：Fusion block 数、cache hit、kernel launch count 和
-  wall-clock time 不是同一指标；固定 API 不提供稳定私有 cache key。
+  wall-clock time 不是同一指标；上游 API 不提供稳定私有 cache key。
   标签为 `源码核验 + CPU 可运行验证`，硬件 launch 是 `可选平台实验`。
 
-## 第 5 章：数据处理
+### 第 5 章：数据处理
 
 - **原作问题**：数据读取、顺序、shuffle、并行 worker、预取、背压和吞吐。
 - **OpenMLSys 文件**：`chapter_data_processing/requirements.md`、
@@ -225,7 +236,7 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
   memory 或全局保序吞吐。标签为 `源码核验 + CPU 可运行验证 +
   协议/成本模型`。
 
-## 第 6 章：分布式训练
+### 第 6 章：分布式训练
 
 - **原作问题**：数据/模型/流水线并行、collective、parameter server、
   stale gradient、quorum 和 checkpoint 一致性。
@@ -242,7 +253,7 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 - **不可直接比较**：协议结果不等于 DDP/NCCL/跨节点性能或故障恢复；
   Flex CPU collective 仍是 `未覆盖`，真实通信为 `可选平台实验`。
 
-## 第 7 章：模型部署
+### 第 7 章：模型部署
 
 - **原作问题**：转换、压缩、artifact、推理 runtime、安全、batching 和
   rollback。
@@ -260,7 +271,7 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 - **不可直接比较**：manifest/checksum 不是完整供应链安全；旧 revision
   的 ONNX fixture、HTTP、Remote、WASM 和 GPU service 是可选/未覆盖。
 
-## 第 8 章：强化学习
+### 第 8 章：强化学习
 
 - **原作问题**：MDP、trajectory、replay、on/off-policy、多环境、MARL 和
   Actor–Learner freshness。
@@ -275,7 +286,7 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 - **不可直接比较**：mock policy 不是 DQN/PPO/SAC；joint vector 不是
   MARL credit assignment runtime；完整 Actor–Learner 是可选/未覆盖。
 
-## 第 9 章：GPU 集群与控制面
+### 第 9 章：GPU 集群与控制面
 
 - **原作问题**：cluster topology、队列、gang scheduling、通信、故障、
   checkpoint 和 observability。
@@ -292,20 +303,13 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 - **不可直接比较**：虚拟时间、cross-rack penalty 和 trace 不代表 GPU、
   NCCL、RDMA、网络拥塞、多租户 runtime 或弹性 membership benchmark。
 
-## 与综合实验的关系
+### 与综合实验的关系
 
 综合实验把第 5–7 章串成一条 CPU 可运行路径：
 `Dataset → autodiff → ModuleRecord → inference`；它回答“状态怎样跨过
 数据、训练和 artifact 边界”。本页的比较卡回答“同一主题在 OpenMLSys、
 固定 Burn 源码、CPU 实验和协议模型之间分别有哪种证据”。前者是纵向学习
 路径，后者是横向审计摘要，二者不能相互替代。
-
-## 如何使用这些卡片
-
-先读对应章节的框架无关模型，再运行卡片列出的 CPU 示例，最后按
-下文「逐文件对照矩阵」回到仓库中的对照矩阵，检查原作逐文件范围和
-固定 revision。若一个结论没有同时标出证据标签、硬件前提和未覆盖边界，
-它就不能作为本书的发布级比较结论。
 
 ## 逐文件对照矩阵
 
@@ -322,7 +326,6 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 记录映射到本书哪一章哪一节、保留了什么、改写了什么，以及结论靠什么支撑。
 各章文件级改编说明见[来源与改编总录](appendix-sources.md)；对照矩阵是全书总账，二者口径一致。
 
-
 ## 对照矩阵的 C/S/R/L/E 字段
 
 矩阵中每个主题记录五类证据：
@@ -338,11 +341,14 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 `excluded`（明确不进入九章主线，如推荐系统、联邦学习、可解释 AI、
 机器人和附录）和 `optional`（需要额外平台环境）。
 
-## 如何使用
+## 如何使用本附录
 
 1. 读正文时遇到 `源码核验` 的说法，可按章节末节给出的源码入口
    对照固定 revision 阅读；
-2. 想确认某个 OpenMLSys 主题在本书中的去向，查对照矩阵的核心路径
-   映射；
+2. 想确认某个 OpenMLSys 主题在本书中的去向，先读比较卡（先看对应
+   章节的框架无关模型，再运行卡片列出的 CPU 示例），再查对照矩阵的
+   核心路径映射；
 3. 想判断一个结论能否外推到 GPU、集群或生产部署，先看它带的是
-   `CPU 可运行验证` 还是 `协议/成本模型`/`可选平台实验` 标签。
+   `CPU 可运行验证` 还是 `协议/成本模型`/`可选平台实验` 标签——
+   没有同时标出证据标签、硬件前提和未覆盖边界的结论，本书不把它
+   当作可对外比较的结论。

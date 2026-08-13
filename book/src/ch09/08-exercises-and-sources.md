@@ -7,11 +7,11 @@
 负责已分配 rank 之间的 collective；设备运行时负责 stream、memory、
 kernel 和同步边界。
 
-OpenMLSys v1 提供了分布式训练的拓扑、通信、并行和参数服务器动机。固定
+OpenMLSys v1 提供了分布式训练的拓扑、通信、并行和参数服务器动机。
 Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
-`DistributedOps`、CUDA collective 和 `ComputeClient` 等局部入口，但没有
-把这些入口组合成集群调度器。CPU 模拟器只验证资源、成本和恢复协议，不
-替代真实集群 benchmark。
+`DistributedOps`、CUDA collective 和 `ComputeClient` 等数据面入口；
+它们与控制面各能力的分工，见第 4 节的集群级能力表和第 6 节的容错
+闭环表。
 
 ## 练习
 
@@ -226,7 +226,7 @@ schema 版本字段；`lease_version` 的语义见
 
 </details>
 
-7. 【进阶】阅读固定 Burn 的 `ExecutionStrategy`，实现一个只打印设备集合和策略
+7. 【进阶】阅读 Burn 的 `ExecutionStrategy`，实现一个只打印设备集合和策略
    的 adapter；不要把它命名为 cluster scheduler。
 
 <details>
@@ -443,7 +443,7 @@ server、注册参数、提交同步、`all_reduce`/`sync_collective`）。
 - `summary.md`：保留规模化训练、AllReduce、参数服务器和故障动机。
 
 旧章节中的硬件规格、厂商性能数字、图片、具体框架实现和外部链接不被
-当作当前固定 Burn 能力。新增的 queue、quota、lease、failure detector、
+当作 Burn 的当前能力。新增的 queue、quota、lease、failure detector、
 cluster telemetry 和 CPU simulator 是本书的框架无关系统设计。
 
 ## Burn/CubeCL 固定源码入口
@@ -465,10 +465,10 @@ CubeCL revision 是 `be278a1e76aed881e2cc6b165414ee6103ca4634`：
 - `cubecl/crates/cubecl-cpu/src/runtime.rs`
 - `cubecl/crates/cubecl-cuda/src/compute/server.rs`
 
-固定源码可核验设备/通信/运行时入口；不能据此声称已有集群作业队列、
-拓扑感知放置、多租户 quota、跨节点 rendezvous、elastic membership、
-自动重试、分布式 checkpoint 共识或统一集群遥测。这些能力在真实系统
-中的实现（Borg、Gandiva、Tiresias 等）见附录
+固定源码可核验的是设备/通信/运行时入口；从这里到完整集群系统之间
+的那段距离——作业队列、拓扑放置、elastic membership、分布式
+checkpoint 共识——正是本章 CPU 模拟器建模的协议层。这些协议的工业
+实现（Borg、Gandiva、Tiresias 等）见附录
 [参考文献](../references.md#第-9-章-大规模-gpu-集群管理)。
 
 ## 本章系统结论

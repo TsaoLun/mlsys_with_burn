@@ -28,18 +28,10 @@ NCCL、RDMA 或真实 GPU 集群。
 
 ## 本章路线
 
-```text
-workload card
-    │ GPU / memory / bytes / failure domain
-    ▼
-control plane ── queue ── admission ── placement ── recovery
-    │
-    ▼
-training data plane ── all-reduce / all-gather / checkpoint
-    │
-    ▼
-device runtime ── stream / memory pool / kernel / sync
-```
+本章自上而下走四层：workload card（GPU/内存/通信字节/故障域）→
+控制面（queue、admission、placement、recovery）→ 训练数据面
+（all-reduce、all-gather、checkpoint）→ 设备运行时（stream、内存池、
+kernel、同步），如下图。
 
 先定义集群作业的资源和完成条件，再从硬件拓扑推导通信成本。之后讨论
 队列、成组调度、拓扑放置、多租户与故障协议，最后放入纯 Rust 模拟器。

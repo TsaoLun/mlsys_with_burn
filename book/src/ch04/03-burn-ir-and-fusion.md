@@ -5,7 +5,9 @@
 Fusion Backend 下的 Tensor 操作不会立刻调用底层 Backend。以浮点加法为
 例，burn-fusion 创建 `BinaryOpIr`，把它包装为 `OperationIr`，然后向当前
 Fusion 流标识（`StreamId`：延迟队列的隔离键；不是 CUDA stream，也不是
-集群作业队列）对应的 Fusion client 注册。
+集群作业队列）对应的 Fusion client 注册。单个算子从 API 到这条注册流
+的完整路径，[「算子解剖」](../op-anatomy.md)以 tanh 为样本逐层摘录，
+可与本节互相印证。
 
 `OperationIr` 是覆盖多种操作族的大枚举。每个 Tensor 通过 `TensorIr`
 携带：
@@ -56,7 +58,7 @@ Fusion 搜索跟踪每个 block 的：
 
 ## 4. CubeCL Backend 的 fuser
 
-固定 burn-cubecl 快照按顺序注册：
+`burn-cubecl` 按顺序注册：
 
 - `ElementWiseFuser`；
 - `MatmulFuser`；

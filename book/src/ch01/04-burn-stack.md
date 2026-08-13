@@ -31,21 +31,7 @@
 Autodiff 等变体。一次张量操作会通过 bridge 和 dispatch 层到达相应后端
 实现。
 
-```text
-Tensor 操作
-    │
-    ▼
-burn-tensor bridge
-    │
-    ▼
-burn-dispatch::Dispatch + DispatchDevice
-    │
-    ├── Flex
-    ├── CubeCL-backed CUDA / WGPU / ROCm / CPU
-    ├── LibTorch / NdArray
-    ├── Remote
-    └── Autodiff(内部设备)
-```
+![Tensor 操作经 burn-tensor bridge 与 burn-dispatch 的 Dispatch/DispatchDevice，分派到 Flex、CubeCL 后端、LibTorch/NdArray、Remote 或 Autodiff 变体](../img/ch01-dispatch-tree.svg)
 
 `burn-backend` 定义 `Backend`、`BackendTypes` 和各类操作契约。具体后端
 只要满足这些契约，就能被上层以统一张量语义使用。但“统一接口”不意味着

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="380" viewBox="0 0 720 380" role="img" aria-label="OffPolicyStrategy 的采样、回放与训练循环">
+  <style>
+    .box { fill:#f7f7f5; stroke:#2c2c2c; stroke-width:1.5; }
+    .box2 { fill:#eef3f8; stroke:#2c2c2c; stroke-width:1.5; }
+    .box3 { fill:#f3efe8; stroke:#2c2c2c; stroke-width:1.5; }
+    .t { font-family: system-ui, sans-serif; font-size:13px; fill:#1a1a1a; }
+    .s { font-family: system-ui, sans-serif; font-size:11px; fill:#444; }
+    .arr { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); }
+    .loop { stroke:#2c2c2c; stroke-width:1.5; fill:none; marker-end:url(#m); stroke-dasharray:5 4; }
+  </style>
+  <defs>
+    <marker id="m" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#2c2c2c"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="24" y="24" width="300" height="48" rx="4"/>
+  <text class="t" x="36" y="44">MultiAgentEnvLoop::run_steps</text>
+  <text class="s" x="36" y="62">每次收集 train_interval 步</text>
+
+  <path class="arr" d="M174 72 V104"/>
+  <rect class="box2" x="24" y="108" width="300" height="48" rx="4"/>
+  <text class="t" x="36" y="128">state/action 转换 + TransitionBuffer::push</text>
+  <text class="s" x="36" y="146">num_envs 个环境的 transition 进入 replay</text>
+
+  <path class="arr" d="M324 132 H388"/>
+  <text class="s" x="332" y="124">门槛检查</text>
+  <rect class="box3" x="392" y="108" width="304" height="48" rx="4"/>
+  <text class="t" x="404" y="128">buffer.len ≥ train_batch_size</text>
+  <text class="s" x="404" y="146">且已达到 warmup_steps，否则继续采样</text>
+
+  <path class="arr" d="M544 156 V188"/>
+  <rect class="box2" x="392" y="192" width="304" height="48" rx="4"/>
+  <text class="t" x="404" y="212">sample(train_batch_size)</text>
+  <text class="s" x="404" y="230">从 replay 抽 batch</text>
+
+  <path class="arr" d="M544 240 V272"/>
+  <rect class="box3" x="392" y="276" width="304" height="48" rx="4"/>
+  <text class="t" x="404" y="296">PolicyLearner::train × train_steps</text>
+  <text class="s" x="404" y="314">loss 与 optimizer 由应用的 learner 决定</text>
+
+  <path class="arr" d="M392 300 H174 V340"/>
+  <rect class="box" x="24" y="344" width="300" height="30" rx="4"/>
+  <text class="t" x="36" y="364">evaluation / checkpoint / metrics</text>
+
+  <path class="loop" d="M100 344 V80"/>
+  <text class="s" x="40" y="332">回到采样，行为 policy 已更新</text>
+</svg>

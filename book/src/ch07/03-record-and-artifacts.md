@@ -111,7 +111,7 @@ SafeTensors 这类纯 tensor 数据格式可以避免加载时执行任意模型
 
 静态加密主要保护第一条，TLS/Iroh transport 主要保护第二条，TEE 试图
 缩小第三条，模型签名和加载校验主要帮助第四条中的篡改检测；它们不能
-互相替代。固定 Burn `ModuleRecord`、Remote endpoint 或
+互相替代。Burn 的 `ModuleRecord`、Remote endpoint 或
 `PeerAuthorizer` 只提供可组合接口，不能单独构成上述安全产品。
 
 本章实验刻意只覆盖最小边界：本书示例中的 Burn Linear module 经过

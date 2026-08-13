@@ -19,7 +19,7 @@
 1. 用 MDP 区分 state、observation、action、reward、`done` 和 `truncated`；
 2. 解释环境 step、策略 inference、transition 和 episode 的所有权边界；
 3. 区分 on-policy、off-policy、trajectory 与 replay batch；
-4. 使用固定 Burn 的 `Environment` 和 `TransitionBuffer` 构造 CPU rollout；
+4. 使用 Burn 的 `Environment` 和 `TransitionBuffer` 构造 CPU rollout；
 5. 解释 `Policy`、`Batchable`、`ToObservation`/`ToAction` 和
    `PolicyLearner` 如何组合，而不是把它们误认为某个具体算法；
 6. 用采样吞吐、inference batching、队列等待和设备拷贝建立成本模型；
@@ -44,7 +44,7 @@ trait、关联类型、`Clone`/`Send`、随机采样和基本概率；不要求�
 分布式通信混成一个无法定位问题的黑盒。
 
 固定版本边界必须明确：`burn-rl` 没有内置 DQN、PPO 或 SAC；具体
-`PolicyLearner` 由应用实现。固定 `burn-train` 能编排环境、异步
+`PolicyLearner` 由应用实现。`burn-train` 能编排环境、异步
 inference、replay、训练、评估和 checkpoint，但这不等于已经提供通用
 多智能体 league 或跨节点 Actor–Learner runtime。
 

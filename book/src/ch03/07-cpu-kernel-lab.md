@@ -76,7 +76,8 @@ tiled_intensity = 8.0
 ```
 
 它说明“一次全局加载服务多个乘加”如何降低加载次数，但不模拟 bank
-conflict、边界 tile、cube 同步或真实带宽。真实共享内存 Kernel 仍属练习。
+conflict、边界 tile、cube 同步或真实带宽。真正带 `sync_cube()` 与
+边界填零的共享内存 Kernel 见第 8 节的 GEMM 阶梯可选实验。
 
 ```bash
 cargo run -p ch03-tile-loads --locked
@@ -152,6 +153,57 @@ wgpu output matches host reference
 4. 在读回前同步；
 5. 把设备、驱动、warm-up 和首次编译成本写入报告。
 
-GPU 实验可以进一步加入 `Vector`、共享 tile 或 CubeK matmul 对照，但不能
-把 CPU 测试通过当成这些硬件路径已经验证。
+共享内存 tile 的下一级已经做成了可选实验，见下一节；`Vector` 向量化
+与 CubeK matmul 对照仍是延伸方向。任何一条都不能把 CPU 测试通过当成
+硬件路径已经验证。
+
+## 8. 可选实验：GEMM 优化阶梯（wgpu）
+
+`examples/ch03-gemm-ladder` 把第 5 节阶梯的第 1、2 级写成真正的
+CubeCL Kernel。crate 的默认特性只编译纯 Rust 部分——朴素参考实现、
+与共享内存 Kernel 同构的分块实现、确定性矩阵生成——不依赖 CubeCL，
+因此不受 `tracel-llvm` 平台资产的影响，任何机器都能验证「按 tile
+重排不改变结果」这一语义前提；`--features wgpu` 才编译并运行 GPU
+Kernel：
+
+```bash
+cargo test -p ch03-gemm-ladder --locked                          # 任何机器
+cargo test -p ch03-gemm-ladder --features wgpu --locked          # 需要图形驱动
+cargo run  -p ch03-gemm-ladder --features wgpu --release --locked
+```
+
+tiled Kernel 与第 5 节「Tiling 与共享内存」的五步流程逐行对应：
+协作装载、两道 `sync_cube()` 屏障、边界 tile 填零：
+
+```rust,ignore
+{{#include ../../../examples/ch03-gemm-ladder/src/lib.rs:tiled_kernel}}
+```
+
+计时协议先预热一次（吸收 JIT 编译与首次分配），再提交 32 次
+launch，用一次读回充当完成边界：
+
+```rust,ignore
+{{#include ../../../examples/ch03-gemm-ladder/src/lib.rs:timing}}
+```
+
+在一台 Intel macOS 工作机（`wgpu<wgsl>`，Metal 后端，release
+构建）上，一次运行打印：
+
+```text
+  size      naive µs      tiled µs     加速比
+   256         639.9         135.7    4.71
+   512        2050.1         485.2    4.22
+  1024       12676.8        2857.9    4.44
+```
+
+这是本书第一处真实设备测量，请按第 5 节测量协议的口径读它：数字
+只描述这台机器这次运行，换设备、驱动、shape 或后端都可能不同；
+方向与复用模型一致——共享内存 tile 把每个输入元素的全局读取次数
+除以 tile 边长，本机观测到约 4–5 倍差距。先看正确性再看时间仍是
+铁律：两级 Kernel 的输出都必须与 host reference 一致（测试覆盖
+17、33 这类非整除形状的填零分支），一旦不一致，任何加速比都没有
+意义。向量化装载、双缓冲与矩阵指令是这个实验的自然延伸，也是章末
+练习的动手起点。生产实现里，这个手写 kernel 相当于把 CubeK 的
+`global` 装载协议与 `Register` tile 变体压平在一个函数里——四层
+组件的拆分见第 4 节的「第七层」小节。
 

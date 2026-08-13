@@ -56,22 +56,7 @@ server，却没有因此获得联合动作、通信、团队奖励或 equilibriu
 
 `burn-train` 的 `OffPolicyStrategy` 把配置映射为一条循环：
 
-```text
-MultiAgentEnvLoop::run_steps(train_interval)
-        │
-        ▼
- state/action 转换 + TransitionBuffer::push
-        │
-        ├─ buffer.len >= train_batch_size
-        │    且达到 warmup_steps
-        │
-        └─ sample(train_batch_size)
-                │
-                ▼
-       PolicyLearner::train × train_steps
-                │
-        evaluation / checkpoint / metrics
-```
+![OffPolicyStrategy 的循环：run_steps 收集 transition 入 replay，达到 batch 与 warmup 门槛后 sample 并执行 train_steps 次训练，随后 evaluation/checkpoint/metrics，再回到采样](../img/ch08-offpolicy-loop.svg)
 
 `OffPolicyConfig` 的 `num_envs`、`autobatch_size`、`replay_buffer_size`、
 `train_interval`、`train_steps`、`eval_interval`、`eval_episodes`、

@@ -1,7 +1,7 @@
 # 实验：张量、Module 与梯度
 
-本章实验位于 `examples/ch02-tensor-basics`，统一使用 GitHub 本书固定版本
-的 Burn 和 Flex CPU。本书示例工程启用了 `std`、`flex`、`autodiff`
+本章实验位于 `examples/ch02-tensor-basics`，统一使用本书固定版本的
+Burn（GitHub revision）和 Flex CPU。本书示例工程启用了 `std`、`flex`、`autodiff`
 features。
 
 ## 1. 逐元素运算
@@ -118,10 +118,49 @@ product = left * right = [4, 49]
 这证明的是 tape 的连接语义，不是“所有 runtime 错误都会返回 Result”；
 shape/device 错误仍应按固定 backend 的 API 契约单独验证。
 
-## 9. 运行
+## 9. 亲手造一个 tape（独立小实验）
+
+前八节都在观察 Burn 的 autodiff。第二个示例 crate
+`examples/ch02-mini-autodiff` 反过来：不依赖任何框架，用约一百行
+Rust 实现一个只支持 `add`/`mul`/`relu` 的反向模式 tape，把「记录 →
+反向」的最小机制完整摊开。核心记录只有一张按执行顺序追加的表：
+
+```rust,ignore
+{{#include ../../../examples/ch02-mini-autodiff/src/lib.rs:op}}
+```
+
+反向传播按编号从大到小扫一遍。追加顺序天然是拓扑序，这正是
+[「计算图的构成与生成」](04-computational-graph.md)里「处理一个节点
+之前，它的所有消费者必须已经完成」的实现形态：
+
+```rust,ignore
+{{#include ../../../examples/ch02-mini-autodiff/src/lib.rs:backward}}
+```
+
+运行 `cargo run -p ch02-mini-autodiff --locked` 会打印 tape 的每一行
+（`w = relu(x*y + x)`，`x=2, y=3`）：
+
+```text
+按追加顺序打开 tape（编号即拓扑序）：
+  id  op       value      grad
+   0  leaf     2.000     4.000
+   1  leaf     3.000     2.000
+   2  mul      6.000     1.000
+   3  add      8.000     1.000
+   4  relu     8.000     1.000
+dw/dx = 4（= y + 1），dw/dy = 2（= x）
+```
+
+它的七个测试与前面几节的 Burn 观察一一对应：`x*x` 的扇出梯度累加、
+只记录执行过的分支、`detach` 抄值断流、数值梯度校验。对照着读，
+第 6–8 节在 Burn 里看到的每个行为都能在这一百行里找到成因。本实验
+刻意不做：张量（只有标量 `f64`）、二阶导数、图优化与并行执行。
+
+## 10. 运行
 
 ```bash
 cargo run -p ch02-tensor-basics --locked
+cargo run -p ch02-mini-autodiff --locked   # 第 9 节的独立小实验
 ```
 
 输出应包含：
@@ -139,7 +178,7 @@ Device autodiff：普通=false，autodiff 包装=true
 detach：原始梯度=None，新 leaf 梯度=Some([3.0, 3.0])
 ```
 
-## 10. 测试
+## 11. 测试
 
 ```bash
 cargo test -p ch02-tensor-basics --locked
@@ -151,7 +190,7 @@ cargo test -p ch02-tensor-basics --locked
 `burn-backend-tests` 中找到对应的回归测试；Module 参数遍历与统计由
 `burn-core` 的 Module 测试支撑。
 
-## 11. 沿源码追踪
+## 12. 沿源码追踪
 
 建议按顺序阅读：
 

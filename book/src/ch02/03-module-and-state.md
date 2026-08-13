@@ -25,6 +25,49 @@ Burn 用 `Module` 统一这些操作。
 `Module` 提供参数遍历、`num_params`、设备迁移和状态转换等操作。宏生成的
 实现减少样板代码，但结构和字段所有权仍是普通 Rust 语义。
 
+### 宏在替你写什么
+
+派生宏不是魔法，值得看一次它的真实产物。对上面的 `TinyModel` 运行
+`cargo expand`（本书固定版本，节选）：
+
+```rust,ignore
+impl burn::module::Module for TinyModel {
+    fn num_params(&self) -> usize {
+        let mut num_params = 0;
+        num_params += burn::module::Module::num_params(&self.projection);
+        num_params += burn::module::Module::num_params(&self.activation);
+        num_params
+    }
+    fn visit<Visitor: burn::module::ModuleVisitor>(&self, visitor: &mut Visitor) {
+        visitor.enter_module("projection", "Struct:TinyModel");
+        burn::module::Module::visit(&self.projection, visitor);
+        visitor.exit_module("projection", "Struct:TinyModel");
+        visitor.enter_module("activation", "Struct:TinyModel");
+        burn::module::Module::visit(&self.activation, visitor);
+        visitor.exit_module("activation", "Struct:TinyModel");
+    }
+    fn map<Mapper: burn::module::ModuleMapper>(self, mapper: &mut Mapper) -> Self {
+        mapper.enter_module("projection", "Struct:TinyModel");
+        let projection = burn::module::Module::map(self.projection, mapper);
+        mapper.exit_module("projection", "Struct:TinyModel");
+        // …activation 同理…
+        Self { projection, activation }
+    }
+    // collect_devices / to_device / fork：同样的逐字段转发
+}
+```
+
+三个机制一目了然。第一，**没有运行时反射**：宏在编译期为每个字段
+写出普通 Rust 代码，遍历就是一串直接函数调用，可内联、可优化。
+第二，**`enter_module`/`exit_module` 携带字段名**——第 7 章
+Burnpack 里 `projection.weight` 这样的参数路径，就是 visitor 沿途
+把这些名字拼起来的结果：命名不是存档格式的发明，而是派生宏与
+visitor 协议的副产品。第三，**`map` 按值接收并重建 `Self`**：设备
+迁移、精度转换这类"改写每个参数"的操作因此天然满足所有权规则，
+不需要内部可变性。`derive(Config)` 与 `derive(RecordState)` 是同一
+套思路。想看完整产物，在示例 crate 上运行
+`cargo expand -p ch02-tensor-basics --lib` 即可。
+
 参数统计可以直接口算验证。`Linear(d_in, d_out)` 含权重
 $d\_{in} \times d\_{out}$ 和偏置 $d\_{out}$；一个 784→128→10 的两层
 MLP 共有 $(784 \times 128 + 128) + (128 \times 10 + 10) = 101770$
@@ -65,7 +108,7 @@ Module
 
 例如，训练中的 BatchNorm 统计量、量化 scale、词表或 tokenizer 可能不
 属于同一种参数；把它们全部包成 `Param` 会改变 optimizer 和 record 的
-语义，把它们全部留作普通字段又可能导致恢复后推理不一致。固定 Burn
+语义，把它们全部留作普通字段又可能导致恢复后推理不一致。Burn
 源码能验证 visitor/Param 的行为，但业务模型如何分类仍是应用的 schema
 决定。
 

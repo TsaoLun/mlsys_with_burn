@@ -218,6 +218,34 @@ Inspector，断言 `drain()` 结果互不包含对方的操作；stream 隔离�
 
 </details>
 
+6. 【进阶】给 `ch04-mini-pass-pipeline` 增加恒等元素消除（`x+0 → x`、
+   `x*1 → x`），并回答：对 `f32` 的 `-0.0`，`x+0 → x` 按位合法吗？
+
+<details>
+<summary>提示</summary>
+
+先写「语义按位一致」测试再写 Pass（照抄现有 Pass 的测试骨架）。
+`(-0.0) + 0.0` 在 IEEE 754 里等于 `+0.0`，用 `f32::to_bits` 而不是
+`==` 检查这条改写在 `-0.0` 上的行为；对照
+[「静态信息、Pass 与自动微分边界」](02-static-analysis-and-passes.md)
+「亲手写一个 Pass」段的合法性讨论决定它属于标准还是 fast-math 集。
+
+</details>
+
+7. 【挑战】让 CSE 识别交换律：`add %0 %1` 与 `add %1 %0` 合并为一个
+   节点，并说明为什么 `Exp` 这类单输入算子不需要这一步。
+
+<details>
+<summary>提示</summary>
+
+在 `common_subexpression_elimination` 的结构化 `Key` 上做操作数
+归一化（如小编号在前）即可，`Mul` 同理；浮点加法交换律逐位成立
+（结合律才不成立），依据见
+[「静态信息、Pass 与自动微分边界」](02-static-analysis-and-passes.md)
+的浮点语义段。改完后跑随机图语义测试确认按位一致。
+
+</details>
+
 
 ### 源码题
 

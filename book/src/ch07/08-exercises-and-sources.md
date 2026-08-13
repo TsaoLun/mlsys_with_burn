@@ -10,13 +10,18 @@ feature 开启后增加 snapshot、Burnpack/SafeTensors/PyTorch store、过滤�
 
 固定 `burn-onnx` 的 `ModelGen` 将 ONNX graph 解析成 Burn graph，生成 Rust
 source，并收集 Burnpack 权重。`File`、`Embedded`、`Bytes` 和 `None`
-决定权重从哪里进入生成的 model。由于该固定仓库的 manifest 仍依赖旧
+决定权重从哪里进入生成的 model。由于该仓库固定快照的 manifest 仍依赖旧
 Burn revision，本章对 ONNX 的源码对照与本书 Record 实验保持分离。
 
 Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 需要异步事件循环；no_std 只缩小标准库依赖，不自动提供文件、网络、线程
 或所有 backend。HTTP/gRPC、版本发布、鉴权、限流、指标和故障恢复属于
 应用服务层。
+
+本章还有两个纯 Rust 机制实验：`ch07-ptq-calibration` 把量化校准的
+scale/zero-point、粒度与离群值交易变成可复现数字；
+`ch07-serving-queue-sim` 用虚拟时间队列演示连续批处理与 KV 预算如何
+决定延迟和吞吐。它们验证的是协议与机制，不是任何 backend 的性能。
 
 ## 练习
 
@@ -250,7 +255,7 @@ model、handler 拿到的是共享引用还是消息通道，再填实现。
 <summary>提示</summary>
 
 [「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)的
-「`ModelGen` 的固定源码路线」已给出四阶段骨架，把它当待验证的
+「`ModelGen` 的转换路线」已给出四阶段骨架，把它当待验证的
 假设：在源码里定位 `OnnxGraphBuilder`、`ParsedOnnxGraph::into_burn`、
 `BurnGraph::codegen` 与 `register_burnpack_loaders`，补全箭头之间
 省略的中间结构。该仓库依赖较早的 Burn revision，只读源码即可，
@@ -433,11 +438,12 @@ remote 延迟分解的某一项，再决定注入与观测手段。重复提交�
 <details>
 <summary>提示</summary>
 
-[「压缩、精度与离线优化」](04-compression-and-optimization.md)给出
-scale/zero-point 公式和一段把校准范围 -3.2～2.8 映射到 int8 的带
-数字演算，照着扩展即可。粒度对比时数一数逐通道需要多少组
-scale/zero-point、metadata 随之怎么涨；离群值裁剪等于改变校准范围
-的选取。量化在本章是原理层讲解，验算用纯 Rust 数值即可，不依赖
+从 `examples/ch07-ptq-calibration` 出发：它已实现 scale/zero-point
+推导、min-max/百分位校准、per-channel 重建和主体/离群值分开的 MSE，
+照着改校准策略与粒度即可。对照
+[「压缩、精度与离线优化」](04-compression-and-optimization.md)的
+带数字演算读输出；粒度对比时数一数逐通道需要多少组
+scale/zero-point、metadata 随之怎么涨。实验是协议层演算，不依赖
 低精度 backend kernel。
 
 </details>
@@ -456,6 +462,22 @@ scale/zero-point、metadata 随之怎么涨；离群值裁剪等于改变校准�
 拒绝、固定源码内置的 metadata 与 tensor 数上限，各覆盖哪一层的哪个
 子问题；剩下没有任何机制覆盖的空白，就是 `ModuleRecord` 单独解决
 不了的部分。
+
+</details>
+
+10. 【挑战】给 `ch07-serving-queue-sim` 增加 chunked prefill：把大 prompt
+    切成固定大小的块分多步处理，比较长 prompt 到达时其他请求的
+    p95 延迟变化。
+
+<details>
+<summary>提示</summary>
+
+当前模型在接纳步一次处理全部 prompt token（见
+[「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)
+「动手版」小节声明的简化），一条 512 token 的 prompt 会拖慢同一步里
+所有请求——这正是要测的干扰。改法：`Running` 增加未完成的 prefill
+余量，每步最多处理 `chunk` 个 prompt token；断言总 token 数守恒，
+再比较 p95。
 
 </details>
 
@@ -507,8 +529,8 @@ OpenMLSys v1：
 1. 部署闭环是：训练态 → artifact → 校验 → 推理入口 → 服务侧 batch/队列/版本。
 2. `ModuleRecord`/Burnpack 管参数状态；ONNX/codegen 管图转换，二者版本不能混用。
 3. 推理选用哪个 Device（CPU/WGPU/CUDA）与 artifact 格式正交，但影响延迟与批处理。
-4. CPU 上你验证了 Linear 参数往返保存/恢复与输出误差边界。
-5. GPU 阅读线索：同一 record 加载到加速 Device 后的同步与 batch 合并；LLM 服务专题见正文边界段。
+4. CPU 上你验证了 Linear 参数往返保存/恢复与输出误差边界、PTQ 校准的误差交易，以及连续批处理与 KV 预算的队列行为。
+5. GPU 阅读线索：同一 record 加载到加速 Device 后的同步与 batch 合并；LLM 服务的机制模型见 `ch07-serving-queue-sim`，工程实现见参考文献。
 6. 不能把本地 load 成功当成完整服务上线或 ONNX 端到端已在同一依赖图验证。
 
 ## 来源与改编说明

@@ -47,6 +47,53 @@ explosion；若特化太少，又可能保留低效的动态逻辑。
 Autotune level 控制搜索成本和候选广度，不等于“越高永远越快”。短生命周期
 进程可能还没收回搜索成本；服务系统则可能通过预热摊销。
 
+### 一个 tune key 长什么样
+
+「按 tune key 缓存」的 key 不是随手拼的字符串。matmul 的键
+（`cubek-matmul/src/strategy/tune_key.rs`）由两部分组成：
+
+```rust,ignore
+pub struct MatmulAutotuneKey {
+    pub definition: MatmulProblemDefinition,   // 问题本身
+    pub analysis: MatmulAutotuneAnalysis,      // 预分析的分桶
+}
+
+pub struct MatmulProblemDefinition {
+    #[autotune(anchor)] pub m: usize,
+    #[autotune(anchor)] pub n: usize,
+    #[autotune(anchor)] pub k: usize,
+    pub lhs_pow2_factor: u8,      // stride 对齐到的 2 的幂，
+    pub lhs_stride_factor: u8,    // 封顶 2^10——注释：128 字节
+    // …rhs 同理…                  // swizzle 的重复周期
+    pub elem_lhs: StorageType,    // dtype 参与键
+    pub matrix_layout_lhs: MatrixBatchLayout,  // 布局参与键
+    // …
+}
+```
+
+每个字段都是一次「性能等价类」的工程判断，机制都能说出来源：
+
+- **`#[autotune(anchor)]` 把尺寸分桶**。anchor 的实现（cubecl-runtime
+  `tune/util.rs`）把数值**向上取整到某个底数的幂**：默认底数 2，
+  autotune level 调粗细——level 0 用更大的底（更粗的桶、更少的首调），
+  level 3 精确匹配（每个 shape 单独调）。没有它，训练中每个不同的
+  batch 长度都会触发一轮全新测量；
+- **stride 对齐只记到 $2^{10}$**：源码注释给出理由——128 字节
+  swizzle 的重复周期，是最后一个还会影响性能的对齐档位。再大的
+  对齐在性能上等价，就不该产生新键；
+- **analysis 提前分桶**：`from_size` 用 512/2048 两道门槛把问题分成
+  Small/Medium/Large，加上 matmul 类别（general/vec-mat 等）。这些
+  桶不只用于缓存，还用于**剪枝候选**：
+  `should_tune_double_buffering` 按键判断双缓冲是否值得进入测量
+  集合——小问题上连测都不测。
+
+把这三条合起来读：tune key 的设计目标是**控制编译与测量次数的
+上界**，同时让同一桶里的 shape 共享结论。粗桶省首调成本、赌桶内
+性能相近；细桶反之。这正是上一段「autotune level 不等于越高越快」
+的机制根源。存储侧与之配套：`LocalTuner` 按设备 ID 各持一个
+Tuner，Tuner 内再按键缓存——所以换设备必然重测，换 shape 只在
+跨桶时重测。
+
 ## 3. 从 TVM/MLIR 到 CubeCL
 
 OpenMLSys 介绍 TVM、Ansor、MLIR、TBE 和 AKG，核心问题仍然成立：

@@ -97,15 +97,15 @@ $$
 对解释“提交”与“可读”很重要。
 
 `burn-cuda`/CubeCL CUDA 路径中可以看到 NCCL collective 的实现入口，
-但这只说明该 backend 有设备通信实现。它不自动提供：
+但这只说明该 backend 有设备通信实现。从设备通信到集群系统之间的
+每一段，都对应本章某个控制面主题：
 
-- 集群作业队列和 rank/world rendezvous；
-- 跨节点成员失效、重试和 elastic join；
-- 机柜拓扑发现和 placement；
-- 统一的 NCCL 版本、driver、网络和 launcher 配置。
-
-`DistributedContext` 保存的是传入的设备集合；不能把它解释为完整的
-cluster membership service。
+| 集群级能力 | 谁负责 | 设备通信入口的假设 |
+|---|---|---|
+| 作业队列与 rank/world rendezvous | 控制面（本章模拟器的 queue 与 gang 准入） | collective 启动时 rank 集合已经确定 |
+| 成员失效、重试与 elastic join | 控制面 + 通信组重建 | `DistributedContext` 只保存传入的设备集合，不是 membership service |
+| 机柜拓扑发现与 placement | 控制面（本章“同节点→同机柜→跨机柜”策略） | 通信实现只看见设备列表，不知道链路档位 |
+| NCCL 版本、driver、网络、launcher 的一致性 | 部署与运维层 | 错配表现为运行时错误，编译期查不出来 |
 
 ## Flex CPU 不能作为 collective 实验
 
@@ -127,5 +127,5 @@ placement → communication domain → link contention
           → collective time → synchronous step/makespan
 ```
 
-Burn 提供 collective 的数据面接口和部分 backend 实现；集群控制面仍要
-负责拓扑发现、rank 配置、资源租约和失败协议。
+这条因果链上每一环归谁负责，本节的集群级能力分工表已经给出：
+placement 与链路档位在控制面，collective 数据面入口在 Burn/CubeCL。

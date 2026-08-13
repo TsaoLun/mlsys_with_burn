@@ -38,7 +38,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 
 </details>
 
-2. 【基础】`done` 和 `truncated` 在 bootstrap 中为什么可能有不同语义？固定
+2. 【基础】`done` 和 `truncated` 在 bootstrap 中为什么可能有不同语义？
    `burn-train` 的 transition 路径在哪里合并了它们？
 
 <details>
@@ -105,8 +105,8 @@ learner 一侧，避免笼统的“变快/变慢”。
 <summary>提示</summary>
 
 [「多智能体与分布式系统边界」](06-multi-agent-boundary.md)的
-「固定 Burn 可以组合什么」列出了这个名字实际提供的能力：多个环境
-实例共享同一个 `AsyncPolicy` 的合批推理。从固定 `Environment` 只有
+「Burn 可以组合什么」列出了这个名字实际提供的能力：多个环境
+实例共享同一个 `AsyncPolicy` 的合批推理。从 `Environment` 只有
 一个 `Action` 关联类型入手，检查联合动作、每个 agent 独立的 reward
 与 credit assignment 各缺少什么支撑。
 
@@ -121,7 +121,7 @@ learner 一侧，避免笼统的“变快/变慢”。
 [「TD 更新、off-policy 与训练编排」](05-learning-and-off-policy.md)的
 「Checkpoint 不只保存 policy」给出判断框架：区分算法不变量与可以
 重建的 cache。对照
-`burn/crates/burn-train/src/learner/rl/checkpointer.rs`，看固定实现把
+`burn/crates/burn-train/src/learner/rl/checkpointer.rs`，看这份实现把
 哪些 record 分开保存、哪些完全没有替你保存；对每一项论证遗漏它会
 破坏什么——下一步动作、更新方向还是数据分布。
 
@@ -312,7 +312,7 @@ observation 从环境到分布再变回动作”走一遍图，检验有没有�
 <summary>提示</summary>
 
 [「Transition、回放与采样」](03-replay-and-sampling.md)的
-「Circular replay buffer」把固定实现的行为列成了五步，可当作阅读
+「Circular replay buffer」把该实现的行为列成了五步，可当作阅读
 提纲逐条到源码里找对应；`examples/ch08-rl-rollout` 的
 `unit_capacity_retains_only_the_latest_aligned_transition` 测试展示
 覆盖之后所有字段仍指向同一条 transition——读 `sample` 时留意这种
@@ -344,7 +344,7 @@ batch 时由谁触发 flush；update 消息与在途 action 请求的先后顺�
 <summary>提示</summary>
 
 [「Rollout 吞吐、异步环境与推理队列」](04-rollout-throughput.md)的
-「固定 Burn 的三种 runner」概括了三层结构与 double batching 的
+「Burn 的三种 runner」概括了三层结构与 double batching 的
 “领先一步”设计。阅读时为每种 runner 画一条 transition 从
 `env.step` 到交给调用方的路径，标出它跨越哪些 channel、在哪一步被
 组装成 `Trajectory`，再比较三条路径对 reset 边界的处理差异。
@@ -374,7 +374,7 @@ batch 时由谁触发 flush；update 消息与在途 action 请求的先后顺�
 <summary>提示</summary>
 
 [「TD 更新、off-policy 与训练编排」](05-learning-and-off-policy.md)的
-「固定 DQN example 的完整边界」已把应用侧要自己实现的七件事列成
+「DQN example 的完整分工」已把应用侧要自己实现的七件事列成
 清单，阅读时给每一项找到对应代码位置即可。特别注意区分哪些类型来自
 burn-rl/burn-train 的 trait、哪些是这个 example 自带的实现——这条
 边界正是“能组合出 DQN”与“自带 DQN”的差别。
@@ -438,7 +438,7 @@ batch 会分离。
 
 要守住的性质列在
 [「Rollout 吞吐、异步环境与推理队列」](04-rollout-throughput.md)
-「固定 Burn 的三种 runner」的异步验证清单里：每个环境的 transition
+「Burn 的三种 runner」的异步验证清单里：每个环境的 transition
 按自身顺序出现、`env_id` 能把结果路由回正确环境。重排机制可借鉴
 第 5 章[「多线程加载与保序性边界」](../ch05/05-multithread-and-order.md)
 的“附加全局序号、在消费者侧重排”方案；测试时故意打乱 worker 的
@@ -454,7 +454,7 @@ batch 会分离。
 
 [「Transition、回放与采样」](03-replay-and-sampling.md)给出两个
 支点：内存估算式把容量与每字段字节数联系起来；「本节小结」明确
-优先级采样与 n-step 不在固定 `TransitionBuffer` 的能力内，这是一道
+优先级采样与 n-step 不在 `TransitionBuffer` 的能力内，这是一道
 自行扩展设计题。从“`sample` 的所有字段共用同一 indices”这个
 不变量出发，推 n-step 需要额外读哪些相邻行、优先级需要在 push、
 sample 和 checkpoint 各加什么状态。
@@ -470,7 +470,7 @@ sample 和 checkpoint 各加什么状态。
 [「多智能体与分布式系统边界」](06-multi-agent-boundary.md)的
 「与分布式训练的关系」列出了六条应当先写下的可验证条件，可以直接
 当设计文档的提纲；`examples/ch08-rl-rollout` 的 `policy_is_fresh`
-测试是版本滞后判断的最小原型。记住固定 Burn 只提供单进程编排，
+测试是版本滞后判断的最小原型。记住 Burn 目前只提供单进程编排，
 跨节点部分全由你的协议承担——包括队列满时阻塞、丢弃还是覆盖的
 选择。
 

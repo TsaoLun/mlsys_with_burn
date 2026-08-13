@@ -179,6 +179,32 @@ require-grad 意图。问：`set_require_grad(false)` 关掉的又是什么？
 
 </details>
 
+8. 【进阶】给 `ch02-mini-autodiff` 增加 `sub` 与 `div` 算子：先写出反向规则，
+   再仿照现有测试补一个数值梯度校验。
+
+<details>
+<summary>提示</summary>
+
+`Mul` 的规则展示了「反向需要前向值」：`div` 对分子的梯度是 `1/b`、
+对分母是 `-a/b²`，两者都要读 tape 里保存的前向值。校验仿照
+`numeric_gradient_check` 用中心差分，测试输入让分母远离 0。代码入口
+见[实验第 9 节](07-labs.md)。
+
+</details>
+
+9. 【挑战】把 mini tape 的标量推广为定长向量：支持元素级 `add`/`mul` 加一个
+   `sum` 归约，说明 `backward` 里哪些位置需要修改、哪些保持不变。
+
+<details>
+<summary>提示</summary>
+
+归约的反向是广播：`sum` 把标量梯度摊回每个元素，正好对应
+[「Tensor、Device 与运行时后端」](02-tensor-device-backend.md)讲的
+广播反向归约（方向相反）。每个节点的 `grad` 要从 `f64` 变成与
+`value` 同形的向量，而拓扑序扫描的骨架完全不用动。
+
+</details>
+
 
 ### 源码题
 

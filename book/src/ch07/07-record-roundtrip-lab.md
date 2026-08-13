@@ -119,7 +119,7 @@ burnpack magic=NRUB version=1 metadata_bytes=133 data_section_start=256 total_by
    p95/p99；
 7. 具备匹配网络和 backend 后，再尝试 Remote 或浏览器客户端。
 
-第 5 步不能跳过：固定仓库的 `burn-onnx` 仍指向较早 Burn revision，
+第 5 步不能跳过：`burn-onnx` 固定快照仍指向较早 Burn revision，
 本章没有把两个 revision 的 generated model 类型混进同一依赖图。
 
 ## 6. 接到第 5–6 章

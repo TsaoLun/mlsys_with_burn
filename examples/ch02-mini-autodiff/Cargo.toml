@@ -1,0 +1,13 @@
+[package]
+name = "ch02-mini-autodiff"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+rust-version.workspace = true
+
+[lints.clippy]
+dbg_macro = "deny"
+todo = "warn"
+
+[dependencies]

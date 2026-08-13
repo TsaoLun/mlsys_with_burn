@@ -24,7 +24,7 @@ epsilon、log probability、随机数种子或 value estimate。context 不是�
 
 ## 三种表示之间的转换
 
-固定 Burn 把环境与 policy 之间的转换分成两个 trait：
+Burn 把环境与 policy 之间的转换分成两个 trait：
 
 ```text
 Environment::State ── ToObservation<O> ──► Policy::Observation

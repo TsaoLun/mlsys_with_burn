@@ -23,8 +23,9 @@
    并能沿六个决策点走查一次 `Tensor::matmul` 到 CubeK Strategy 的路径；
 6. 用 GEMM 解释 tiling、向量化、共享内存和流水线；
 7. 说明 autotune 为何依赖 shape、dtype、设备与运行时状态；
-8. 在 CPU runtime 上运行并测试一个真实 CubeCL Kernel，并用 host 加载
-   模型理解 tiling 为何减少全局读（不把它当成共享内存实验）。
+8. 在 CPU runtime 上运行并测试一个真实 CubeCL Kernel，用 host 加载
+   模型理解 tiling 为何减少全局读；有图形驱动时，再用可选 GEMM
+   阶梯实验实测共享内存 tile 的收益。
 
 ## 先修知识
 
@@ -36,8 +37,10 @@
 我们先按 **GPU 机器模型**建立并行与存储层次，再进入 CubeCL / CubeK。
 正文同步对照 `CpuRuntime`、`WgpuRuntime`、`CudaRuntime`、`HipRuntime`
 等源码入口：同一套 Kernel IR 如何接到不同设备。默认实验仍在 CPU（可选
-`--features wgpu`）上验证语义，不要求本机安装 CUDA。GEMM 把硬件、
-Kernel 与算子库连起来；更深的 Fusion / JIT / stream 留到第 4 章。
+`--features wgpu`）上验证语义，不要求本机安装 CUDA；有图形驱动的读者
+还可以用可选的 GEMM 阶梯实验，把「朴素 → 共享内存 tile」的差距在
+自己机器上实测出来。GEMM 把硬件、Kernel 与算子库连起来；更深的
+Fusion / JIT / stream 留到第 4 章。
 
 ## 小节
 

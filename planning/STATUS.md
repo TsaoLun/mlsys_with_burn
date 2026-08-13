@@ -29,6 +29,18 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
 - [x] 内容与结构加固批次（2026-08-12）：修正实验语义/成本模型、补齐
   章节导航与桥接、修复损坏 SVG、修正误导性练习提示，并扩展
   `check_release.py` 防回归。
+- [x] 全书审计修复批次（2026-08-13，P0–P3）：消除三处自相矛盾与
+  5 处失效标题引用；op-anatomy 补 `matmul` State 真实摘录（含
+  「对侧被追踪才 checkpoint」细节）；三面否定墙改为归属分工表
+  （ch06/06、ch09/04、ch09/06）；ch09 六节小结去同款收尾；定语式
+  「固定 X」约 35 处收敛；附录许可证 9→1、重复定义合并、比较卡降级；
+  ch06/ch09 双总结去重；新增 5 张承重 SVG（dispatch 树、生态、存储
+  层次、tape→optimizer、OffPolicy 循环）并删对应 ASCII/重复表格；
+  ch07 章末补两个新实验、术语表补 PTQ/校准/scale-zero-point/连续
+  批处理/KV cache 五词。验证：`mdbook build/test`、`cargo fmt`、
+  `check_release --require-built-book` 全绿；图片引用与 SVG 使用
+  无缺失；完整 `make check` 仍被本机 tracel-llvm 404 阻断（既有）。
+  见 `planning/session-logs/2026-08-13-audit-repair.md`。
 
 ## 下一步
 
@@ -215,6 +227,109 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
   与折叠提示；`docs/AUTHORING.md` 补充练习体例。
 
 ## 本次交接
+
+- 已完成（2026-08-13 夜 2）：深度批次五——CubeK 四层下钻与
+  autotune 键（详见
+  `planning/session-logs/2026-08-13-depth-batch-five.md`）。
+  - ch03/04 续接「第七层：Routine 内部的四层组件」：
+    batch/global/stage/tile 职责表（按 pinned 模块注释）、tile 五
+    变体与 requires_accelerator、优化阶梯映射为显式类型、GEMM 阶梯
+    实验定位为 global+Register 压平形态。
+  - ch03/06 新增「一个 tune key 长什么样」：MatmulAutotuneKey 逐
+    字段机制来源（anchor 尺寸分桶与 level 底数、stride 因子 2^10
+    封顶的 swizzle 注释、512/2048 分桶、按键剪枝候选）；核实
+    LocalTuner 按设备 ID 分 Tuner。
+  - ch03/05 与 ch03/07 各一句互链。
+- 验证：断言全部按 pin `git show/grep` 核实；`mdbook build/test`、
+  `check_release.py --require-built-book`（`ok=true`）、
+  `git diff --check` 通过；无代码改动。
+- 下一步：提交推送；机制纵深剩余候选——`#[derive(CubeType)]`
+  展开、attention/reduce 的四层对照走读、Fusion 即时 kernel 与
+  CubeK 预制 kernel 的选择边界。
+
+- 已完成（2026-08-13 夜）：深度批次四——宏黑箱、ONNX 算子旅程、
+  解剖对照（详见 `planning/session-logs/2026-08-13-depth-batch-four.md`）。
+  - ch02/03 与 ch03/03 各新增「宏在替你写什么」：引用本机
+    cargo-expand 的**真实展开产物**讲透 `derive(Module)`（逐字段
+    visit/map、字段名即参数路径来源）与 `#[cube]`（expand 登记 IR、
+    define 产出 KernelDefinition 即缓存键、launch 装配），标注
+    「节选并简化」。
+  - ch07/02 新增「一个算子的旅程：Gemm」：注册→属性/形状→
+    模式识别（Gemm 特例融合为 Linear，权重布局元数据）→ quote!
+    代码生成→fixture 五站，全按 burn-onnx pin 核实。
+  - 解剖页 add/sum 真实摘录对照（State 由数学决定），示例增两断言
+    （共 6 测试）。
+- 验证：6 测试 `--locked` 通过、clippy/fmt、`mdbook build/test`、
+  `check_release.py --require-built-book`（`ok=true`）、
+  `git diff --check` 均通过。
+- 下一步：提交推送；机制纵深候选——matmul 的 CubeK
+  tile/stage/global 下钻、autotune 键端到端追踪、
+  `#[derive(CubeType)]` 展开对照。
+
+- 已完成（2026-08-13 晚）：深度批次三——「算子解剖」贯穿页
+  （详见 `planning/session-logs/2026-08-13-op-anatomy.md`）。定位
+  澄清：不做明面「贡献者内容」，以机制纵深使贡献成为副产品。
+  - `book/src/op-anatomy.md`：tanh 的十层解剖（API→契约→dispatch→
+    autodiff 反向/checkpoint 策略→Flex→CubeCL→Fusion 双注册→IR
+    词汇→backend-tests 同一断言切后端），全部按 pin 摘录并附失效
+    模式与「换算子怎么走」。
+  - `examples/ch02-ch04-op-anatomy`（4 测试）：前向/反向/数值核对/
+    乘积法则断言，输出三行 0.00e0 引入页面。
+  - ch02/05、ch04/03 交叉指针；附录、running-examples、Makefile、
+    workspace 同步。
+- 验证：4 测试通过、clippy/fmt、`mdbook build/test`（90 页）、
+  `check_release.py --require-built-book`（`ok=true`）、
+  `git diff --check` 均通过。
+- 下一步：提交推送；同一哲学的后续候选——`#[cube]`/
+  `#[derive(Module)]` 宏展开机制小节、ch07「一个 ONNX 算子的
+  旅程」、二元/归约算子解剖对照。
+
+- 已完成（2026-08-13 傍晚）：深度批次二——三个纯 Rust 可运行深度
+  实验（详见 `planning/session-logs/2026-08-13-depth-batch-two.md`）。
+  - `ch04-mini-pass-pipeline`（8 测试）：亲手写常量折叠/DCE/CSE +
+    融合分组，附故意非法的 fast-math 消去（正文浮点反例的可运行
+    版）；接入 ch04/02、ch04/07 §10 与练习。
+  - `ch07-ptq-calibration`（6 测试）：min-max vs 百分位、
+    per-channel、int8 GEMM；按「整体 MSE 掩盖校准交易」的真实误差
+    结构写断言与正文；接入 ch07/04。
+  - `ch07-serving-queue-sim`（5 测试，D024）：连续批处理 vs 静态批
+    与 KV 预算的虚拟时间队列模型（延迟 268→90 ms、空转槽步
+    5646→0、KV 扫描单调）；ch07/05 与 ch01/05 的 LLM 声明改为
+    「机制模型可运行、Burn runtime 未覆盖」。
+  - 工程：workspace/Makefile/running-examples/附录/练习/
+    chapter-sources 同步；D024 记录扩围。
+- 验证：三 crate 测试 19 项全过、clippy 零警告、
+  `cargo fmt --all --check`、`mdbook build/test`、
+  `check_release.py --require-built-book`（`ok=true`）、
+  `git diff --check` 均通过。
+- 偏差：PTQ 两个断言首版失败，按误差结构修正（见会话日志），失败
+  本身写进了正文教学。
+- 下一步：提交推送；深度候选剩 F（真实数据集训练，需可选下载
+  决策）、GEMM 阶梯 3–5 级、迷你 tape 向量化（已留作练习）。
+
+- 已完成（2026-08-13 下午）：深度批次一——全书第一处真实设备测量与
+  「亲手造一遍」实验（详见
+  `planning/session-logs/2026-08-13-depth-batch-one.md`）。
+  - `examples/ch03-gemm-ladder`：默认纯 Rust 分块 GEMM 语义验证；
+    `--features wgpu` 提供朴素/共享内存两级 CubeCL Kernel 与计时
+    协议。本机 Metal release 实测 256/512/1024 方阵 tiled 加速
+    4.71/4.22/4.44 倍；正文 ch03/05、ch03/07 第 8 节、
+    OPTIONAL_PROFILES 按单机观测口径接入。
+  - `examples/ch02-mini-autodiff`：约百行无依赖反向 tape（7 测试：
+    数值梯度校验、扇出累加、分支、detach）；正文 ch02/05、ch02/07
+    第 9 节接入，练习新增 2 题。
+  - 依赖设计绕开 tracel-llvm：`ch03-gemm-ladder` 默认零 CubeCL
+    依赖，wgpu 特性用 pins 同 revision 的 `cubecl`（无 `cpu`
+    特性）；workspace/Makefile/Cargo.lock 同步。
+- 验证：两 crate 测试（默认 3+7，wgpu 5）、clippy/fmt、
+  `mdbook build/test`、`check_release.py --require-built-book`
+  （`ok=true`）、`git diff --check` 均通过；wgpu 路径在本机 Metal
+  实跑。
+- 偏差：本机因上游资产缺失无法回归 `ch03-cubecl-kernel` 等
+  cubecl-cpu 示例（见已知问题更新），CI/Linux 不受影响。
+- 下一步：提交推送；有条件时在其他 GPU 平台复跑阶梯并把观测记入
+  会话日志。后续深度候选：迷你 Pass 流水线（ch04）、PTQ 校准迷你
+  实验（ch07）、KV cache/连续批处理模拟（需扩围决策）。
 
 - 已完成（2026-08-13）：教科书化第一批（D023），面向读者体验的四项
   表达层修订；证据纪律与能力边界事实不变。
@@ -601,9 +716,13 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
 - `burn-rl` 当前固定快照提供环境、policy、replay 和 runner 组合抽象，
   不提供通用 DQN/PPO/SAC、prioritized replay 或 MARL/Actor–Learner
   集群协议；第 8 章 D011 和来源映射已标出这些边界。
-- `tracel-llvm v22.1.4-5` 的 bundler 资产在不同平台/缓存环境可能影响
-  CubeCL CPU 路径；本次 Intel macOS 工作区的完整 `make check` 已通过，
-  干净环境仍应以 CI 结果为准。
+- `tracel-llvm v22.1.4-5` 的 GitHub release **没有 macos-x64 资产**
+  （只有 linux-AArch64/x64、macos-AArch64、windows-x64；2026-08-13
+  经 API 核实）。Intel macOS 上凡依赖 `cubecl-cpu` 的构建都会在
+  bundler 下载 `macos-x64.checksums.json` 时 404——这不是缓存问题。
+  规避：`ch03-gemm-ladder` 的依赖设计（默认零 CubeCL、wgpu 特性不带
+  `cpu`）不受影响；其余 CubeCL CPU 示例在该平台无法本地回归，以
+  CI/Linux 结果为准。
 
 ## 交接模板
 

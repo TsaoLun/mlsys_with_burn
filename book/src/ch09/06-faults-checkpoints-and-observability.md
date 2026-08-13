@@ -53,19 +53,17 @@ $C^* \approx \sqrt{2 \times 60 \times 14400} \approx 1315\ \text{s} \approx 22\ 
 这个公式解释了为什么“每一步都存”和“从来只存最后”都不是好策略；它也再次
 说明 checkpoint 间隔是成本模型决策，而不是配置文件的随手一项。
 
-## 本版 Burn 覆盖到哪里
+## 容错闭环里 Burn 站在哪一格
 
-Burn 的 `LearningCheckpointer`、文件 checkpoint 和异步 checkpointer
-可以保存 learner 的训练状态。它们没有实现：
+把“发现故障→保住进度→恢复训练”写成闭环，每个环节的归属就清楚了：
 
-- 节点心跳和 failure detector；
-- worker 自动重启、弹性加入或抢占；
-- 分布式 checkpoint 的跨节点提交共识；
-- 对象存储租约、版本清理和多租户访问控制；
-- 失败后自动重新放置并重新注入 rank。
-
-同样，`DistributedContext` 的通信 server 生命周期由 Rust 对象创建和
-销毁管理，但没有把节点故障、超时、重试和成员变更建模为集群协议。
+| 容错闭环的环节 | Burn 快照提供什么 | 缺口由谁补 |
+|---|---|---|
+| 保住进度：保存 learner 训练状态 | `LearningCheckpointer`、文件与异步 checkpointer | —— |
+| 发现故障：心跳与 failure detector | 无；通信 server 生命周期只随 Rust 对象创建/销毁 | 集群控制面（本章模拟器的故障 trace 是它的协议模型） |
+| 响应故障：自动重启、弹性加入、抢占、重新注入 rank | 无 | 控制面调度器 |
+| 跨节点 checkpoint 提交共识 | 单机语义 | 存储协议层 |
+| artifact 治理：租约、版本清理、访问控制 | 无 | 对象存储与多租户系统 |
 
 ## 观测什么，在哪里观测
 
@@ -126,6 +124,6 @@ admit as a gang → replay missing steps → complete
 
 ## 本节小结
 
-可恢复集群需要故障域、版本化 checkpoint、幂等重试和跨层遥测。Burn
-本版覆盖训练状态和本地 runtime 的部分接口，但 failure detector、
-重启、弹性 membership 和集群级观测仍属于外部系统。
+可恢复集群需要故障域、版本化 checkpoint、幂等重试和跨层遥测。哪个
+环节由谁提供，本节的容错闭环表已经给出；其中协议不变量（资源归还、
+重试上限、checkpoint replay）是实验里可以亲手验证的部分。

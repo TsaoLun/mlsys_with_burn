@@ -140,3 +140,47 @@ hit。Fusion block 数、cache hit、kernel 启动次数和墙钟时间是四种
 4. 比较 `StreamId::allocate()` 与 `StreamId::current()` 的测试隔离效果；
 5. 分别记录首次和稳态时间，但把它们作为环境相关测量。
 
+## 10. 迷你 Pass 流水线（独立小实验）
+
+前九节都在**观察** Burn 的编译行为；`examples/ch04-mini-pass-pipeline`
+反过来，让你在一个五算子的表达式 IR 上**亲手写** Pass。IR 只有一张
+按创建顺序编号的节点表（追加顺序即拓扑序，与第 2 章 tape 同一结构）：
+
+```rust,ignore
+{{#include ../../../examples/ch04-mini-pass-pipeline/src/lib.rs:ir}}
+```
+
+常量折叠用与解释器完全相同的 `f32` 运算在编译期求值，这是它能按位
+保持语义的原因；DCE 从 outputs 反向标记可达节点；CSE 把结构相同的
+节点合并到第一次出现。`cargo run -p ch04-mini-pass-pipeline --locked`
+打印一条流水线的全过程：
+
+```text
+原图：15 个节点，输出 = [14.234]
+常量折叠后：15 个节点（2*3+4 变为 const 10）
+DCE 后：9 个节点（死子树与折叠残留被删除）
+CSE 后：7 个节点（两棵 exp(x*y) 合并）
+优化后输出 = [14.234]（与原图按位一致）
+
+链 exp→mul 的融合组数：1
+把中间值 exp(x) 标记为输出后：2（必须物化，切成两组）
+```
+
+注意折叠本身不减少节点数——它把 `mul`/`add` 换成 `Const`，旧节点
+成为死代码，要等 DCE 回收：这就是 Pass 之间「一个的输出是另一个的
+机会」的依赖关系。最后两行的融合分组分析与本章 FusionInspector 的
+同步切分观察同构：中间值一旦被外部读取（或有多个消费者）就必须
+物化，链条在那里断开。
+
+实验里还有一个**故意非法**的改写 `fast_math_cancel`，把
+$(x+c)+(-c)$ 消去为 $x$：
+
+```rust,ignore
+{{#include ../../../examples/ch04-mini-pass-pipeline/src/lib.rs:fast_math}}
+```
+
+它的两个测试并排放着：小常量下改写结果与原图一致（看起来无害），
+$c=10^{16}$ 时原图输出 $0$、改写后输出 $1$——第 2 节浮点反例的可
+运行版。合法性来自数值语义论证，不来自「跑了几个样例没出错」。
+本实验刻意不做：控制流、shape/dtype 分析、调度与真实代码生成。
+
