@@ -4,6 +4,8 @@
 [前言](preface.md)
 [许可、来源与独立性声明](attribution.md)
 [如何运行本书示例](running-examples.md)
+[从应用到集群](infra-map.md)
+[一次调用会经过哪些层](crate-map.md)
 
 # 基础篇
 
@@ -60,11 +62,11 @@
   - [burn-train 的 Learner 与训练装配](ch06/03-burn-train-orchestration.md)
   - [优化器、学习率与检查点](ch06/04-optimizer-and-checkpoint.md)
   - [本机多设备与数据并行](ch06/05-local-data-parallel.md)
-  - [集合通信、DDP 与能力边界](ch06/06-collective-and-ddp.md)
+  - [集合通信、DDP 与并行策略](ch06/06-collective-and-ddp.md)
   - [实验：CPU 线性回归训练循环](ch06/07-training-loop-lab.md)
   - [练习、延伸阅读与来源](ch06/08-exercises-and-sources.md)
 
-# 应用与扩展篇
+# 服务、集群与扩展
 
 - [第 7 章 模型服务](ch07-model-serving.md)
   - [部署边界、artifact 与服务成本](ch07/01-deployment-boundary.md)
@@ -75,7 +77,7 @@
   - [Remote、WASM/no_std 与部署边界](ch07/06-remote-wasm-and-nostd.md)
   - [实验：CPU 模型状态往返保存与恢复](ch07/07-record-roundtrip-lab.md)
   - [练习、延伸阅读与来源](ch07/08-exercises-and-sources.md)
-- [第 8 章 强化学习系统](ch08-rl-systems.md)
+- [第 8 章 强化学习系统（可选）](ch08-rl-systems.md)
   - [MDP、环境与轨迹边界](ch08/01-mdp-environment-and-trajectory.md)
   - [Policy、观察转换与动作批处理](ch08/02-policy-and-batching.md)
   - [Transition、回放与采样](ch08/03-replay-and-sampling.md)

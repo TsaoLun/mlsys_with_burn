@@ -254,7 +254,7 @@ Inspector，断言 `drain()` 结果互不包含对方的操作；stream 隔离�
 <details>
 <summary>提示</summary>
 
-在本书固定版本源码 `burn/crates/burn-fusion/src/ops/` 下搜索
+在本书所用版本源码 `burn/crates/burn-fusion/src/ops/` 下搜索
 `float_add`，看它构造 `BinaryOpIr` 后把描述交给谁；对照
 [「Burn IR 与运行时融合」](03-burn-ir-and-fusion.md)第 1 节的注册
 链路，把“Tensor 操作到 client”的每一跳落到具体函数上。
@@ -398,7 +398,7 @@ value 是可执行产物还是“哪个候选胜出”的记录，失效条件�
 
 TVM、MLIR、Halide 等编译系统论文见附录
 [参考文献](../references.md#第-4-章-ai-编译器与运行时系统)。
-本书固定版本源码中的权威入口：
+本书所用版本源码中的权威入口：
 
 - `burn/crates/burn-ir/src/`
 - `burn/crates/burn-fusion/src/ops/`
@@ -421,11 +421,11 @@ LLVM、MLIR、Halide、TVM/Ansor 和自动微分文献可用于比较 IR、sched
 ## 本章系统结论
 
 1. 编译器做保持语义的变换；运行时把计划落实到分配、调度、launch 与同步。
-2. 前端关注 OperationIr / Pass / autodiff 边界；后端关注选择、内存、stream 与 JIT/cache。
-3. 同一套 Fusion/CubeCL IR 可以落到不同 Runtime；同步/`read` 语义在设备上更昂贵。
-4. CPU 上 FusionInspector 让你看到计划切分与数值等价，不是硬件 launch 计数器。
-5. GPU 阅读时对照：设备 graph capture（若后端支持）、cache/JIT 与真实 launch 指标的区别。
-6. Fusion block 数、cache hit、kernel launch 与墙钟时间不是同一个量。
+2. 前端关注 OperationIr / Pass / autodiff 边界；后端关注选择、内存、stream 与 JIT。
+3. 同一套 Fusion/CubeCL IR 可以落到不同 Runtime；同步在设备上更昂贵。
+4. FusionInspector 让你看到计划切分；迷你 Pass 让你亲手写出非法 fast-math 的后果。
+5. 改融合规则打开 `burn-fusion`，改 JIT 缓存键打开 CubeCL Compiler。
+6. Fusion block 数、cache hit 和墙钟时间不是同一个量。
 
 ## 来源与改编说明
 

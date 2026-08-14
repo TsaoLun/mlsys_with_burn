@@ -32,6 +32,8 @@ Agent 开始工作时依次阅读：
 
 ## 索引
 
+- [`2026-08-14-curriculum-reframe.md`](2026-08-14-curriculum-reframe.md)：
+  读者主路径重编（D025）：系统课章首、产业/crate 地图、并行与服务加厚。
 - [`2026-07-30-bootstrap-ch01-ch02.md`](2026-07-30-bootstrap-ch01-ch02.md)：
   项目评估、基建、远程依赖策略及第 1–2 章实现。
 - [`2026-07-31-ch03-accelerator.md`](2026-07-31-ch03-accelerator.md)：

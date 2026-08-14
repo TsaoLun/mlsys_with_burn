@@ -28,7 +28,7 @@ Burn 用 `Module` 统一这些操作。
 ### 宏在替你写什么
 
 派生宏不是魔法，值得看一次它的真实产物。对上面的 `TinyModel` 运行
-`cargo expand`（本书固定版本，节选）：
+`cargo expand`（本书所用版本，节选）：
 
 ```rust,ignore
 impl burn::module::Module for TinyModel {

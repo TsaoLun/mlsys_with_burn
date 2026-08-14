@@ -1,6 +1,6 @@
 # 实验：CPU 上运行 CubeCL Kernel
 
-示例在 `examples/ch03-cubecl-kernel`，依赖本书固定的 CubeCL 版本，并启用
+示例在 `examples/ch03-cubecl-kernel`，依赖本书所用的 CubeCL 版本，并启用
 `cpu`、`std` 和 `stdlib` feature。CPU Runtime 经 LLVM/MLIR 编译 Kernel；
 首次构建会比前两章慢，增量运行会快得多。
 

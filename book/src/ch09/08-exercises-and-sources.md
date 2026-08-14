@@ -8,7 +8,7 @@
 kernel 和同步边界。
 
 OpenMLSys v1 提供了分布式训练的拓扑、通信、并行和参数服务器动机。
-Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
+Burn / CubeCL 提供 `ExecutionStrategy`、`DistributedContext`、
 `DistributedOps`、CUDA collective 和 `ComputeClient` 等数据面入口；
 它们与控制面各能力的分工，见第 4 节的集群级能力表和第 6 节的容错
 闭环表。
@@ -44,7 +44,7 @@ Burn/CubeCL 快照提供 `ExecutionStrategy`、`DistributedContext`、
 
 对照[「集群负载、系统分层与能力边界」](01-cluster-workload-and-boundary.md)
 的三层图和第 6 章
-[「集合通信、DDP 与能力边界」](../ch06/06-collective-and-ddp.md)：
+[「集合通信、DDP 与并行策略」](../ch06/06-collective-and-ddp.md)：
 队列等待属于控制面，`all_reduce` 属于训练数据面，
 `ComputeClient::sync` 属于设备运行时完成边界。
 
@@ -343,7 +343,7 @@ placement（测试
 <summary>提示</summary>
 
 第 6 章[「本机多设备与数据并行」](../ch06/05-local-data-parallel.md)
-和[「集合通信、DDP 与能力边界」](../ch06/06-collective-and-ddp.md)
+和[「集合通信、DDP 与并行策略」](../ch06/06-collective-and-ddp.md)
 分别对应这两种策略，本章
 [「集群负载、系统分层与能力边界」](01-cluster-workload-and-boundary.md)
 概括了三种 `ExecutionStrategy`。读源码时盯住两点：设备集合从哪
@@ -359,7 +359,7 @@ placement（测试
 <summary>提示</summary>
 
 调用顺序对照第 6 章
-[「集合通信、DDP 与能力边界」](../ch06/06-collective-and-ddp.md)
+[「集合通信、DDP 与并行策略」](../ch06/06-collective-and-ddp.md)
 的 AllReduce 语义与完成边界；注意第 9 章模拟器只建立成本协议，
 不调用这些 Burn collective API。
 
@@ -427,7 +427,7 @@ server、注册参数、提交同步、`all_reduce`/`sync_collective`）。
 
 ## OpenMLSys v1 来源
 
-本章逐文件参考本书固定版本
+本章逐文件参考本书所用版本
 `9c289782ccbb165ac8ad7c960ecffc12942a5560`：
 
 - `openmlsys/v1/zh_chapters/chapter_distributed_training/index.md`：
@@ -465,22 +465,20 @@ CubeCL revision 是 `be278a1e76aed881e2cc6b165414ee6103ca4634`：
 - `cubecl/crates/cubecl-cpu/src/runtime.rs`
 - `cubecl/crates/cubecl-cuda/src/compute/server.rs`
 
-固定源码可核验的是设备/通信/运行时入口；从这里到完整集群系统之间
+源码里可以定位设备、通信和运行时入口；从这里到完整集群系统之间
 的那段距离——作业队列、拓扑放置、elastic membership、分布式
-checkpoint 共识——正是本章 CPU 模拟器建模的协议层。这些协议的工业
+checkpoint 共识——正是本章模拟器建模的协议层。这些协议的工业
 实现（Borg、Gandiva、Tiresias 等）见附录
 [参考文献](../references.md#第-9-章-大规模-gpu-集群管理)。
 
 ## 本章系统结论
 
 1. 集群控制面负责作业、资源与故障；训练数据面负责 rank 间通信——两层不能混称。
-2. gang scheduling、按“同节点→同机柜→跨机柜”收紧的拓扑放置，与
-   $\alpha+\beta$ 通信成本共同决定 makespan；链路每往外跨一档，带宽
-   通常低 1–2 个数量级。
-3. CPU 模拟器验证了队列、成组准入、故障重放与确定性 trace，不测量真实 GPU/NCCL。
-4. GPU 阅读时应把第 6 章一次 AllReduce 的字节量放进机柜/链路模型重算成本。
-5. Burn/CubeCL 源码可定位设备与 collective 数据面入口，但不提供作业队列实现。
-6. 不能把虚拟时间或放置结果当成 GPU benchmark。
+2. gang scheduling 与「同节点→同机柜→跨机柜」放置，和 $\alpha+\beta$ 共同决定 makespan。
+3. 模拟器观察队列、成组准入、故障重放；对应产业里的 Slurm / K8s 设备插件 / 内部 GPU 调度器。
+4. 把第 6 章一次 AllReduce 的字节量放进机柜模型，才能看出放置为什么重要。
+5. Burn / CubeCL 提供设备与 collective 数据面入口，不提供作业队列。
+6. 虚拟时间回答不了真机 NCCL 或网络拥塞。
 
 ## 来源与改编说明
 

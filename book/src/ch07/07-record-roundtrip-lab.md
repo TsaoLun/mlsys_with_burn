@@ -17,9 +17,8 @@
               restored forward
 ```
 
-你会观察参数保存、加载、shape 和数值是否一致。本实验刻意不做 ONNX
-导入、HTTP/gRPC、Remote、WASM、SafeTensors、量化或 GPU 性能——本地
-load 成功不等于服务已经上线。
+你会观察参数保存、加载、shape 和数值是否一致。范围停在 Burnpack 往返；
+ONNX 导入、HTTP 和 Remote 见本章其它小节。本地 load 成功不等于服务已经上线。
 
 ## 1. 创建目标 module 和 reference
 

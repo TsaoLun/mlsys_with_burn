@@ -281,7 +281,7 @@ visitor 对 `Param` 与普通字段的处理，再拿 BatchNorm 统计量自测�
 ## 延伸阅读
 
 接口与自动微分的论文见附录[参考文献](../references.md#第-2-章-编程接口与计算图)。
-本书固定版本源码中的权威入口：
+本书所用版本源码中的权威入口：
 
 - `burn/crates/burn-tensor/src/tensor/api/base.rs`
 - `burn/crates/burn-tensor/src/tensor/api/float.rs`
@@ -301,9 +301,9 @@ visitor 对 `Param` 与普通字段的处理，再拿 BatchNorm 统计量自测�
 1. 工作流各阶段携带各自的数据、状态与出错点，不能压成一个模糊的 `train()`。
 2. `Tensor` 的编译期秩/类别与运行时 shape、dtype、Device 必须分开看。
 3. Module/`Param` 管理可训练状态；autodiff tape 记录实际执行路径上的一阶反向。
-4. CPU 上你应观察到广播、参数统计与分支 tape 的梯度行为。
-5. GPU 阅读线索：同一 Module API 最终要落到某个 Backend/CubeCL Kernel；中间还隔着 dispatch 与（可选）Fusion。
-6. 不能把 autodiff tape、Fusion IR 与 device graph capture 当成同一层实现。
+4. 实验里可以看到广播、参数统计与分支 tape；迷你 tape 用来对照 `burn-autodiff`。
+5. 改 API、反向或分派时分别打开 `burn-tensor`、`burn-autodiff`、`burn-dispatch`，见[一次调用会经过哪些层](../crate-map.md)。
+6. autodiff tape、Fusion IR 与 device graph capture 不是同一层。
 
 ## 来源与改编说明
 

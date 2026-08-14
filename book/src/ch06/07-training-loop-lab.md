@@ -2,7 +2,7 @@
 
 ## 你会学到什么
 
-示例在 `examples/ch06-training-loop`：用本书固定版本的
+示例在 `examples/ch06-training-loop`：用
 `Device::flex().autodiff()` 和一个 `1 → 1` 的 `Linear`，在 $y=2x+1$
 数据上看 MSE loss 随 SGD 下降。
 
@@ -10,9 +10,9 @@
 forward → loss → backward → GradientsParams → SGD → loss
 ```
 
-本实验刻意不做 DDP、AllReduce、网络带宽、模型并行或 GPU 性能测量。
-当前 Flex CPU 路径本身也没有 collective 实现，所以把范围收在单设备
-训练循环上。
+范围停在单设备循环。Flex 没有 collective 实现，DDP / AllReduce / 模型
+并行放到[集合通信、DDP 与并行策略](06-collective-and-ddp.md)用成本模型
+讨论。
 
 ## 1. 构造 CPU autodiff model
 

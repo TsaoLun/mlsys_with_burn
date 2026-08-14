@@ -1,46 +1,48 @@
 # 第 9 章 大规模 GPU 集群管理
 
+当训练或推理跨越许多节点，决定「谁获得哪些 GPU、通信走哪条链路、失败
+之后从哪恢复」的不再是训练循环内部的 `all_reduce`，而是集群控制面。
+本章对应 OpenMLSys 分布式训练里的集群内容，并补上成组调度、多租户和
+故障协议。
+
+产业里对应 Slurm、Kubernetes 的设备插件、内部 GPU 调度器（如 Borg
+系），以及 NCCL 所在的机柜网络。Burn 的 DDP 入口是数据面案例，不是
+作业队列。默认实验用纯 Rust 虚拟时间模拟器观察放置与故障，不测量真
+机集群。
+
 ## 本章问题
 
-当训练跨越大量节点后，系统如何调度昂贵的加速器、处理故障并定位性能
-瓶颈？
+当作业跨越大量节点后，系统如何调度昂贵的加速器、处理故障并定位性能
+瓶颈？控制面、训练数据面和设备运行时各管什么？
 
 ## 学习目标
 
 完成本章后，你应该能够：
 
 1. 区分集群控制面、训练通信数据面和 GPU 设备运行时；
-2. 用 GPU、节点、机柜、ToR（Top of Rack）和 Spine 描述通信域；
-3. 为一个成组调度（gang scheduling）作业写出 GPU、显存和网络域需求；
-4. 用 `alpha + beta * bytes` 模型解释集合通信，并区分同节点、同机柜
-   跨节点、跨机柜三档放置域的成本跳变；
+2. 用 GPU、节点、机柜、ToR 和 Spine 描述通信域；
+3. 为一个成组调度作业写出 GPU、显存和网络域需求；
+4. 用 $\alpha + \beta \cdot \text{bytes}$ 解释集合通信，并区分同节点 /
+   同机柜 / 跨机柜三档成本；
 5. 解释 FIFO、拓扑感知放置、配额和资源碎片之间的取舍；
 6. 设计带 checkpoint、attempt、step 和幂等确认的故障恢复协议；
-7. 区分 Burn/CubeCL 已核验的本机/设备接口与外部集群调度职责；
-8. 在 CPU 离散事件模拟器中观察队列等待、跨机柜流量、通信成本和重试。
+7. 把第 6 章一次 AllReduce 的字节量放进机柜模型重算成本；
+8. 在离散事件模拟器中观察队列等待、跨机柜流量和重试。
 
 ## 先修知识
 
-建议先完成第 4 章的 stream、内存和执行边界，第 6 章的训练状态、数据
-并行、集合通信和 checkpoint，第 7 章的部署成本。需要理解 Rust 的
-`struct`、`enum`、trait、集合类型和基本的离散事件模拟；不要求 CUDA、
-NCCL、RDMA 或真实 GPU 集群。
+建议先完成第 6 章的训练状态与集合通信。需要理解基本的离散事件模拟。
+不要求本机已有 GPU 集群。
 
 ## 本章路线
 
-本章自上而下走四层：workload card（GPU/内存/通信字节/故障域）→
-控制面（queue、admission、placement、recovery）→ 训练数据面
-（all-reduce、all-gather、checkpoint）→ 设备运行时（stream、内存池、
-kernel、同步），如下图。
-
-先定义集群作业的资源和完成条件，再从硬件拓扑推导通信成本。之后讨论
-队列、成组调度、拓扑放置、多租户与故障协议，最后放入纯 Rust 模拟器。
-相对第 6 章：那里讲清梯度同步**数据面**期望什么；本章把一次 AllReduce
-的字节量放进机柜/链路，看控制面放置如何改变 $\alpha+\beta$ 成本。Burn
-的 DDP / `DistributedContext` 与 CubeCL client 仍是数据面源码案例，不是
-作业队列实现。默认实验用虚拟时间；真集群遥测不在默认路径。
+自上而下走四层：workload card → 控制面（queue、admission、placement、
+recovery）→ 训练数据面（all-reduce、checkpoint）→ 设备运行时。
 
 ![控制面负责任务与资源，训练数据面负责集合通信与设备执行；放置结果改变通信域从而进入 makespan](img/ch06-ch09-control-data-planes.svg)
+
+相对第 6 章：那里讲清梯度同步数据面期望什么；本章把一次 AllReduce 的
+字节量放进机柜/链路，看放置如何改变成本。
 
 ## 小节
 
@@ -53,10 +55,7 @@ kernel、同步），如下图。
 7. [实验：CPU 集群调度与故障模拟器](ch09/07-cpu-cluster-simulator-lab.md)
 8. [练习、延伸阅读与来源](ch09/08-exercises-and-sources.md)
 
-读完全书主线后，可回到[综合实验](capstone.md)，把数据、训练、状态
-保存和推理恢复作为一个端到端系统再检查一遍。
+读完全书主线后，可回到[综合实验](capstone.md)，把数据、训练、状态保存
+和推理恢复再走一遍。
 
-示例代码位于 `examples/ch09-cluster-simulator`，只使用 Rust 标准库和虚拟
-时间。它验证调度协议、通信成本模型、checkpoint 恢复和资源归还；它不
-测量真实 GPU、网络或 NCCL 性能，也不声称本书所用 Burn 版本提供作业队列、
-多租户隔离、弹性 membership 或自动故障迁移。
+示例位于 `examples/ch09-cluster-simulator`，只使用 Rust 标准库和虚拟时间。

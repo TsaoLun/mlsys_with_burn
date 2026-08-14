@@ -1,59 +1,50 @@
 # 第 7 章 模型服务
 
-训练结束不是系统结束。一个模型从训练进程走到用户请求之间，至少要经过
-状态导出、格式或图转换、数值验证、运行时选择、输入输出契约和服务治理。
-模型服务（model serving）关心的不只是“能不能算出一个 tensor”，还要回答
-模型文件由谁解释、权重何时进入设备、请求怎样排队，以及延迟、吞吐、内存和
-安全边界由哪一层负责。
+训练结束不是系统结束。模型从训练进程走到用户请求，至少要经过状态导出、
+格式或图转换、数值校验、运行时选择、输入输出契约，以及排队与限流。
+模型服务（model serving）关心的不只是「能不能算出一个 tensor」，还要
+回答：文件由谁解释、权重何时进入设备、请求怎样合并，延迟和显存由哪一层
+负责。
+
+这是 OpenMLSys「模型部署」一章的对应物。产业里对应 ONNX Runtime、
+TensorRT、Triton Inference Server，以及大模型场景下的 vLLM / 连续批处理。
+本章有两条线：**产物线**（Record / Burnpack / ONNX）和 **服务线**（batch、
+队列、KV 预算）。默认实验走产物往返；连续批与 KV 用队列模型把机制跑出来。
 
 ## 本章问题
 
-训练产物如何转换、验证、优化并部署到服务器、浏览器或受限设备？本书固定快照中的 `ModuleRecord`、`burn-onnx`、Remote 和 WASM/no_std 分别解决哪一
-段问题，又没有解决什么？
+训练产物如何转换、校验并部署到服务器、浏览器或受限设备？请求到达之后，
+系统如何在延迟、吞吐和显存之间取舍？生成式服务里 prefill / decode 和
+KV cache 改变了哪些成本？
 
 ## 学习目标
 
 完成本章后，你应该能够：
 
-1. 把模型部署拆成模型产物（artifact）、执行运行时（runtime）、请求服务和安全治理四个边界；
-2. 解释 ONNX 图到 Burn Rust source 的转换为什么不是简单的文件改名；
-3. 区分模型拓扑、参数状态、权重格式、运行时 backend 和服务协议；
-4. 使用 `ModuleRecord`/Burnpack 在 CPU 上保存并恢复参数，验证推理输出，
-   并读出容器的 magic、版本、metadata 边界与 256 字节对齐；
-5. 区分 `burn-onnx` 的 `File`、`Embedded`、`Bytes` 和 `None` 加载策略；
-6. 用 batch、队列和设备读回建立延迟/吞吐的基本模型；
-7. 解释 Burn Remote 的 compute peer 边界，以及 WASM 异步连接的限制；
-8. 分清本版已跑通的参数往返、源码中可对照的 ONNX/Remote 路径，以及
-   仍需额外工程的服务能力。
+1. 把部署拆成产物（artifact）、执行运行时、请求服务和安全治理；
+2. 解释 ONNX 图到可执行路径为什么不是文件改名；
+3. 区分模型拓扑、参数状态、权重格式、backend 和服务协议；
+4. 使用 `ModuleRecord` / Burnpack 保存并恢复参数，并读出容器布局；
+5. 区分几种权重加载策略，以及它们与运行时 Device 正交；
+6. 用 batch、队列、TTFT / TPOT 和 KV 预算建立服务成本模型；
+7. 解释 Remote 与 WASM / `no_std` 各自停在哪；
+8. 分清「参数能恢复」和「已经有一条生产服务」。
 
 ## 先修知识
 
-建议先完成第 2 章的 Tensor、Device、Module 和 ModuleRecord，第 4 章的
-IR/融合与同步边界，第 5 章的数据管道，以及第 6 章的训练状态。需要理解
-Rust trait、所有权、二进制 artifact 和基本的延迟/吞吐概念。不要求先拥有
-CUDA、浏览器或部署集群。
+建议先完成第 2 章的 Module 和第 6 章的训练状态。需要理解二进制产物和
+基本的延迟/吞吐概念。
 
 ## 本章路线
 
-先把部署问题放到框架无关的边界上，再进入固定源码：
-
 ![部署主路径：训练状态 → artifact → convert/validate/optimize → runtime model，再经 pre/post 与 batch/queue 服务边界](img/ch07-serving-pipeline.svg)
 
-`ModuleRecord` 适合验证“参数能否恢复到一个 Burn module”；`burn-onnx` 负责
-把 ONNX 图生成成 Burn Rust source，并为生成模型安排 Burnpack 权重加载；
-Remote 把 tensor operation 送到 compute peer；服务端的路由、鉴权、版本、
-限流和故障转移则仍然是应用系统的职责。
+`ModuleRecord` 验证「参数能否恢复到一个 module」；`burn-onnx` 把 ONNX
+图生成 Burn Rust 源码。仓库里的 burn-onnx 仍指向另一份 Burn 提交，因此
+ONNX 路径与 Record 实验分开讲。
 
-版本关系需要心里有数：仓库里的 `burn-onnx` 仍指向较早的 Burn，与本书
-示例使用的 Burn 不是同一提交。因此本章把 ONNX 路径对照和
-`ModuleRecord` CPU 实验分开讲——本地 load 成功，不等于 ONNX 端到端已经
-在同一依赖图上验证。
-
-相对训练章，本章多出的是 **artifact 与推理入口**。闭环是：
-`Module → Record/Burnpack → 校验 → 推理 forward →（应用）batch/队列/版本`。
-推理 Device 可选 CPU/WGPU/CUDA，与格式正交；默认实验仍在 CPU 上验证
-往返一致性。有环境时再尝试加速 Device 或独立 ONNX fixture，见
-[如何运行本书示例](running-examples.md)。
+服务侧的路由、鉴权、限流和灰度是应用系统的职责。生成式场景额外的
+prefill / decode 与 KV 预算，用第 7 章队列实验观察机制。
 
 ## 小节
 
@@ -66,10 +57,7 @@ Remote 把 tensor operation 送到 compute peer；服务端的路由、鉴权、
 7. [实验：CPU 模型状态往返保存与恢复](ch07/07-record-roundtrip-lab.md)
 8. [练习、延伸阅读与来源](ch07/08-exercises-and-sources.md)
 
-第 5–7 章已经覆盖“数据 → 训练 → artifact → 推理”的最小闭环；书末的
-[综合实验](capstone.md) 会把这条链跑成一次端到端检查。
+第 5–7 章覆盖「数据 → 训练 → 产物 → 推理」的最小闭环；书末
+[综合实验](capstone.md) 会把这条链跑一遍。
 
-示例代码位于 `examples/ch07-record-roundtrip`，使用当前项目固定 Burn
-revision 的 Flex CPU。它验证的是 Burnpack 参数状态的内存导出/加载和输出
-一致性，不下载 ONNX、不启动网络服务，也不把一次 CPU 测试外推为浏览器或
-GPU 性能结论。
+示例位于 `examples/ch07-record-roundtrip` 与 `ch07-serving-queue-sim`。

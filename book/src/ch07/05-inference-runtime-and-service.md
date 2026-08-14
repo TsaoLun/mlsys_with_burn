@@ -116,19 +116,30 @@ Burn 提供 Tensor、Module、Device、backend 和部分 Remote server/client
 是让 service adapter 负责请求生命周期，让 model runner 只消费已经校验
 的 typed batch，并返回 typed output。
 
-## 与大模型服务的边界
+## 生成式服务：prefill、decode 与 KV
 
-生成式 LLM 服务在上述问题之外还有一层自回归（autoregressive）特有的
-系统问题：逐 token 解码使 KV cache 成为主要内存对象，请求长度差异
-极大，需要 continuous batching、paged KV 管理和前缀缓存（prefix
-caching）才能维持吞吐。这两个机制的**原理**可以在下面的队列模型里
-亲手跑出来；但要分清模型与能力：Burn 主线没有现成的 paged attention
-或 continuous batching **服务** runtime；`burn-onnx` 中 Attention
-节点对 `past_k`/`past_v` 张量的图转换，也不等于服务端的分页 KV 管理
-或连续批处理。把它们写成“Burn 能力”会越过本书的证据纪律。完整的
-LLM 专章（训练、投机采样、MoE 等）仍属于规划中的后续版本；工程实现
-可从附录[参考文献](../references.md#第-7-章-模型服务)中的
-Orca（continuous batching）与 PagedAttention（vLLM）两篇论文进入。
+自回归生成把一次请求拆成两段：prefill 吃完整 prompt，decode 逐步吐出
+token。成本因此分裂——
+
+- **TTFT**（time to first token）主要由 prefill 和排队决定；
+- **TPOT**（time per output token）主要由 decode 步和 KV 读写决定；
+- **KV cache** 按序列长度线性增长，往往比权重更先撞上显存墙。
+
+连续批处理（continuous batching）允许短请求先离开、新请求加入正在
+进行的 decode 步，避免静态批里「短序列占着槽位等最长序列」。KV 预算
+则给并发上硬顶：驻留序列的 prompt + decode 预留之和不能超过容量。
+
+这两个机制可以在 `examples/ch07-serving-queue-sim` 里跑出来（见下一
+小节）。工程上的分页注意力（paged attention）、前缀缓存、投机采样是
+同一组杠杆的细化，实现见[参考文献](../references.md#第-7-章-模型服务)
+中的 Orca 与 PagedAttention。Burn 主线提供 Tensor / Module / Device
+上的 `forward`，没有现成的 paged KV 或连续批服务 runtime；`burn-onnx`
+里 Attention 节点对 `past_k` / `past_v` 的图转换，也不等于服务端的
+分页管理。
+
+队列模型做了两处简化：prefill 在接纳步一次完成（真实系统常有 chunked
+prefill）；KV 按 prompt+decode 全额预留，没有换出。它解释机制方向，
+不预测某套生产 runtime 的毫秒数。
 
 ### 动手版：连续批处理与 KV 预算的队列模型
 
@@ -169,14 +180,15 @@ prefill，长 prompt 会被切片以免拖慢整步）；KV 按 prompt+decode �
 预留，没有 vLLM 式的分页与抢占。模型解释机制方向，不预测任何真实
 runtime 的数字。
 
-## 产业对照（概念对齐，不是性能对等）
+## 产业对照
 
-| 本书 / Burn | 常见产业说法 | 对齐点 | 不要外推 |
+| 本书讨论的机制 | 常见产业说法 | 对齐点 | 实现落点 |
 |---|---|---|---|
-| `ModuleRecord` / Burnpack | checkpoint / SavedModel 等权重快照 | 拓扑+参数可恢复 | 不是完整服务 manifest |
-| `burn-onnx` codegen | ONNX Runtime / 导出图 | 图→可执行路径 | 旧 Burn revision；非本书默认依赖 |
-| Device 上的 `forward` | 推理 session.run | 无训练 tape 的执行 | 不含鉴权/限流 |
-| batcher + 队列（应用层） | Triton / 自研 serving 批处理 | 延迟/吞吐权衡 | Burn 不提供统一生产线程池 |
+| `ModuleRecord` / Burnpack | checkpoint / SavedModel | 拓扑+参数可恢复 | `burn-core` / `burn-store` |
+| `burn-onnx` codegen | ONNX Runtime / 导出图 | 图→可执行路径 | 独立仓库，另一份 Burn 提交 |
+| Device 上的 `forward` | 推理 `session.run` | 无训练 tape 的执行 | 不含鉴权/限流 |
+| 应用层 batcher + 队列 | Triton / 自研 serving | 延迟/吞吐权衡 | 服务框架由应用提供 |
+| 连续批 + KV 预算模型 | vLLM / Orca | 长度方差与显存墙 | `ch07-serving-queue-sim` |
 
 ## 正确性与性能测试
 

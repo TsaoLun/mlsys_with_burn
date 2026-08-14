@@ -7,11 +7,11 @@
 输入产生梯度，`Learner` 组合 model、optimizer 和 scheduler，
 `SupervisedTraining` 再装配数据、事件、指标、检查点和执行策略。
 
-固定 Burn 快照提供单设备、本机多设备和 DDP 的不同入口。`MultiDevice`
+Burn 提供单设备、本机多设备和 DDP 的不同入口。`MultiDevice`
 在一个进程内切分 loader 并聚合多设备梯度；DDP 为每个本地设备启动 worker，
 通过 backend `DistributedOps` 进行梯度 collective，并要求用户在每个节点
 启动且保持配置一致。DDP 入口之外还差哪几层才是完整的分布式训练系统，见
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)中
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)中
 「DDP 的范围与参与责任」的分工表。
 
 ## 练习
@@ -65,7 +65,7 @@ Adam 的一阶/二阶矩也是需要恢复的训练状态。见
 
 集合通信要求全体参与者共同到达；step 时间近似
 「最慢设备的计算时间 + 通信时间」。见
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)的
 AllReduce 语义段。
 
 </details>
@@ -77,7 +77,7 @@ AllReduce 语义段。
 <summary>提示</summary>
 
 两者都把「提交操作」与「结果可读」拆成不同时间点。对照
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的完成语义段
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)的完成语义段
 与第 4 章[「内存、Stream 与异步执行」](../ch04/06-memory-streams-execution.md)。
 
 </details>
@@ -88,7 +88,7 @@ AllReduce 语义段。
 <summary>提示</summary>
 
 异步 push/pull 意味着梯度可能基于旧参数版本计算。见
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)末尾的版本
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)末尾的版本
 协议四问。
 
 </details>
@@ -111,7 +111,7 @@ AllReduce 语义段。
 <summary>提示</summary>
 
 三种策略分别要求 server 记住什么才能在重启后不重复应用同一梯度？从
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的版本协议
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)的版本协议
 四问逐条推。
 
 </details>
@@ -226,7 +226,7 @@ metric 在事件处理线程上被惰性物化，输出因此要能跨线程存�
 
 三个分支的差异集中在 loader 如何切分、梯度在哪里聚合。对照
 [「本机多设备与数据并行」](05-local-data-parallel.md)与
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)。
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)。
 
 </details>
 
@@ -248,7 +248,7 @@ metric 在事件处理线程上被惰性物化，输出因此要能跨线程存�
 <details>
 <summary>提示</summary>
 
-按[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的
+按[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)的
 DDP 分层图逐层对应：参数注册、梯度提交、`all_reduce`、
 `sync_collective` 各发生在哪个文件。
 
@@ -262,7 +262,7 @@ DDP 分层图逐层对应：参数注册、梯度提交、`all_reduce`、
 <summary>提示</summary>
 
 Flex 的注释明确写出不支持 collective。对照
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)的
 「各后端的实现现状」一节，区分「API 层存在」与「backend 有实现」。
 
 </details>
@@ -314,7 +314,7 @@ Flex 的注释明确写出不支持 collective。对照
 
 ring 的每设备流量近似 $2S$ 但延迟项按 $2(p-1)$ 步增长；小消息、多
 设备时树形占优。推导见
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)的通信成本段。
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)的通信成本段。
 
 </details>
 
@@ -337,7 +337,7 @@ ring 的每设备流量近似 $2S$ 但延迟项按 $2(p-1)$ 步增长；小消�
 <summary>提示</summary>
 
 同步 DDP 每步形成共同完成点，没有版本差；异步测试要围绕
-[「集合通信、DDP 与能力边界」](06-collective-and-ddp.md)版本协议
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)版本协议
 四问设计断言。
 
 </details>
@@ -378,11 +378,11 @@ Horovod、GPipe、ZeRO、参数服务器等系统的论文集中在附录
 ## 本章系统结论
 
 1. 训练系统管理的是可恢复状态：参数、优化器、采样器、步数与检查点。
-2. 数据并行的关键成本在梯度同步；可用 $\alpha+\beta$ 与 bubble/staleness 做数量级估计。
-3. Burn 在源码中提供 `DistributedContext`、`all_reduce` 与 DDP strategy 入口；Flex CPU 没有 collective 实现。
-4. CPU 上你观察到单设备 SGD 使 loss 下降并改变参数。
-5. GPU 阅读时应对照：多 `Device`、collective 后端与拓扑带来的字节×延迟项。
-6. 不能把单机 CPU 训练 loop 当成 NCCL/跨节点 DDP 已经验证。
+2. DP 切样本，TP 切隐藏维，PP 切层，ZeRO 切状态；通信模式和显存公式必须一起写。
+3. 数据并行的关键成本在梯度同步，可用 $\alpha+\beta$ 与 1F1B 空泡做数量级估计。
+4. 实验观察单设备 SGD 使 loss 下降；DDP 契约在 `DistributedOps`，Flex 没有 collective。
+5. 产业对照：PyTorch DDP / FSDP / Megatron；作业启动属于第 9 章。
+6. 单机训练循环回答不了 NCCL 或跨节点 DDP。
 
 ## 来源与改编说明
 

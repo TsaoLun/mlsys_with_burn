@@ -2,10 +2,13 @@
 
 ## Mission
 
-Build a Chinese, Rust-first machine-learning-systems textbook using Burn,
-CubeCL, CubeK, and burn-onnx as the continuous implementation stack.
-OpenMLSys supplies the source structure and selected material; this project
-must add independent verification, modern context, and runnable Rust examples.
+Build a Chinese machine-learning-systems textbook. OpenMLSys supplies the
+systems curriculum and selected material. Burn, CubeCL, CubeK, and burn-onnx
+are the running implementation so readers can open the same crates a
+framework uses—from tensor APIs through kernels, training, serving, and
+clusters. Teach transferable infrastructure problems first; point to
+implementation files second. Do not make snapshot-audit language the
+reader-facing story.
 
 ## Read Before Working
 
@@ -35,7 +38,9 @@ must add independent verification, modern context, and runnable Rust examples.
 
 - Write in Chinese; introduce an English term at first use when useful.
 - Explain the framework-independent principle before the Burn implementation.
-- Distinguish verified behavior, design interpretation, and future work.
+- Reader prose: systems problem, cost model, where production stacks put it,
+  which crate implements it here. Keep pins, evidence labels, and CI language
+  out of chapter landings and learning objectives (D025).
 - Do not claim that Burn supports a feature without checking the pinned source.
 - Record OpenMLSys source files and material changes in each chapter.
 - Do not mechanically translate Python syntax. Redesign examples around Rust

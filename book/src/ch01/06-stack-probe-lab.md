@@ -1,6 +1,6 @@
 # 实验：探测执行栈
 
-本实验不追求复杂计算，而是走通全书最短的一条可运行路径：
+本实验走通全书最短的一条可运行路径：
 
 ```text
 启用 flex feature
@@ -10,8 +10,8 @@
   → 主机读回结果
 ```
 
-示例代码在编译期嵌入本书使用的版本说明，因此运行输出会带上写作时的
-快照名称。环境与依赖准备见[如何运行本书示例](../running-examples.md)。
+环境与依赖准备见[如何运行本书示例](../running-examples.md)。分派树见
+[第 1 章技术栈](04-burn-stack.md)和[一次调用会经过哪些层](../crate-map.md)。
 
 ## 1. 阅读实验源码
 
@@ -25,13 +25,12 @@
 `snapshot_name()` 读出嵌入的版本名称；这里只展示连接设备和张量执行的
 主路径。
 
-需要注意四点：
+需要注意三点：
 
-1. 报告里的 snapshot 名称来自本书写作时固定的版本，方便你对照正文；
-2. `Device::flex()` 只在启用 Burn 的 `flex` feature 后存在；
-3. `settings()` 和 `is_autodiff()` 观察的是设备能力，而不是 Tensor
+1. `Device::flex()` 只在启用 Burn 的 `flex` feature 后存在；
+2. `settings()` 和 `is_autodiff()` 观察的是设备能力，而不是 Tensor
    类型参数；
-4. `sync()` 提供统一同步接口。对 Flex 来说它很轻量，但异步或缓冲后端
+3. `sync()` 提供统一同步接口。对 Flex 来说它很轻量，但异步或缓冲后端
    需要同一语义来等待已提交工作。
 
 ## 2. 运行探测
@@ -69,7 +68,7 @@ cargo test -p ch01-stack-probe --locked
 
 ## 4. 沿源码追踪
 
-建议按以下顺序在本书固定版本的源码仓库中查找：
+建议按以下顺序在本书所用版本的源码仓库中查找：
 
 1. `burn/crates/burn-tensor/src/device.rs`：公开 `Device`；
 2. `burn/crates/burn-dispatch/src/device.rs`：`DispatchDevice::Flex`；

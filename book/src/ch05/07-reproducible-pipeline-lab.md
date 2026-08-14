@@ -1,6 +1,6 @@
 # 实验：可复现数据管道
 
-示例在 `examples/ch05-data-pipeline`，只用本书固定版本的 Flex CPU 和
+示例在 `examples/ch05-data-pipeline`，只用本书所用版本的 Flex CPU 和
 `burn::data`。数据集只有 12 个整数样本，不下载外部文件，方便你在普通
 机器上观察 Dataset、shuffle、batching、worker 和进度语义。
 

@@ -1,24 +1,61 @@
 # 实时状态
 
-更新日期：2026-08-13
+更新日期：2026-08-14
 
 ## 当前里程碑
 
-M5：首个稳定版审计准备（可与 M6 并行；M5 tag 不阻塞于 M6）。
+M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞）。
 
 ## 当前目标
 
-完成以 OpenMLSys v1 固定 revision 为参照的 P0/P1 对照发布审计，并保持
-九章候选版的 CPU-first、源码证据和可选平台边界可复核；静态书站经
-GitHub Pages 可读。读者正文按 D020/D021 只面向学习者；项目自洽材料在附录。
-M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落地（D022）。
+读者主路径按 OpenMLSys 系统问题组织九章，并补上当代训练并行、推理服务
+与集群控制面；Burn 用来指出实现落点。项目自洽（版本、证据标签、对照
+矩阵）留在附录与工具链（D025）。静态书站经 GitHub Pages 可读。
 
 ## 进行中
 
-- [ ] P0/P1 已完成；等待发布者决定是否创建候选 tag/发布归档。
+- [ ] 等待发布者决定是否创建候选 tag/发布归档。
+- [x] D025：正文重编——九章章首、阅读路径、系统结论、产业/crate 地图；
+  第 8 章标为可选；主路径去掉「可核对 / CPU-first / 快照」叙事。
+  见 `planning/session-logs/2026-08-14-curriculum-reframe.md`。
 - [x] 仓库 `origin/main` 已到 `1ae11a5`，Pages 站点
   `https://tsaolun.github.io/mlsys_with_burn/` 此前已可访问；本机仍不能
   代替管理员核对 Settings → Pages 的 Source/environment 保护。
+
+## 下一步
+
+1. 提交并推送本批重编；推送后抽查 Pages：新首页、`infra-map`、
+   `crate-map`、第 6 章并行策略、第 7 章生成式服务、第 8 章「可选」。
+2. 由发布者审阅 D025 与重编后的章首，再决定候选 tag/归档。
+3. 在能访问 `tracel-llvm` 固定资产的环境重跑完整 `make check`。
+4. 真机 CUDA/NCCL 仅在 pins 与环境允许时追加可选命令；不得改默认 CPU
+   gate（D022）。
+5. 后续内容增量（不阻塞 tag）：并行策略虚拟时间实验、第二条服务
+   capstone、二元/归约算子解剖练习。
+
+## 本次交接
+
+- 已完成（2026-08-14）：按 D025 重编全书读者主路径。
+  - 新增 `book/src/infra-map.md`、`book/src/crate-map.md`；SUMMARY
+    前置地图，第 8 章标题加「可选」，「应用与扩展篇」改为「服务、集群
+    与扩展」。
+  - 重写前言、首页、归属、九章章首、ch01 阅读路径与大模型地图、
+    ch01/04 技术栈、ch06/06 并行策略（DP/TP/PP/ZeRO）、ch07/05 生成式
+    服务（TTFT/TPOT/KV）、ch09/01 与 Slurm/K8s 对照；九章系统结论改写。
+  - 主路径删除「刻意不做」；「本书固定版本」改为「本书所用版本」；
+    实验节改为「停在哪」。附录保留证据账本（check_release 仍要求
+    「固定版本」「结论靠什么支撑」）。
+  - 更新 AGENTS.md、AUTHORING、MASTER_PLAN、CHAPTER_MATRIX、README。
+- 验证：`mdbook build book`、`mdbook test book`、
+  `python3 tools/check_release.py --require-built-book`（`ok=true`、
+  `errors=[]`）、`git diff --check` 通过。未跑完整 `make check`
+  （本机 tracel-llvm 404 既有）。
+- 偏差：未新增 Rust 示例（并行模拟器、第二条 capstone 列为下一步）；
+  小节技术正文以改口吻与加厚关键节为主，未逐段重写全部 80+ 小节。
+- 下一步：提交推送；Pages 抽查新导航。
+
+## 已完成
+
 - [x] 修复线上 `$...$` 公式不渲染：自定义 theme 启用 MathJax 美元分隔符
   （D019）；全书 42 个含公式页面 Puppeteer 核验通过。
 - [x] 学习者文风改写（D020）与自洽材料后移附录（D021）：章首五标签/
@@ -41,20 +78,6 @@ M6（深度、GPU 叙事与体感补强）正文与可选 profile 文档已落�
   `check_release --require-built-book` 全绿；图片引用与 SVG 使用
   无缺失；完整 `make check` 仍被本机 tracel-llvm 404 阻断（既有）。
   见 `planning/session-logs/2026-08-13-audit-repair.md`。
-
-## 下一步
-
-1. 提交并推送本批内容与结构加固；推送后抽查 Pages 导航、三张修复 SVG、
-   第 8/9 章实验页与综合实验页。
-2. 由发布者审阅 `planning/comparison/openmlsys-v1-crosswalk.md` 和
-   `tools/check_release.py` 的机器可读输出，决定候选版归档/tag。
-3. 在能访问 `tracel-llvm` 固定资产的环境重跑完整 `make check`；本机
-   当前被上游 `macos-x64.checksums.json` 404 阻断在 CubeCL CPU 构建。
-4. 真机 CUDA/NCCL 仅在 pins 与环境允许时，向
-   `docs/OPTIONAL_PROFILES.md` 追加命令；不得改默认 CPU gate（D022）。
-5. 继续跟踪 Burn 预发布快照；更新 pins 前先新增决策记录并重跑全书审计。
-
-## 已完成
 
 - [x] 确定项目名为 “MLSys with Burn”。
 - [x] 确定正文采用 CC BY-NC-SA 4.0，原创代码采用 MIT OR Apache-2.0。

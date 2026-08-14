@@ -274,7 +274,7 @@ Safety 文档随定义在
 <summary>提示</summary>
 
 对照[「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)的「逐层走查」
-小节，按其中的文件路径在本书固定版本源码里各读一遍；每到一层，
+小节，按其中的文件路径在本书所用版本源码里各读一遍；每到一层，
 先用一句话回答该层要解决的问题，再找出支撑这句话的函数或注释。
 
 </details>
@@ -371,7 +371,7 @@ CubeDim 参与编译配置，某些长度变化可能再次触发编译；计时
 
 Roofline、CUDA 与 tile 编译器的论文见附录
 [参考文献](../references.md#第-3-章-ai-加速器与编程)。
-本书固定版本源码中的权威入口：
+本书所用版本源码中的权威入口：
 
 - `cubecl/README.md`
 - `cubecl/examples/gelu/`
@@ -391,16 +391,16 @@ Roofline、CUDA 与 tile 编译器的论文见附录
 - `burn/crates/burn-cubecl/src/ops/module.rs`
 
 CUDA、Triton、CUTLASS、TVM 与 MLIR 文档适合做生态对照；使用时应记录版本，
-不能用最新在线签名替代本书固定版本的源码事实。
+不能用最新在线签名替代本书所用版本的源码事实。
 
 ## 本章系统结论
 
-1. 加速器收益来自并行度、算术强度与数据复用，而不是“有 GPU”四个字。
-2. Cube/Unit/Plane 是设备无关拓扑；应对齐 GPU 的 block/thread/warp 心智模型。
-3. CubeCL 用同一套 Kernel IR 对接 `CpuRuntime`、`WgpuRuntime`、`CudaRuntime`、`HipRuntime` 等。
-4. CPU 上你验证了 Kernel 与 host reference 的数值一致；可选 WGPU 对照同一语义。
-5. GPU 阅读时应继续追：共享内存抽象、合并访存、occupancy，以及 CUDA/HIP Runtime 源码入口。
-6. 不能把 CPU/WGPU 正确性结果外推为带宽、吞吐或厂商 GEMM 排名。
+1. 加速器收益来自并行度、算术强度与数据复用，而不是「有 GPU」四个字。
+2. Cube/Unit/Plane 应对齐 GPU 的 block/thread/warp；存储层次决定搬运代价。
+3. CubeCL 用同一套 Kernel IR 对接 CPU / WGPU / CUDA / HIP Runtime。
+4. 实验对照 Kernel 与 host reference；有图形驱动时可看共享内存 tile 的相对差距。
+5. 改 Kernel 或 matmul 策略时打开 CubeCL / CubeK，见[一次调用会经过哪些层](../crate-map.md)。
+6. 正确性对照回答不了带宽排名或厂商 GEMM 谁更快。
 
 ## 来源与改编说明
 

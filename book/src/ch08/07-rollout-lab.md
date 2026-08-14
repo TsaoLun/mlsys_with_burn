@@ -18,12 +18,12 @@
                        （先只收集，learner 再从回放批学习）
 ```
 
-阶段 A 问“环境边界与表格 TD 是否可观察”；阶段 B 问“当 learner 的数据
-来自回放而不是环境当下时，同一个算法会看到什么”。你会观察到：`done`
+阶段 A 问「环境边界与表格 TD 是否可观察」；阶段 B 问「当 learner 的数据
+来自回放而不是环境当下时，同一个算法会看到什么」。你会看到：`done`
 与 `truncated` 分别出现、circular buffer 容量、replay batch 的 shape、
 终止转移不做 next-state bootstrap，以及同一个 Q 值在两条数据路径下走向
-不同结果。本实验刻意不做神经网络 forward、autodiff、DQN 收敛、gym、
-GPU 仿真、多环境异步或多智能体通信——先把机制看清楚，再放回更大系统。
+不同结果。这个实验停在表格 TD 与 replay 语义；神经网络 DQN、gym 和
+多智能体放到[多智能体与分布式系统边界](06-multi-agent-boundary.md)。
 
 ## 1. 实现环境边界
 

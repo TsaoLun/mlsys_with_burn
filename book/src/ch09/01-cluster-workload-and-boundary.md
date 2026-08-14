@@ -39,6 +39,11 @@
 运行时：ComputeClient → stream → kernel → memory → sync
 ```
 
+产业里这三层常常分别落在：作业调度器（Slurm、Kubernetes 设备插件、
+内部 GPU 调度器）、通信库（NCCL / RCCL）和设备 runtime（CUDA / ROCm /
+Metal）。本章模拟器建模的是控制面协议；第 6 章的 `all_reduce` 入口属于
+数据面。
+
 Fusion 的 operation queue、CubeCL 的 stream scheduler 和集群的作业队列都
 可以被称为“调度”，但它们的对象和故障语义不同。前者安排已经进入一个
 进程或设备的工作；后者决定哪个租户的作业可以占用哪组设备。不能因为

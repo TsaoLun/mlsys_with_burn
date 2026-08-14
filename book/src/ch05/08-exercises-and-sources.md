@@ -7,8 +7,8 @@
 map、selection、shuffle、partial 和 window 组合成惰性逻辑。`Batcher`
 在明确的 Device 边界把 item 变成模型可消费的输出。
 
-`DataLoaderBuilder` 可以配置 batch size、seed、worker 数和设备。固定
-快照的多 worker 实现能并行读取、批处理、传播错误并复用 worker pool，
+`DataLoaderBuilder` 可以配置 batch size、seed、worker 数和设备。多
+worker 实现能并行读取、批处理、传播错误并复用 worker pool，
 但 receiver 依据消息到达返回 batch，没有全局序号重排。因此必须分别测试
 样本覆盖率、变换正确性、进度和顺序要求。
 
@@ -396,7 +396,7 @@ attempt、RNG 派生与错误分类；`examples/ch05-data-pipeline` 的
 ## 延伸阅读
 
 数据管道系统的论文见附录[参考文献](../references.md#第-5-章-数据处理系统)。
-本书固定版本源码中的权威入口：
+本书所用版本源码中的权威入口：
 
 - `burn/crates/burn-dataset/src/dataset/base.rs`
 - `burn/crates/burn-dataset/src/dataset/in_memory.rs`
@@ -413,16 +413,16 @@ attempt、RNG 派生与错误分类；`examples/ch05-data-pipeline` 的
 
 PyTorch DataLoader、TensorFlow `tf.data`、MindSpore MindData、DALI、Ray
 Dataset 和 Arrow/Parquet 可以作为系统对照。比较时要记录版本、顺序
-语义、进程/线程模型和是否包含设备传输，不能把它们的特性自动外推到
-固定 Burn 快照。
+语义、进程/线程模型和是否包含设备传输。
 
 ## 本章系统结论
 
-1. 数据管道要同时满足正确语义、吞吐与可复现，而不是“越快越好”。
-2. Dataset/Mapper/Batcher/DataLoader 分层：惰性变换、组 batch、设备投放各有边界。
-3. CPU 上你验证了数据守恒、固定 seed 与多 worker 下的顺序/进度语义。
-4. GPU 阅读线索：`to_device` 之后的 HtoD、pinned memory、与训练 step 的流水线重叠。
-5. 不能把一次 CPU loader 测量当成存储系统或跨节点 sampler 的吞吐结论。
+1. 数据管道要同时满足正确语义、吞吐与可复现；设备空等数据是最常见的训练故障之一。
+2. Dataset / Mapper / Batcher / DataLoader 分层：惰性变换、组 batch、设备投放各有边界。
+3. 多 worker 提高生产率时，守恒和保序是两件不同的事——Burn 默认不保证全局顺序。
+4. 实验检查数据守恒、固定 seed 与进度；产业对照是 PyTorch DataLoader / `tf.data` / DALI。
+5. 改 map 或 loader 时打开 `burn-dataset` 与 `burn-core` 的 `data/`。
+6. 一次本地 loader 测量回答不了对象存储或跨节点 sampler 的吞吐。
 
 ## 来源与改编说明
 

@@ -7,7 +7,7 @@
 编程、自动微分、数据、训练部署、硬件加速和分布式六类能力，但框架并不
 等于数据平台、服务系统和 GPU 集群的总和。
 
-在本书固定的 Burn 0.22 快照中，`Tensor<D, K>` 使用 Device 选择运行时
+在本书所用的 Burn 0.22 中，`Tensor<D, K>` 使用 Device 选择运行时
 后端，经 burn-dispatch 到达 Flex 或 CubeCL 等具体实现。CubeCL 提供
 Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子；burn-onnx
 则是有独立版本关系的模型导入项目。
@@ -200,7 +200,7 @@ commit；[「Burn 技术栈」](04-burn-stack.md)「训练、状态与模型交�
 ## 延伸阅读
 
 原理与产业背景的论文见附录[参考文献](../references.md#第-1-章-导论)。
-源码阅读入口如下，路径均相对于本书固定版本的源码仓库（如何获取见
+源码阅读入口如下，路径均相对于本书所用版本的源码仓库（如何获取见
 [如何运行本书示例](../running-examples.md) 的「阅读固定源码」）：
 
 - `burn/crates/burn/src/lib.rs`：Burn 能力总览与限制；
@@ -211,7 +211,7 @@ commit；[「Burn 技术栈」](04-burn-stack.md)「训练、状态与模型交�
 - `cubek/README.md`：CubeK 算法范围；
 - `burn-onnx/SUPPORTED-ONNX-OPS.md`：导入器的算子边界。
 
-在线 Burn Book 可以辅助理解设计动机，但遇到 API 差异时，以本书固定版本
+在线 Burn Book 可以辅助理解设计动机，但遇到 API 差异时，以本书所用版本
 的源码与示例为准。
 
 
@@ -226,20 +226,20 @@ commit；[「Burn 技术栈」](04-burn-stack.md)「训练、状态与模型交�
 <summary>提示</summary>
 
 卡片四行模板在[「机器学习应用与系统负载」](01-applications-and-loads.md)，
-「进入哪一章」可对照该节的生命周期路径图；哪些字段需要真实 GPU、
-网络或外部系统才能验证，判定口径见
-[范围、证据与对照附录](../appendix-scope-and-evidence.md)。
+「进入哪一章」可对照该节的生命周期路径图，或直接看
+[从应用到集群](../infra-map.md)。需要 GPU 或网络才能观察的字段，写进
+卡片并标明环境即可。
 
 </details>
 
 ## 本章系统结论
 
 1. 机器学习系统要把应用负载拆成计算、数据、硬件与生命周期约束，而不是只谈模型结构。
-2. 现代框架需要分层：用户接口 → 执行/微分 → IR/融合 → Kernel → Runtime。
-3. Burn 0.22 用 `Tensor<D,K>` + `Device` 选择后端；Flex 是默认 CPU 路径，不经过 CubeCL。
-4. CPU 上你应已跑通 `ch01-stack-probe`：选中 Flex、同步并读回结果。
-5. GPU/多后端阅读时对照：`Device::wgpu` / `Device::cuda`、dispatch 变体，以及后文 CubeCL Runtime。
-6. 不能从一次 CPU probe 推出 GPU 吞吐、分布式或全部后端能力一致。
+2. 分层是：用户接口 → 执行/微分 → IR/融合 → Kernel → Runtime；横跨的是数据管道、训练、服务与集群。
+3. Burn 用 `Tensor<D,K>` + `Device` 选择后端；Flex 是默认 CPU 路径，不经过 CubeCL。
+4. `ch01-stack-probe` 让你走通 Device → 分派 → 读回；改分派时打开 `burn-dispatch`。
+5. 产业对照与阅读顺序见[从应用到集群](../infra-map.md)。
+6. 一次 CPU probe 回答不了 GPU 吞吐或跨节点训练。
 
 ## 来源与改编说明
 

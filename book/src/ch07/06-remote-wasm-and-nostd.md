@@ -101,5 +101,5 @@ Remote transport、WASM binary、Burnpack/SafeTensors 和模型混淆解决的
 server 有 `PeerAuthorizer` 扩展点，就声称项目已经提供完整的模型安全
 产品。先写清威胁模型，再选择机制和验证方法。
 
-本书把 Remote、WASM 和 no_std 作为可从源码核验的扩展路径；本章实验
+本书把 Remote、WASM 和 no_std 作为可从源码对照的扩展路径；本章实验
 只需要本地内存和 Flex，网络、浏览器和固件前提留在本节及练习中。

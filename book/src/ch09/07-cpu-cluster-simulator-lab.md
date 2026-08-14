@@ -17,8 +17,8 @@ step、梯度字节数和 checkpoint 周期。时间是虚拟整数，不是 `sl
 - 失败后释放资源，从最近 checkpoint 恢复并记录 replay steps；
 - 相同输入得到相同 trace、makespan 和指标。
 
-本实验刻意不做真实 GPU kernel、NCCL、RDMA、网络拥塞或租户安全测量；
-它把第 9 章的控制面想法收成可运行的数据结构。
+模拟器建模控制面协议，不测量真实 GPU、NCCL 或网络拥塞。真机集群对应
+Slurm / K8s 设备插件，见本章分层说明。
 
 ## 1. 集群与作业模型
 

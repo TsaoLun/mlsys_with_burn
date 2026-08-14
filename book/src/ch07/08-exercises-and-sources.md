@@ -526,12 +526,12 @@ OpenMLSys v1：
 
 ## 本章系统结论
 
-1. 部署闭环是：训练态 → artifact → 校验 → 推理入口 → 服务侧 batch/队列/版本。
-2. `ModuleRecord`/Burnpack 管参数状态；ONNX/codegen 管图转换，二者版本不能混用。
-3. 推理选用哪个 Device（CPU/WGPU/CUDA）与 artifact 格式正交，但影响延迟与批处理。
-4. CPU 上你验证了 Linear 参数往返保存/恢复与输出误差边界、PTQ 校准的误差交易，以及连续批处理与 KV 预算的队列行为。
-5. GPU 阅读线索：同一 record 加载到加速 Device 后的同步与 batch 合并；LLM 服务的机制模型见 `ch07-serving-queue-sim`，工程实现见参考文献。
-6. 不能把本地 load 成功当成完整服务上线或 ONNX 端到端已在同一依赖图验证。
+1. 部署有两条线：产物（拓扑+参数可恢复）和服务（排队、合批、KV 预算）。
+2. `ModuleRecord` / Burnpack 管参数状态；ONNX/codegen 管图转换，二者不要混用依赖。
+3. 生成式服务要把 TTFT、TPOT 和 KV 显存分开算；连续批的价值来自长度方差。
+4. 实验覆盖参数往返、PTQ 校准交易，以及静态批 vs 连续批的队列行为。
+5. 产业对照：checkpoint / ONNX Runtime / Triton / vLLM；HTTP 治理由应用提供。
+6. 本地 load 成功不等于已经有一条生产服务。
 
 ## 来源与改编说明
 

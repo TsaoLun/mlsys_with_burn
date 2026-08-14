@@ -1,6 +1,6 @@
 # 实验：张量、Module 与梯度
 
-本章实验位于 `examples/ch02-tensor-basics`，统一使用本书固定版本的
+本章实验位于 `examples/ch02-tensor-basics`，统一使用本书所用版本的
 Burn（GitHub revision）和 Flex CPU。本书示例工程启用了 `std`、`flex`、`autodiff`
 features。
 
@@ -153,8 +153,8 @@ dw/dx = 4（= y + 1），dw/dy = 2（= x）
 
 它的七个测试与前面几节的 Burn 观察一一对应：`x*x` 的扇出梯度累加、
 只记录执行过的分支、`detach` 抄值断流、数值梯度校验。对照着读，
-第 6–8 节在 Burn 里看到的每个行为都能在这一百行里找到成因。本实验
-刻意不做：张量（只有标量 `f64`）、二阶导数、图优化与并行执行。
+第 6–8 节在 Burn 里看到的每个行为都能在这一百行里找到成因。迷你 tape
+只用标量 `f64`，没有张量、二阶导数或图优化。
 
 ## 10. 运行
 
@@ -186,7 +186,7 @@ cargo test -p ch02-tensor-basics --locked
 
 测试覆盖逐元素数值、广播、字节布局（小端 `f32`、`-0.0` 符号位、`F64`
 转换后的宽度）、Module 参数注册、乘法梯度、控制流分支梯度和 detach 的
-`Option`/数值/shape 状态。张量、广播和梯度行为可在本书固定版本的
+`Option`/数值/shape 状态。张量、广播和梯度行为可在本书所用版本的
 `burn-backend-tests` 中找到对应的回归测试；Module 参数遍历与统计由
 `burn-core` 的 Module 测试支撑。
 

@@ -1,4 +1,4 @@
-# 集合通信、DDP 与能力边界
+# 集合通信、DDP 与并行策略
 
 ## AllReduce 的语义
 
@@ -151,14 +151,52 @@ worker pull parameters
 gradient 和收敛分析难度。`burn-train` 没有内置 parameter-server
 strategy；本章把它作为对照协议讲解。
 
-## 产业对照（概念对齐，不是性能对等）
+## 数据并行之外：切开的是什么
 
-| 本书 / Burn | 常见产业说法 | 对齐点 | 不要外推 |
+数据并行（DP / DDP）切开的是**样本**。大模型训练里另外三条切分同样常见，
+它们切的对象不同，通信模式也不同。Burn 的训练编排目前围绕单设备循环、
+本机多设备和 DDP 策略；下面三条作为系统课必懂的成本模型，不要求默认
+示例跑通。
+
+| 策略 | 切开的对象 | 每步主要通信 | 典型代价 |
 |---|---|---|---|
-| `DistributedContext` + `all_reduce` | PyTorch DDP / Horovod 数据面 | 共同调用、归约语义、完成边界 | Flex 无实现 ≠ API 不存在 |
-| CubeCL CUDA + NCCL 入口 | NCCL AllReduce | GPU 集合通信 runtime | 默认示例未跑通；需匹配驱动 |
-| `ExecutionStrategy::ddp` | 多进程/多线程 launcher | 策略与 backend 组合点 | 不含集群调度/弹性成员 |
-| 参数服务器对照 | PS / 异步 SGD 文献 | push/pull、版本与陈旧梯度 | `burn-train` 未内置该 strategy |
+| 数据并行 DP | batch | 梯度 AllReduce，每设备约 $2S$ 字节（环算法） | 优化器状态整份复制；显存随模型涨 |
+| 张量并行 TP | 一层内的隐藏维 / 矩阵分块 | AllGather 或 ReduceScatter，按层发生 | 需要高带宽域（通常同节点 NVLink） |
+| 流水线并行 PP | 模型的层段 | 相邻 stage 传激活 / 梯度 | 1F1B 仍有 warm-up / drain 空泡 |
+| ZeRO / FSDP | 参数、梯度、优化器状态的分片 | AllGather 参数、ReduceScatter 梯度 | 用通信换显存；切到哪一级决定流量 |
+
+流水线空泡可以写成 stage 数 $p$ 与 micro-batch 数 $m$ 的关系。GPipe
+式 flush 的空闲比例约为 $(p-1)/(m+p-1)$；1F1B 把前向与后向交错后，
+稳态空泡下降，但 warm-up 与 drain 仍在。这和第 4 章「同步切断融合
+片段」是同一类时序问题：依赖边会制造气泡。
+
+张量并行把一次 `matmul` 的 $K$ 或 $N$ 维切开，所以通信发生在**层内**，
+对延迟敏感，通常不能跨机柜。这和第 9 章「同节点 → 同机柜 → 跨机柜」
+的放置规则直接相连：TP 组应落在最高带宽域，DP 组可以跨域并承担
+AllReduce 的 $\beta$ 项。
+
+ZeRO 的直觉是：DP 下每张卡都存完整 $\theta$、$g$、$s$（参数、梯度、
+优化器状态）。若只把 $s$ 分片（ZeRO-1），每卡优化器显存约降为 $1/p$；
+再分片 $g$（ZeRO-2）、$\theta$（ZeRO-3 / FSDP）则每次前向前要
+AllGather 参数。显存公式和通信轮次必须一起写，不能只说「切了所以更省」。
+
+激活重计算（activation checkpointing）是另一条显存杠杆：丢弃部分正向
+激活，反向时重算。它与第 2 章 autodiff tape 的 checkpoint 策略同类——
+省的是激活内存，付的是额外前向 FLOP。大模型里它几乎总是和 PP / ZeRO
+一起出现。
+
+作业启动、rank 发现和弹性成员仍属于第 9 章。没有这些，DDP 入口假设
+「每个节点已被人拉起来、configuration 一致」。
+
+## 产业对照
+
+| 本书讨论的机制 | 常见产业说法 | 对齐点 | 实现落点 |
+|---|---|---|---|
+| `DistributedContext` + `all_reduce` | PyTorch DDP / Horovod | 共同调用、归约语义、完成边界 | 契约在 `burn-tensor` / `burn-backend`；Flex 无实现 |
+| CubeCL CUDA + NCCL 入口 | NCCL AllReduce | GPU 集合通信 runtime | `burn-cubecl` 与 CUDA server；需驱动 |
+| `ExecutionStrategy::ddp` | 多进程 launcher | 策略与 backend 组合点 | `burn-train`；不含集群调度 |
+| 参数服务器对照 | PS / 异步 SGD | push/pull、版本与陈旧梯度 | 对照协议；`burn-train` 无内置 PS |
+| TP / PP / ZeRO 成本模型 | Megatron、GPipe、FSDP | 切分对象与通信轮次 | 本章公式；不是当前默认训练 API |
 
 如果把一次异步更新写成：
 

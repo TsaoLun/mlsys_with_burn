@@ -524,11 +524,11 @@ OpenMLSys v1：
 
 ## 本章系统结论
 
-1. RL 系统把“环境交互”接进与监督学习不同的数据与状态边界（done/truncated、轨迹）。
-2. replay、policy 版本与 off-policy 元数据决定样本能否安全用于更新；容量与采样分布本身就是 learner 的数据边界。
-3. CPU 上你观察到确定性 rollout、circular replay、在线与回放驱动两条 TD 路径在同一环境序列上的不同结果。
-4. GPU 阅读线索：大批量 replay 与策略网络 forward 的设备放置、以及 Actor–Learner 间的版本延迟。
-5. 不能把组合 API 或小型 TD 实验当成完整 DQN/PPO/MARL runtime。
+1. RL 系统把环境交互接进与监督学习不同的数据边界（`done` / `truncated`、轨迹）。
+2. replay、policy 版本与容量决定 learner 实际看到的数据分布。
+3. 实验对照在线 TD 与回放驱动 TD；`burn-rl` 提供组合抽象，具体算法由应用实现。
+4. 产业对照：Gym、Impala / Actor–Learner；RLHF 是采样—训练分离的生产形态。
+5. 小型表格实验回答不了完整 DQN / PPO / MARL。
 
 ## 来源与改编说明
 

@@ -1,12 +1,13 @@
 # Burn 技术栈
 
-本节描述的是本书使用的 Burn `0.22.0-pre.1` 开发版本，而不是
-对所有 Burn 版本都成立的永久 API。预发布阶段的在线文档和源码可能短暂
-不同步，因此本书把固定 commit 的实现与测试作为事实来源。
+后面各章打开源码时，会反复碰到同一组 crate。本节只建立职责地图：谁负责
+用户 API，谁负责分派，谁负责 Kernel。版本号与检出方式见
+[如何运行本书示例](../running-examples.md)；改某一层时先看
+[一次调用会经过哪些层](../crate-map.md)。
 
 ## 用户侧：Tensor、Module 与 Device
 
-在当前快照中，用户张量的核心形式是 `Tensor<D, K>`：
+用户张量的核心形式是 `Tensor<D, K>`：
 
 - `D` 是张量秩；
 - `K` 表示浮点、整数或布尔等张量类别；
@@ -14,50 +15,47 @@
 
 后端选择被移动到 `Device`。用户先启用 Cargo feature，再用
 `Device::flex()`、`Device::cuda(...)`、`Device::wgpu(...)` 等工厂方法
-创建设备。这样，模型代码可以使用统一的 `Tensor` 类型，并在运行时由设备
-携带具体后端身份。
+创建设备。模型代码可以使用统一的 `Tensor` 类型，由设备在运行时携带
+具体后端身份。
 
 `Module` 与 `Param` 组织模型结构和可训练参数。它们与 Tensor、Device
-共同构成模型开发者最常接触的接口，第 2 章将进入其类型和生命周期。
+共同构成模型开发者最常接触的接口，第 2 章进入其类型和生命周期。
 
-> 一些随本版附带的 Burn Book 页面仍使用旧的 `Tensor<B, D>` 写法。
-> 这正说明教材必须记录版本：概念文档仍可参考，代码则应以
-> `burn-tensor/src/tensor/api/base.rs` 为准。
+> 一些随附的 Burn Book 页面仍使用旧的 `Tensor<B, D>` 写法。概念仍可
+> 参考，代码签名以 `burn-tensor/src/tensor/api/base.rs` 为准。
 
 ## 分派与后端契约
 
 `Device` 内部包装 `burn-dispatch::DispatchDevice`。后者是带 feature
 条件的枚举，可以包含 Flex、CUDA、ROCm、WGPU、LibTorch、Remote 或
-Autodiff 等变体。一次张量操作会通过 bridge 和 dispatch 层到达相应后端
-实现。
+Autodiff 等变体。一次张量操作会通过 bridge 和 dispatch 层到达相应后端。
 
 ![Tensor 操作经 burn-tensor bridge 与 burn-dispatch 的 Dispatch/DispatchDevice，分派到 Flex、CubeCL 后端、LibTorch/NdArray、Remote 或 Autodiff 变体](../img/ch01-dispatch-tree.svg)
 
 `burn-backend` 定义 `Backend`、`BackendTypes` 和各类操作契约。具体后端
-只要满足这些契约，就能被上层以统一张量语义使用。但“统一接口”不意味着
-能力完全相同：数据类型、图捕获、融合和量化支持都可能因后端而异。
+只要满足这些契约，就能被上层以统一张量语义使用。统一接口不意味着能力
+完全相同：数据类型、图捕获、融合和量化支持都可能因后端而异。
 
-本书基础实验默认使用 **Flex**。它是纯 Rust CPU 后端，便于在没有 GPU
-驱动的环境中运行。选择 Flex 也意味着这些实验不会自动经过 CubeCL、
-CubeK 或 GPU 融合路径。
+默认实验使用 **Flex**：纯 Rust CPU 后端，便于在没有 GPU 驱动的环境中
+运行。这些实验不会自动经过 CubeCL、CubeK 或 GPU 融合路径。
 
 ## 全书设备与 Runtime 地图
 
-把“默认跑哪条”和“正文会讲哪条”分开看：
+把「默认跑哪条」和「正文会讲哪条」分开看：
 
 ![从 Tensor/Device 经 Burn backend 到 CubeCL Runtime 与 Kernel 的路径；默认实验走 Flex/CPU，正文同步对照 WGPU/CUDA 等 Runtime](../img/ch01-device-runtime-map.svg)
 
-| 层次 | 本书固定版本中的入口（相对上游仓库） | 默认实验 | 正文怎么读 |
+| 层次 | 入口（相对上游仓库） | 默认实验 | 正文位置 |
 |---|---|---|---|
 | Device / dispatch | `burn-tensor` 的 `Device`；`burn-dispatch` 的 `DispatchDevice` | `Device::flex()` | 第 1–2 章 |
-| CPU 后端 | `burn-flex` | 是 | 默认可复现的语义观察 |
-| GPU/图形后端 | `burn-wgpu`、`burn-cuda` 等 crate | 否（可选） | 第 3–4、7 章对照 |
+| CPU 后端 | `burn-flex` | 是 | 语义观察 |
+| GPU/图形后端 | `burn-wgpu`、`burn-cuda` 等 crate | 否（可选） | 第 3–4、7 章 |
 | CubeCL 桥 | `burn-cubecl`、`burn-cubecl-fusion` | 第 3–4 章相关示例 | Kernel / Fusion |
-| CubeCL Runtime | `cubecl-cpu::CpuRuntime`、`cubecl-wgpu::WgpuRuntime`、`cubecl-cuda::CudaRuntime`、`cubecl-hip::HipRuntime` | CPU；可选 WGPU | 同一 IR、不同设备完成边界 |
+| CubeCL Runtime | `CpuRuntime`、`WgpuRuntime`、`CudaRuntime`、`HipRuntime` | CPU；可选 WGPU | 同一 IR、不同设备完成边界 |
 
-读法建议：无独显时仍把 GPU 拓扑与 Runtime 差异读完；有环境时再按
+无独显时仍应把 GPU 拓扑与 Runtime 差异读完；有环境时再按
 [如何运行本书示例](../running-examples.md) 做可选跑通。源码里存在
-`CudaRuntime` 只说明入口可定位，不表示本书默认示例已在该 GPU 上测过吞吐。
+`CudaRuntime` 说明入口可定位，不等于默认示例已在该 GPU 上测过吞吐。
 
 ## 可组合能力：Autodiff 与 Fusion
 
@@ -127,17 +125,14 @@ Burn Rust 源码与权重。独立仓库意味着它有自己的 Burn revision�
 `burn-onnx/Cargo.toml` 所 pin 的 Burn commit 与本教材示例的 commit
 不同。第 7 章必须显式处理这种兼容关系，而不能只比较版本字符串。
 
-## 能力边界
+## 阅读时记住的几件事
 
-本书会把下列限定当作架构的一部分，而不是脚注：
+- Remote 仍标为 Beta；
+- 量化支持因后端而异，当前路径没有 QAT；
+- burn-onnx 只覆盖其列表中的算子，且依赖另一份 Burn 提交；
+- 集合通信的契约在 backend，Flex 没有实现；
+- 同一 Tensor API 不代表所有设备性能相同。
 
-- Burn 0.22.0-pre.1 是预发布快照，API 仍可能破坏性变化；
-- Remote 当前是 Beta；
-- 量化支持依赖后端，当前版本不支持 QAT；
-- burn-onnx 只支持其列表中已实现的算子和经过验证的模型；
-- 分布式训练和相关文档仍在演进；
-- 同一 Tensor API 不代表所有设备具有相同性能和能力。
-
-诚实描述限制能让源码导读更有价值：读者不仅学习“系统有什么”，也学习
-如何从 feature、trait、测试和支持矩阵判断“系统究竟保证了什么”。
+从 feature、trait 和支持矩阵判断「这一层保证了什么」，比记住版本号更有用。
+打开对应 crate 的入口见[一次调用会经过哪些层](../crate-map.md)。
 

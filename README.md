@@ -3,10 +3,10 @@
 [中文](README_CN.md) | English
 
 *Machine Learning Systems: Design and Implementation with Burn and Rust* is
-an open-source textbook for Rust developers who want to study machine learning
-systems. It uses Burn as a continuous case study and follows the
-Burn → CubeCL → CubeK stack through tensors, automatic differentiation,
-compilation, kernels, training, and deployment.
+an open-source textbook for Rust developers. Chapters follow OpenMLSys
+systems questions, with Burn → CubeCL → CubeK as the running
+implementation—from tensor APIs through kernels, data pipelines, training,
+serving, and GPU clusters.
 
 This project is adapted from
 [OpenMLSys](https://github.com/openmlsys/openmlsys). It is not an official
@@ -14,11 +14,9 @@ OpenMLSys or Tracel project and is not affiliated with either organization.
 
 ## Project Status
 
-This is the nine-chapter candidate edition for the fixed
-`burn-0.22.0-pre.1` source snapshot. It is in release-audit stabilization:
-the book has CPU-first runnable evidence, source crosswalks, and explicit
-optional platform boundaries. See [`planning/STATUS.md`](planning/STATUS.md)
-for verified progress and remaining limitations.
+This is the nine-chapter candidate edition aligned with Burn
+`0.22.0-pre.1`. See [`planning/STATUS.md`](planning/STATUS.md) for progress
+and remaining limitations.
 
 ## Dependency Sources
 

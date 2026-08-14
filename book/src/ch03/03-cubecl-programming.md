@@ -25,7 +25,7 @@ tile。这样能产生特化代码，也可能增加编译数量；它不是普�
 ### 宏在替你写什么
 
 对本章 GEMM 阶梯实验的 `gemm_naive_kernel` 运行 `cargo expand`，可以
-看到 `#[cube(launch_unchecked)]` 生成了三样东西（本书固定版本，
+看到 `#[cube(launch_unchecked)]` 生成了三样东西（本书所用版本，
 节选并简化）：
 
 **第一，展开函数**：与原函数同名的模块里出现一个 `expand`，签名中
@@ -94,7 +94,7 @@ Kernel IR 可以由不同 Runtime 编译，并不意味着各 Runtime 的能力�
 
 ### 2.1 多 Runtime：同一 IR，不同完成边界
 
-按本书固定版本，CubeCL 至少暴露这些 Runtime 类型（路径相对 `cubecl/`）：
+按本书所用版本，CubeCL 至少暴露这些 Runtime 类型（路径相对 `cubecl/`）：
 
 | Runtime | 源码位置（示意） | 典型目标 | 本书默认 |
 |---|---|---|---|
