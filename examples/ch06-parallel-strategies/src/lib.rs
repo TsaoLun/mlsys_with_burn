@@ -37,7 +37,7 @@ impl Error for CostError {}
 
 fn require_divisible(value: u64, divisor: u32) -> Result<u64, CostError> {
     let world = u64::from(divisor);
-    if value % world != 0 {
+    if !value.is_multiple_of(world) {
         return Err(CostError::NotDivisible { value, divisor });
     }
     Ok(value / world)
@@ -253,9 +253,9 @@ mod tests {
     #[test]
     fn ring_rejects_indivisible_payload() {
         assert_eq!(
-            ring_allreduce(1000, 8),
+            ring_allreduce(1025, 8),
             Err(CostError::NotDivisible {
-                value: 1000,
+                value: 1025,
                 divisor: 8
             })
         );

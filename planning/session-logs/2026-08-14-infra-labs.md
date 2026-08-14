@@ -27,7 +27,19 @@
 
 ## 验证
 
-见 `planning/STATUS.md` 本次交接（本会话在提交后跑测试）。
+- `cargo test/clippy --all-targets --locked`：
+  `ch06-parallel-strategies` 9 项、`ch07-serving-queue-sim` 8 项、
+  `ch02-ch04-op-anatomy` 7 项（含 `mean_gradient_is_scaled_broadcast`）。
+- 三个 crate `cargo run --locked`；正文环形/空泡/ZeRO 表与运行输出对齐。
+- `mdbook build book`、`mdbook test book`。
+- `python3 tools/check_release.py --require-built-book --json`：`ok=true`、`errors=[]`。
+- `cargo fmt --all --check`、`git diff --check`。
+- 未跑完整 `make check`。
+
+## 修正
+
+环形 AllReduce 的「不可整除」用例最初用了 `payload=1000, p=8`（1000 能被 8
+整除），测试失败后改为 1025；Clippy 要求 `u64::is_multiple_of`。
 
 ## 下一步
 

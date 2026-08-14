@@ -45,9 +45,18 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
   - `ch02-ch04-op-anatomy`：`mean` 反向为 \(1/n\) 广播。
   - 正文动手版、练习改写、`book/src/capstone-infra.md`、Makefile/
     workspace/附录/来源映射同步。
-- 验证：见本文件稍后更新的命令结果（提交后跑测试）。
+- 验证：
+  - `cargo test/clippy --all-targets -p ch06-parallel-strategies --locked`（9 项）
+  - `cargo test/clippy --all-targets -p ch07-serving-queue-sim --locked`（8 项）
+  - `cargo test/clippy --all-targets -p ch02-ch04-op-anatomy --locked`（7 项，含 mean）
+  - 三个 crate 的 `cargo run --locked` 输出与正文表一致
+  - `mdbook build book`、`mdbook test book`
+  - `python3 tools/check_release.py --require-built-book --json`（`ok=true`、`errors=[]`）
+  - `cargo fmt --all --check`、`git diff --check`
+  - 未跑完整 `make check`（CubeCL CPU / tracel-llvm 既有风险；新 crate 为零 CubeCL）
 - 偏差：未实现 KV 抢占；未声称 Burn 提供 vLLM/Megatron runtime。
-- 下一步：发布者审阅；Pages 抽查新页。
+  环形「不可整除」测试初稿误用 1000（可被 8 整除），已改为 1025。
+- 下一步：发布者审阅 D026；Pages 抽查 `capstone-infra`。
 
 ## 已完成
 
