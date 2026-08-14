@@ -15,6 +15,7 @@ CPU_EXAMPLES = \
 	ch04-mini-pass-pipeline \
 	ch05-data-pipeline \
 	ch06-training-loop \
+	ch06-parallel-strategies \
 	ch07-ptq-calibration \
 	ch07-record-roundtrip \
 	ch07-serving-queue-sim \

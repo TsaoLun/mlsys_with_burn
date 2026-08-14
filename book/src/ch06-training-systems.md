@@ -63,4 +63,6 @@
 训练完成后，第 7 章讨论如何保存并服务这些参数；第 9 章把集合通信放进
 机柜与作业队列。
 
-示例位于 `examples/ch06-training-loop`。它使用 Flex CPU，不下载数据。
+示例位于 `examples/ch06-training-loop` 与
+`examples/ch06-parallel-strategies`。前者使用 Flex CPU 跑通一次 SGD；
+后者是切分策略的整数成本模型，不调用集合通信 runtime。

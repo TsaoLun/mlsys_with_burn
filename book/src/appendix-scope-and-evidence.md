@@ -86,7 +86,8 @@
 - `源码核验`：`TrainStep`、`Learner`、optimizer、`MultiDevice`、
   `DistributedContext` 与 collective 入口；
 - `协议/成本模型`：AllReduce、parameter-server、pipeline bubble
-  和 checkpoint version；
+  和 checkpoint version，以及 `ch06-parallel-strategies` 的环形流量 /
+  空泡分数 / ZeRO 显存整数表；
 - `可选平台实验`：Flex CPU 之外的 DDP、跨节点网络和真实通信性能；
 - `未覆盖`：把单机训练 loop 当作分布式训练、集群容错或 NCCL 证明。
 
@@ -98,8 +99,8 @@
 - `源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
   WASM/no_std 和当前 workspace 的 artifact 入口；
 - `协议/成本模型`：manifest、checksum、版本、rollback、batch/queue、
-  安全威胁模型，以及连续批处理与 KV 预算的虚拟时间队列模型
-  （`ch07-serving-queue-sim`）；
+  安全威胁模型，以及连续批处理、TTFT/TPOT、分块 prefill 与 KV 预算的
+  虚拟时间队列模型（`ch07-serving-queue-sim`）；
 - `可选平台实验`：真实 ONNX fixture、服务治理、浏览器/Remote 部署和
   设备性能；
 - `未覆盖`：burn-onnx 旧 revision 与当前 workspace Burn 的端到端混用。
@@ -138,10 +139,16 @@
 - `可选平台实验`：GPU、分布式训练、ONNX fixture 和服务治理；
 - `未覆盖`：把二维回归或 CPU elapsed time 外推成生产性能。
 
+### 训练与服务成本实验
+
+- `协议/成本模型`：`ch06-parallel-strategies` 的环形流量 / 空泡分数 /
+  ZeRO 显存，以及 `ch07-serving-queue-sim` 的 TTFT/TPOT 与分块 prefill；
+- `未覆盖`：把虚拟时间表写成 NCCL、Megatron 或 vLLM 的性能结论。
+
 ### 算子解剖：tanh 的完整一生
 
 - `CPU 可运行验证`：`ch02-ch04-op-anatomy` 的前向/反向/组合数值断言
-  （API→dispatch→Flex 与 autodiff 反向规则）；
+  （API→dispatch→Flex 与 autodiff 反向规则），以及 `sum`/`mean` 归约反向；
 - `源码核验`：tanh 在 API、契约、dispatch、autodiff、Flex、CubeCL、
   Fusion、IR、backend-tests 各层的固定源码位置；
 - `可选平台实验`：CubeCL/Fusion 层的实际执行（第 3 章 wgpu 路径与
@@ -250,7 +257,8 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
   `burn/crates/burn-core/src/tensor/distributed.rs`。
 - **可运行观察**：`ch06-training-loop` 的纯 Rust 协议 helper 测试
   weighted average、staleness、quorum、pipeline slots 和 checkpoint
-  version；另由 CPU autodiff loop 验证单设备训练。
+  version；另由 CPU autodiff loop 验证单设备训练；
+  `ch06-parallel-strategies` 把环形流量、空泡分数和 ZeRO 显存变成整数表。
 - **不可直接比较**：协议结果不等于 DDP/NCCL/跨节点性能或故障恢复；
   Flex CPU collective 仍是 `未覆盖`，真实通信为 `可选平台实验`。
 
@@ -268,7 +276,9 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
   `burn-onnx/crates/burn-import/src/`。
 - **可运行观察**：`ch07-record-roundtrip` 验证 Burnpack 参数往返保存与恢复；
   同 crate 的纯 Rust contract harness 用教学用的非密码学 checksum
-  验证 payload length、版本、rollback 和 dynamic batch。
+  验证 payload length、版本、rollback 和 dynamic batch；
+  `ch07-serving-queue-sim` 给出静态批 / 连续批 / 分块 prefill 的
+  TTFT、TPOT 与 KV 预算曲线。
 - **不可直接比较**：manifest/checksum 不是完整供应链安全；旧 revision
   的 ONNX fixture、HTTP、Remote、WASM 和 GPU service 是可选/未覆盖。
 

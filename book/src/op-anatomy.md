@@ -207,6 +207,7 @@ cargo test -p ch02-ch04-op-anatomy --locked
 前向（API → dispatch → Flex）与标量 f32::tanh 的最大误差：0.00e0
 反向（autodiff Tanh backward）与 1 - tanh(x)^2 的最大误差：0.00e0
 组合 y = x·tanh(x) 的梯度与乘积法则的最大误差：0.00e0
+sum 反向全 1；mean 反向为 1/n=1.43e-1，相对 sum/n 的最大误差：0.00e0
 ```
 
 ## 换一个算子，同样的十层
@@ -267,7 +268,18 @@ kernel 换成 CubeK 的 tile/stage/global 组件（第 3 章）。
 本页示例的 `add_gradient_reduces_over_broadcast`（`[1,3]` 广播进
 `[2,3]`，梯度回到 `[1,3]` 且值为按列归约）与
 `sum_gradient_broadcasts_ones`（梯度恰为全 1）把前两个标本的反向
-语义变成断言。
+语义变成断言。`mean` 是同一条归约规则加上缩放：`mean(x)=sum(x)/n`，
+所以根梯度为 1 时每个输入元素得到 \(1/n\)。
+
+```rust,ignore
+{{#include ../../examples/ch02-ch04-op-anatomy/src/lib.rs:mean_backward}}
+```
+
+跑 `cargo run -p ch02-ch04-op-anatomy --locked` 时，除 tanh 三行误差外
+还会打印 `mean` 相对 `sum/n` 的误差；测试
+`mean_gradient_is_scaled_broadcast` 同时断言它与 `sum` 梯度只差这个
+\(1/n\)。换算子时先写反向公式，再决定第 4 层 `State` 里要存形状还是
+前向值——`mean` 与 `sum` 一样只需要形状和元素个数。
 
 反过来读也成立——**缺一层会发生什么**：第 2 层缺实现是编译错误；
 第 4 层缺规则，算子能前向但不可训练；第 7/8 层缺注册，算子能算但

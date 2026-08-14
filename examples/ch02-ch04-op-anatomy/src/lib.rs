@@ -122,6 +122,20 @@ pub fn sum_backward(inputs: &[f32]) -> Result<Vec<f32>, AnatomyError> {
     values(grad)
 }
 
+// ANCHOR: mean_backward
+/// `mean` 是带缩放的归约：`mean(x) = sum(x)/n`，反向把上游梯度乘 `1/n`
+/// 再广播回每个输入。根梯度为 1 时，每个元素的梯度恰好是 `1/n`。
+pub fn mean_backward(inputs: &[f32]) -> Result<Vec<f32>, AnatomyError> {
+    let device = Device::flex().autodiff();
+    let input = Tensor::<1>::from_floats(inputs, &device).require_grad();
+    let gradients = input.clone().mean().backward();
+    let grad = input
+        .grad(&gradients)
+        .ok_or(AnatomyError::GradientMissing)?;
+    values(grad)
+}
+// ANCHOR_END: mean_backward
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -171,6 +185,18 @@ mod tests {
     fn sum_gradient_broadcasts_ones() {
         let grad = sum_backward(&SAMPLES).expect("反向应可执行");
         assert_eq!(grad, vec![1.0; SAMPLES.len()]);
+    }
+
+    /// mean 的反向是缩放广播：每个输入元素的梯度恰为 1/n。
+    #[test]
+    fn mean_gradient_is_scaled_broadcast() {
+        let grad = mean_backward(&SAMPLES).expect("反向应可执行");
+        let scale = 1.0 / SAMPLES.len() as f32;
+        assert!(max_abs_diff(&grad, &vec![scale; SAMPLES.len()]) < 1e-6);
+        let sum_grad = sum_backward(&SAMPLES).expect("sum 反向应可执行");
+        for (mean_g, sum_g) in grad.iter().zip(&sum_grad) {
+            assert!((mean_g * SAMPLES.len() as f32 - sum_g).abs() < 1e-5);
+        }
     }
 
     /// tape 按乘积法则组合两个算子的反向规则。

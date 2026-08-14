@@ -18,41 +18,36 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 - [x] D025：正文重编——九章章首、阅读路径、系统结论、产业/crate 地图；
   第 8 章标为可选；主路径去掉「可核对 / CPU-first / 快照」叙事。
   见 `planning/session-logs/2026-08-14-curriculum-reframe.md`。
-- [x] 仓库 `origin/main` 已到 `1ae11a5`，Pages 站点
-  `https://tsaolun.github.io/mlsys_with_burn/` 此前已可访问；本机仍不能
-  代替管理员核对 Settings → Pages 的 Source/environment 保护。
+- [x] D026：并行策略整数实验、服务队列 TTFT/分块 prefill、mean 归约
+  反向，以及 `capstone-infra.md` 合读页。
+  见 `planning/session-logs/2026-08-14-infra-labs.md`。
+- [x] 仓库 `origin/main` 已到 `82c0475`（用户手提交的 D025 重编），
+  Pages 站点 `https://tsaolun.github.io/mlsys_with_burn/` 此前已可访问；
+  本机仍不能代替管理员核对 Settings → Pages 的 Source/environment 保护。
 
 ## 下一步
 
-1. 提交并推送本批重编；推送后抽查 Pages：新首页、`infra-map`、
-   `crate-map`、第 6 章并行策略、第 7 章生成式服务、第 8 章「可选」。
-2. 由发布者审阅 D025 与重编后的章首，再决定候选 tag/归档。
+1. 由发布者审阅 D026 与 `capstone-infra.md`，再决定候选 tag/归档。
+2. 推送后抽查 Pages：`capstone-infra`、第 6 章动手版、第 7 章 TTFT 表。
 3. 在能访问 `tracel-llvm` 固定资产的环境重跑完整 `make check`。
 4. 真机 CUDA/NCCL 仅在 pins 与环境允许时追加可选命令；不得改默认 CPU
    gate（D022）。
-5. 后续内容增量（不阻塞 tag）：并行策略虚拟时间实验、第二条服务
-   capstone、二元/归约算子解剖练习。
+5. 后续内容增量（不阻塞 tag）：KV 抢占/换出、真实数据集训练（需可选
+   下载决策）、GEMM 阶梯更高级。
 
 ## 本次交接
 
-- 已完成（2026-08-14）：按 D025 重编全书读者主路径。
-  - 新增 `book/src/infra-map.md`、`book/src/crate-map.md`；SUMMARY
-    前置地图，第 8 章标题加「可选」，「应用与扩展篇」改为「服务、集群
-    与扩展」。
-  - 重写前言、首页、归属、九章章首、ch01 阅读路径与大模型地图、
-    ch01/04 技术栈、ch06/06 并行策略（DP/TP/PP/ZeRO）、ch07/05 生成式
-    服务（TTFT/TPOT/KV）、ch09/01 与 Slurm/K8s 对照；九章系统结论改写。
-  - 主路径删除「刻意不做」；「本书固定版本」改为「本书所用版本」；
-    实验节改为「停在哪」。附录保留证据账本（check_release 仍要求
-    「固定版本」「结论靠什么支撑」）。
-  - 更新 AGENTS.md、AUTHORING、MASTER_PLAN、CHAPTER_MATRIX、README。
-- 验证：`mdbook build book`、`mdbook test book`、
-  `python3 tools/check_release.py --require-built-book`（`ok=true`、
-  `errors=[]`）、`git diff --check` 通过。未跑完整 `make check`
-  （本机 tracel-llvm 404 既有）。
-- 偏差：未新增 Rust 示例（并行模拟器、第二条 capstone 列为下一步）；
-  小节技术正文以改口吻与加厚关键节为主，未逐段重写全部 80+ 小节。
-- 下一步：提交推送；Pages 抽查新导航。
+- 已完成（2026-08-14）：D025 之后的三项内容增量（D026）。
+  - `examples/ch06-parallel-strategies`：环形 AllReduce、GPipe/1F1B、
+    ZeRO、TP AllGather 的整数成本模型。
+  - `ch07-serving-queue-sim`：TTFT/TPOT 字段与 chunked prefill；
+    连续批 = 无上界 chunk。
+  - `ch02-ch04-op-anatomy`：`mean` 反向为 \(1/n\) 广播。
+  - 正文动手版、练习改写、`book/src/capstone-infra.md`、Makefile/
+    workspace/附录/来源映射同步。
+- 验证：见本文件稍后更新的命令结果（提交后跑测试）。
+- 偏差：未实现 KV 抢占；未声称 Burn 提供 vLLM/Megatron runtime。
+- 下一步：发布者审阅；Pages 抽查新页。
 
 ## 已完成
 

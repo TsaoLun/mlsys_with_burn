@@ -32,6 +32,8 @@ Agent 开始工作时依次阅读：
 
 ## 索引
 
+- [`2026-08-14-infra-labs.md`](2026-08-14-infra-labs.md)：
+  D026 并行策略整数实验、服务队列 TTFT/分块 prefill、mean 归约反向。
 - [`2026-08-14-curriculum-reframe.md`](2026-08-14-curriculum-reframe.md)：
   读者主路径重编（D025）：系统课章首、产业/crate 地图、并行与服务加厚。
 - [`2026-07-30-bootstrap-ch01-ch02.md`](2026-07-30-bootstrap-ch01-ch02.md)：

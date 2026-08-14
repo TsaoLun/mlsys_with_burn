@@ -191,6 +191,19 @@ metric 在事件处理线程上被惰性物化，输出因此要能跨线程存�
 
 </details>
 
+7. 【进阶】运行 `ch06-parallel-strategies`，对照 \(p=4\) 与 \(p=32\) 的
+   每设备发送字节和 α 步数，解释「流量趋近 \(2S\)」与「延迟项随 \(p\)
+   线性增长」为什么能同时成立。
+
+<details>
+<summary>提示</summary>
+
+主程序把 \(2(p-1)S/p\) 和 \(2(p-1)\) 打在同一张表里。字节那一列相对
+\(2S\) 的分数恰好是 \((p-1)/p\)；α 步数没有这个 \(1/p\)。公式在
+[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)动手版。
+
+</details>
+
 
 ## 源码题
 
@@ -342,6 +355,19 @@ ring 的每设备流量近似 $2S$ 但延迟项按 $2(p-1)$ 步增长；小消�
 
 </details>
 
+7. 【进阶】取同一组 \((p,m)\)，用交叉相乘证明 1F1B 的空闲比例小于
+   GPipe flush，并指出该模型把每个 F/B 槽当成等长的简化。
+
+<details>
+<summary>提示</summary>
+
+`PipelineBubble::idle_worse_than` 比较的是 \(a/b > c/d \Leftrightarrow ad > cb\)。
+GPipe 分母是 \(m+p-1\)，1F1B 是 \(2m+p-1\)。真实流水线 F 与 B 耗时往往
+不等，见[「集合通信、DDP 与并行策略」](06-collective-and-ddp.md)
+动手版对 1F1B 的注释。
+
+</details>
+
 
 ## 延伸阅读与固定源码入口
 
@@ -380,7 +406,7 @@ Horovod、GPipe、ZeRO、参数服务器等系统的论文集中在附录
 1. 训练系统管理的是可恢复状态：参数、优化器、采样器、步数与检查点。
 2. DP 切样本，TP 切隐藏维，PP 切层，ZeRO 切状态；通信模式和显存公式必须一起写。
 3. 数据并行的关键成本在梯度同步，可用 $\alpha+\beta$ 与 1F1B 空泡做数量级估计。
-4. 实验观察单设备 SGD 使 loss 下降；DDP 契约在 `DistributedOps`，Flex 没有 collective。
+4. 实验观察单设备 SGD 使 loss 下降；并行策略数字在 `ch06-parallel-strategies`；DDP 契约在 `DistributedOps`，Flex 没有 collective。
 5. 产业对照：PyTorch DDP / FSDP / Megatron；作业启动属于第 9 章。
 6. 单机训练循环回答不了 NCCL 或跨节点 DDP。
 

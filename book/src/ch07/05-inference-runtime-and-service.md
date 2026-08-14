@@ -137,48 +137,44 @@ token。成本因此分裂——
 里 Attention 节点对 `past_k` / `past_v` 的图转换，也不等于服务端的
 分页管理。
 
-队列模型做了两处简化：prefill 在接纳步一次完成（真实系统常有 chunked
-prefill）；KV 按 prompt+decode 全额预留，没有换出。它解释机制方向，
-不预测某套生产 runtime 的毫秒数。
+队列模型仍按 prompt+decode 全额预留 KV，没有换出；分块 prefill 已经
+做成可切换的调度，用来看长 prompt 怎样干扰正在 decode 的序列。它解释
+机制方向，不预测某套生产 runtime 的毫秒数。
 
-### 动手版：连续批处理与 KV 预算的队列模型
+### 动手版：连续批处理、TTFT/TPOT 与分块 prefill
 
 `examples/ch07-serving-queue-sim` 用与第 9 章集群模拟器同类的虚拟
-时间协议模型，把「为什么需要 continuous batching」变成三张可复现的
-表。成本模型只有两项：每步固定开销 α 与本步处理 token 数的线性项 β；
+时间协议模型，把「为什么需要 continuous batching」变成可复现的表。
+成本模型只有两项：每步固定开销 α 与本步处理 token 数的线性项 β；
 KV 预算限制同时驻留的序列（按 prompt + decode 预留）：
 
 ```rust,ignore
 {{#include ../../../examples/ch07-serving-queue-sim/src/lib.rs:model}}
 ```
 
+连续批处理把新请求的 prefill 并进正在进行的 decode 步；分块版本把
+大 prompt 切成每步至多 `chunk` 个 token，避免一条长 prompt 独占整步：
+
+```rust,ignore
+{{#include ../../../examples/ch07-serving-queue-sim/src/lib.rs:chunked}}
+```
+
 对 64 条混合长度请求（prompt 32–512、decode 16–256），运行
-`cargo run -p ch07-serving-queue-sim --locked`：
+`cargo run -p ch07-serving-queue-sim --locked`。主程序会打印平均 /
+p95 端到端延迟、p95 TTFT、平均 TPOT，以及分块 prefill（chunk=32）
+对照。差距的来源仍被「空转槽步」点名：静态批里先完成的序列占着槽位
+等批内最长序列结束；长度方差消失时收益随之收窄。
 
-```text
-          调度       平均 ms      p95 ms      总时长 ms     tok/s      空转槽步
-      静态批(8)       268.2       459.7       551.5     16992      5646
-       连续批处理        90.0       128.9       206.6     45372         0
+TTFT 记的是「到达到第一个 decode token 完成」，TPOT 是首 token 之后
+每个后续 decode 的平均间隔。二者和端到端延迟必须分开看：分块 prefill
+通常保护**已经在 decode 的序列**（它们的 TPOT 不再被 512 个 prompt
+token 拖慢），新请求自己的 TTFT 则可能因更多步开销而略差——这正是
+chunk 大小的权衡，不是「切得越碎越好」。
 
-对照：decode 长度全部相同时，静态批空转槽步 = 0，平均延迟差距收窄为 1.99 倍
-```
-
-差距的来源被「空转槽步」直接点名：静态批里先完成的序列占着槽位等
-批内最长序列结束，5646 个 token 槽位在空转；长度方差消失时收益也
-随之收窄——continuous batching 的价值来自**长度方差**，不是魔法。
-KV 预算扫描则把「KV cache 决定并发」变成单调曲线：
-
-```text
-    预算 tok      总时长 ms       tok/s      峰值驻留 tok
-      2048       616.2       15210          2044
-      8192       260.6       35969          8188
-     32768       179.6       52195         27158
-```
-
-两点刻意简化必须记住：prefill 在接纳步一次完成（真实系统有 chunked
-prefill，长 prompt 会被切片以免拖慢整步）；KV 按 prompt+decode 全额
-预留，没有 vLLM 式的分页与抢占。模型解释机制方向，不预测任何真实
-runtime 的数字。
+KV 预算扫描仍把「KV cache 决定并发」变成单调曲线。模型解释机制方向，
+不预测任何真实 runtime 的数字。剩下的简化是：KV 按 prompt+decode 全额
+预留，没有分页与抢占。把这张表和第 6 章并行策略合读，见
+[训练与服务成本实验](../capstone-infra.md)。
 
 ## 产业对照
 
@@ -188,7 +184,7 @@ runtime 的数字。
 | `burn-onnx` codegen | ONNX Runtime / 导出图 | 图→可执行路径 | 独立仓库，另一份 Burn 提交 |
 | Device 上的 `forward` | 推理 `session.run` | 无训练 tape 的执行 | 不含鉴权/限流 |
 | 应用层 batcher + 队列 | Triton / 自研 serving | 延迟/吞吐权衡 | 服务框架由应用提供 |
-| 连续批 + KV 预算模型 | vLLM / Orca | 长度方差与显存墙 | `ch07-serving-queue-sim` |
+| 连续批 + 分块 prefill + KV 预算 | vLLM / Orca | 长度方差、步内干扰与显存墙 | `ch07-serving-queue-sim` |
 
 ## 正确性与性能测试
 

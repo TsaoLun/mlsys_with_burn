@@ -188,6 +188,66 @@ AllGather 参数。显存公式和通信轮次必须一起写，不能只说「�
 作业启动、rank 发现和弹性成员仍属于第 9 章。没有这些，DDP 入口假设
 「每个节点已被人拉起来、configuration 一致」。
 
+### 动手版：把公式跑成整数表
+
+`examples/ch06-parallel-strategies` 把上一节的流量与空泡公式收成整数
+断言：环形 AllReduce 的每设备字节、GPipe / 1F1B 空闲比例、ZeRO 0–3
+每卡显存，以及张量并行一层 AllGather。时间单位是「一步」或一个 α，
+不是墙钟；它也不实现 NCCL 或 Megatron。
+
+环形 AllReduce 的两项可以读出来：
+
+```rust,ignore
+{{#include ../../../examples/ch06-parallel-strategies/src/lib.rs:ring}}
+```
+
+流水线用交叉相乘比较空闲比例，避免把 \((p-1)/(m+p-1)\) 写成近似小数：
+
+```rust,ignore
+{{#include ../../../examples/ch06-parallel-strategies/src/lib.rs:pipeline}}
+```
+
+运行 `cargo run -p ch06-parallel-strategies --locked`：
+
+```text
+环形 AllReduce：payload = 1024 字节（必须能被 p 整除）
+   p      每设备发送      α 步数    相对 2S
+   2          1024           2      1/2
+   4          1536           6      3/4
+   8          1792          14      7/8
+  16          1920          30     15/16
+  32          1984          62     31/32
+
+流水线空泡：p = 4 个 stage（空闲比例用分数，避免浮点）
+   m        GPipe 跨度      GPipe 空闲    1F1B 跨度    1F1B 空闲
+   1               4         3/4             5         3/5
+   4               7         3/7            11         3/11
+  16              19         3/19           35         3/35
+  64              67         3/67          131         3/131
+
+ZeRO 每卡显存：P=16 G=16 O=32 n=8
+     stage       P       G       O      合计
+    复制 / 0      16      16      32      64
+      ZeRO-1      16      16       4      36
+      ZeRO-2      16       2       4      22
+      ZeRO-3       2       2       4       8
+
+张量并行一层 AllGather：激活 1024 字节、p=8，每设备发送 896 字节
+```
+
+三件可以直接读出的事：
+
+1. 环算法每设备流量随 \(p\) 趋近 \(2S\)，但 α 步数按 \(2(p-1)\) 线性涨——
+   小消息、多卡时延迟项会压过带宽项；
+2. 同样 4 个 stage，把 \(m\) 从 1 加到 64，GPipe 空闲从 \(3/4\) 降到
+   \(3/67\)；1F1B 在同一 \(m\) 下分母更大，空泡更小，但 warm-up/drain
+   仍在；
+3. ZeRO-3 把三份状态都除以 \(n\)，换来的是每次前向的参数 AllGather
+   （与上一张 TP 表同一类 \((p-1)S/p\) 流量）。
+
+训练循环实验仍在下一节；把这两张表和第 7 章队列、第 9 章拓扑放在一起
+看的入口见[训练与服务成本实验](../capstone-infra.md)。
+
 ## 产业对照
 
 | 本书讨论的机制 | 常见产业说法 | 对齐点 | 实现落点 |

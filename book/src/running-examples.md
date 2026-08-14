@@ -48,13 +48,15 @@ cargo test -p ch01-stack-probe --locked --offline
 | `ch04-mini-pass-pipeline` | 第 4 章 | 亲手写常量折叠/DCE/CSE，含浮点非法变换反例 |
 | `ch05-data-pipeline` | 第 5 章 | 数据守恒、固定 seed、多 worker 边界 |
 | `ch06-training-loop` | 第 6 章 | CPU autodiff 训练循环、loss 下降 |
+| `ch06-parallel-strategies` | 第 6 章 | DP/TP/PP/ZeRO 的整数流量与空泡表 |
 | `ch07-ptq-calibration` | 第 7 章 | PTQ 校准交易：min-max vs 百分位、per-channel、int8 GEMM |
 | `ch07-record-roundtrip` | 第 7 章 | ModuleRecord/Burnpack 参数往返保存与恢复 |
-| `ch07-serving-queue-sim` | 第 7 章 | 静态批 vs 连续批处理、KV 预算约束的虚拟时间队列模型 |
+| `ch07-serving-queue-sim` | 第 7 章 | 静态批 vs 连续批、TTFT/TPOT、分块 prefill 与 KV 预算 |
 | `ch08-rl-rollout` | 第 8 章 | 确定性环境 rollout、replay、表格 TD 更新 |
 | `ch09-cluster-simulator` | 第 9 章 | 集群调度与故障的确定性虚拟时间模拟 |
 | `ch05-ch07-capstone` | [综合实验](capstone.md) | Dataset → 训练 → Record → 推理的端到端路径 |
-| `ch02-ch04-op-anatomy` | [算子解剖](op-anatomy.md) | tanh 逐层源码事实的数值断言（前向/反向/组合） |
+| `ch06-parallel-strategies` + `ch07-serving-queue-sim` | [训练与服务成本](capstone-infra.md) | 切分流量 / 空泡与排队 TTFT 合读 |
+| `ch02-ch04-op-anatomy` | [算子解剖](op-anatomy.md) | tanh 前向/反向/组合，以及 sum/mean 归约反向 |
 
 ## 运行某个示例
 

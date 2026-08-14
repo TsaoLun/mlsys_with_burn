@@ -58,6 +58,7 @@ prefill / decode 与 KV 预算，用第 7 章队列实验观察机制。
 8. [练习、延伸阅读与来源](ch07/08-exercises-and-sources.md)
 
 第 5–7 章覆盖「数据 → 训练 → 产物 → 推理」的最小闭环；书末
-[综合实验](capstone.md) 会把这条链跑一遍。
+[综合实验](capstone.md) 会把这条链跑一遍。训练切分与服务队列的成本
+数字合读见[训练与服务成本实验](capstone-infra.md)。
 
 示例位于 `examples/ch07-record-roundtrip` 与 `ch07-serving-queue-sim`。

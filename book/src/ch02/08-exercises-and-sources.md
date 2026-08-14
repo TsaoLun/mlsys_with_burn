@@ -205,6 +205,18 @@ require-grad 意图。问：`set_require_grad(false)` 关掉的又是什么？
 
 </details>
 
+10. 【基础】运行 `ch02-ch04-op-anatomy` 的 `mean_backward`，解释为什么
+    `mean` 的梯度是 \(1/n\) 而 `sum` 是全 1，二者只差一个缩放。
+
+<details>
+<summary>提示</summary>
+
+`mean(x)=\mathrm{sum}(x)/n`。归约的反向是广播，再乘 \(1/n\)。对照
+[算子解剖](../op-anatomy.md)里 `sum` 与 `mean` 的断言，以及测试
+`mean_gradient_is_scaled_broadcast`。
+
+</details>
+
 
 ### 源码题
 

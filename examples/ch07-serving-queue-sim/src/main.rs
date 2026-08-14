@@ -1,5 +1,6 @@
 use ch07_serving_queue_sim::{
-    DEFAULT_COST, mixed_workload, simulate_continuous, simulate_static, uniform_workload,
+    DEFAULT_COST, mixed_workload, simulate_chunked_prefill, simulate_continuous, simulate_static,
+    uniform_workload,
 };
 
 // ANCHOR: walkthrough
@@ -9,19 +10,25 @@ fn main() {
 
     println!("64 条混合长度请求（prompt 32–512，decode 16–256），KV 预算 {kv_budget} token：");
     println!(
-        "{:>12}  {:>10}  {:>10}  {:>10}  {:>8}  {:>8}",
-        "调度", "平均 ms", "p95 ms", "总时长 ms", "tok/s", "空转槽步"
+        "{:>12}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>8}",
+        "调度", "平均 ms", "p95 ms", "p95 TTFT", "平均 TPOT", "总时长 ms", "空转槽步"
     );
     let static_batch = simulate_static(&requests, DEFAULT_COST, kv_budget, 8);
     let continuous = simulate_continuous(&requests, DEFAULT_COST, kv_budget);
-    for (name, trace) in [("静态批(8)", &static_batch), ("连续批处理", &continuous)] {
+    let chunked = simulate_chunked_prefill(&requests, DEFAULT_COST, kv_budget, 32);
+    for (name, trace) in [
+        ("静态批(8)", &static_batch),
+        ("连续批处理", &continuous),
+        ("分块 prefill", &chunked),
+    ] {
         println!(
-            "{:>12}  {:>10.1}  {:>10.1}  {:>10.1}  {:>8.0}  {:>8}",
+            "{:>12}  {:>10.1}  {:>10.1}  {:>10.1}  {:>10.1}  {:>10.1}  {:>8}",
             name,
             trace.mean_latency_us() / 1e3,
             trace.p95_latency_us() / 1e3,
+            trace.p95_ttft_us() / 1e3,
+            trace.mean_tpot_us() / 1e3,
             trace.makespan_us / 1e3,
-            trace.throughput_tokens_per_s(&requests),
             trace.idle_token_steps
         );
     }

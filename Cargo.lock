@@ -978,6 +978,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "ch06-parallel-strategies"
+version = "0.1.0"
+
+[[package]]
 name = "ch06-training-loop"
 version = "0.1.0"
 dependencies = [

@@ -20,8 +20,9 @@ Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 
 本章还有两个纯 Rust 机制实验：`ch07-ptq-calibration` 把量化校准的
 scale/zero-point、粒度与离群值交易变成可复现数字；
-`ch07-serving-queue-sim` 用虚拟时间队列演示连续批处理与 KV 预算如何
-决定延迟和吞吐。它们验证的是协议与机制，不是任何 backend 的性能。
+`ch07-serving-queue-sim` 用虚拟时间队列演示连续批处理、TTFT/TPOT、
+分块 prefill 与 KV 预算如何决定延迟。它们验证的是协议与机制，不是任何
+backend 的性能。
 
 ## 练习
 
@@ -465,19 +466,32 @@ scale/zero-point、metadata 随之怎么涨。实验是协议层演算，不依�
 
 </details>
 
-10. 【挑战】给 `ch07-serving-queue-sim` 增加 chunked prefill：把大 prompt
-    切成固定大小的块分多步处理，比较长 prompt 到达时其他请求的
-    p95 延迟变化。
+10. 【进阶】用 `simulate_chunked_prefill` 扫描 `chunk ∈ {16, 32, 64, u32::MAX}`，
+    比较 p95 TTFT 与平均 TPOT，解释最小值为什么通常不在最小 chunk。
 
 <details>
 <summary>提示</summary>
 
-当前模型在接纳步一次处理全部 prompt token（见
 [「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)
-「动手版」小节声明的简化），一条 512 token 的 prompt 会拖慢同一步里
-所有请求——这正是要测的干扰。改法：`Running` 增加未完成的 prefill
-余量，每步最多处理 `chunk` 个 prompt token；断言总 token 数守恒，
-再比较 p95。
+动手版已经把分块 prefill 接进同一队列模型。每步都有 `step_overhead_us`：
+chunk 越小，长 prompt 拆成越多步，α 项累加越多；chunk 太大则又回到
+「一条 512 token 的 prompt 拖慢同一步里所有 decode」。先看
+`chunked_prefill_protects_inflight_decode` 测的是哪一类请求，再决定
+你要优化的是在飞 TPOT 还是新请求 TTFT。
+
+</details>
+
+11. 【挑战】给队列模型增加 KV 抢占或换出：预算满时换出一条序列，比较
+    TTFT / 端到端延迟与从不换出的基线。需要自行设计换出策略，本书默认
+    示例不覆盖。
+
+<details>
+<summary>提示</summary>
+
+当前模型在接纳时按 prompt+decode **全额预留**，见
+[「推理 runtime、批处理与服务接口」](05-inference-runtime-and-service.md)
+动手版末尾的简化。换出要决定：按什么键选牺牲者、换出后 KV 字节如何归还、
+再次换入时是否重做 prefill。这些都改变 TTFT 的定义，先把守恒断言写出来。
 
 </details>
 
@@ -528,8 +542,8 @@ OpenMLSys v1：
 
 1. 部署有两条线：产物（拓扑+参数可恢复）和服务（排队、合批、KV 预算）。
 2. `ModuleRecord` / Burnpack 管参数状态；ONNX/codegen 管图转换，二者不要混用依赖。
-3. 生成式服务要把 TTFT、TPOT 和 KV 显存分开算；连续批的价值来自长度方差。
-4. 实验覆盖参数往返、PTQ 校准交易，以及静态批 vs 连续批的队列行为。
+3. 生成式服务要把 TTFT、TPOT 和 KV 显存分开算；连续批的价值来自长度方差，分块 prefill 保护在飞 decode。
+4. 实验覆盖参数往返、PTQ 校准交易，以及静态批 / 连续批 / 分块 prefill 的队列行为。
 5. 产业对照：checkpoint / ONNX Runtime / Triton / vLLM；HTTP 治理由应用提供。
 6. 本地 load 成功不等于已经有一条生产服务。
 

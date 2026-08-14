@@ -12,7 +12,8 @@ forward → loss → backward → GradientsParams → SGD → loss
 
 范围停在单设备循环。Flex 没有 collective 实现，DDP / AllReduce / 模型
 并行放到[集合通信、DDP 与并行策略](06-collective-and-ddp.md)用成本模型
-讨论。
+讨论；同页动手版把环形流量、空泡分数和 ZeRO 显存跑成整数表
+（`examples/ch06-parallel-strategies`）。
 
 ## 1. 构造 CPU autodiff model
 
@@ -92,4 +93,5 @@ initial_loss=... final_loss=... parameter_delta=...
 完整的 Dataset → autodiff → ModuleRecord → inference 路径见
 [综合实验：数据到推理](../capstone.md)。它把本实验的
 `forward → loss → backward → SGD` 放入固定 train/validation split，并
-增加 loader 守恒、record topology 错误和恢复后输出误差检查。
+增加 loader 守恒、record topology 错误和恢复后输出误差检查。并行策略的
+字节/空泡表与第 7 章队列模型合读，见[训练与服务成本实验](../capstone-infra.md)。

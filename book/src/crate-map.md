@@ -16,7 +16,7 @@
 | 用户 API 形状与文档 | `burn-tensor` 的 `tensor/api/` | 编译期秩 `D`、类别 `K` |
 | 后端必须实现哪些算子 | `burn-backend` 的 `ops/tensor.rs` | 缺实现 = 该后端编不过 |
 | 运行时按设备分派 | `burn-dispatch` | 第 1 章的 `DispatchDevice` |
-| 反向公式、checkpoint | `burn-autodiff` 的 `ops/` | `burn-backend-tests` 里同名 `should_diff_*` |
+| 反向公式、checkpoint | `burn-autodiff` 的 `ops/` | `burn-backend-tests` 里同名 `should_diff_*`；换算子从 `mean`/`sum`/`add` 对照开始 |
 | CPU eager 实现 | `burn-flex` | 默认示例走这里，不经过 CubeCL |
 | GPU / JIT Kernel | `burn-cubecl`，再进 `cubecl/` | 第 3 章 `#[cube]` |
 | 高性能 matmul / 注意力 | `cubek/` 的对应 crate | 第 3 章 Strategy 与 tune key |

@@ -47,6 +47,8 @@
 | 加权集合通信 | weighted AllReduce | 按样本数聚合局部梯度，而非等权平均 | [第 6 章](ch06-training-systems.md) |
 | 梯度新鲜度 | gradient staleness | 当前参数版本与梯度版本的差距 | [第 6 章](ch06-training-systems.md) |
 | 流水线空泡 | pipeline bubble | 1F1B 的 warm-up/drain 空闲槽 | [第 6 章](ch06-training-systems.md) |
+| 环形 AllReduce | ring AllReduce | 每设备约 \(2S\) 字节、α 步数 \(2(p-1)\) 的集合通信 | [第 6 章](ch06-training-systems.md) |
+| 参数分片 | ZeRO / FSDP | 按级切开优化器状态、梯度、参数以换显存 | [第 6 章](ch06-training-systems.md) |
 | 训练执行策略 | `ExecutionStrategy`（burn-train） | MultiDevice/DDP 等训练装配策略；**不是**第 4 章 Fusion 块内的同名搜索对象 | [第 6 章](ch06-training-systems.md) |
 | 训练进程号 | rank | 分布式作业里的进程/副本序号；与张量的秩（rank）不是同一概念 | [第 9 章](ch09-gpu-cluster.md) |
 
@@ -61,6 +63,9 @@
 | 量化参数 | scale / zero-point | 浮点区间到整数网格的仿射映射参数 | [第 7 章](ch07-model-serving.md) |
 | 连续批处理 | continuous batching | 逐 token 调度：请求完成即退出、新请求随时并入 batch | [第 7 章](ch07-model-serving.md) |
 | KV 缓存 | KV cache | 生成式推理保存注意力键值以免重算；容量构成 KV 预算 | [第 7 章](ch07-model-serving.md) |
+| 首 token 延迟 | TTFT | time to first token：到达到第一个 decode token | [第 7 章](ch07-model-serving.md) |
+| 每 token 间隔 | TPOT | time per output token：首 token 之后的平均出字间隔 | [第 7 章](ch07-model-serving.md) |
+| 分块预填充 | chunked prefill | 把长 prompt 切成多步，以免独占连续批的一整步 | [第 7 章](ch07-model-serving.md) |
 | 终止语义 | `done` / `truncated` | 自然终止与外部/时间截断，bootstrap 语义不同 | [第 8 章](ch08-rl-systems.md) |
 | 策略关系 | behavior / target policy | $\mu$ 采样、$\pi$ 学习；on/off-policy 的区分依据 | [第 8 章](ch08-rl-systems.md) |
 | 策略新鲜度 | policy freshness | behavior/target 的版本差 | [第 8 章](ch08-rl-systems.md) |

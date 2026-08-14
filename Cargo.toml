@@ -12,6 +12,7 @@ members = [
     "examples/ch05-data-pipeline",
     "examples/ch05-ch07-capstone",
     "examples/ch06-training-loop",
+    "examples/ch06-parallel-strategies",
     "examples/ch07-ptq-calibration",
     "examples/ch07-record-roundtrip",
     "examples/ch07-serving-queue-sim",

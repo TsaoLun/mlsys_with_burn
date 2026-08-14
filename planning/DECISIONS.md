@@ -363,3 +363,21 @@
 - 影响：AUTHORING 的章首/系统结论体例以本决策为准；D020/D021 的
   「正文只面向学习者」继续有效，且进一步从主路径拿掉自洽术语。
   不改变 `pins.toml`、默认 `make check` 或 D010–D013、D022 的工程边界。
+
+## D026：并行与服务成本以可运行虚拟时间实验进入主路径
+
+- 日期：2026-08-14
+- 决策：在不增加章内小节数、不改 pins、不改默认 CPU gate 的前提下，
+  把 D025 列出的三项内容增量做成可运行实验：
+  （1）`examples/ch06-parallel-strategies` 用整数公式给出环形
+  AllReduce、GPipe/1F1B 空泡、ZeRO 0–3 显存与 TP AllGather；
+  （2）`ch07-serving-queue-sim` 为每条请求记录 TTFT/TPOT，并实现
+  chunked prefill（`simulate_continuous` 即 `chunk = u32::MAX`）；
+  （3）`ch02-ch04-op-anatomy` 增加 `mean` 归约反向（\(1/n\) 广播）。
+  新增书内页 `capstone-infra.md` 把第 6、7 章两张表合读。不声称 Burn
+  实现了 vLLM / Megatron / NCCL runtime。D024 中「无 chunked prefill」
+  的刻意简化由本决策收回；KV 仍全额预留、无抢占。
+- 原因：重编后的并行策略与生成式服务成本如果只停在公式，读者无法
+  改变 \(p,m,\mathrm{chunk}\) 看方向；本书已有第 9 章模拟器先例。
+- 影响：workspace / Makefile / running-examples / 附录证据账本同步
+  登记。练习不得再把已实现的分块 prefill 当作【挑战】实现题。

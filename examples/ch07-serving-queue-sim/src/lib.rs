@@ -1,11 +1,9 @@
 //! 生成式服务的队列协议模型：静态批处理 vs 连续批处理（continuous
-//! batching），外加 KV cache 容量预算对并发的约束。
+//! batching），外加 KV cache 容量预算、TTFT/TPOT 与 chunked prefill。
 //!
 //! 这是与第 9 章集群模拟器同类的**纯 Rust 虚拟时间协议模型**：它解释
 //! Orca/vLLM 一系的机制为什么有效，不代表任何真实服务 runtime 的
-//! 性能。两点刻意简化：prefill 在被接纳的那一步一次性处理全部
-//! prompt token（不做 chunked prefill）；KV 预算按「prompt + 全部
-//! decode」预留，不做抢占与换出。
+//! 性能。KV 预算按「prompt + 全部 decode」预留，不做抢占与换出。
 
 // ANCHOR: model
 /// 一条生成请求：到达时刻、prompt 长度与要生成的 token 数。
@@ -17,8 +15,8 @@ pub struct Request {
 }
 
 /// 一步（iteration）的耗时模型：固定开销 + 本步处理的 token 数。
-/// decode 中的序列每步贡献 1 个 token；prefill 在接纳步贡献全部
-/// prompt token——大 prompt 会拖慢同一步里的所有请求。
+/// decode 中的序列每步贡献 1 个 token；prefill 按本步实际处理的
+/// prompt token 计——大 prompt 若一次吃完，会拖慢同一步里的所有请求。
 #[derive(Clone, Copy, Debug)]
 pub struct CostModel {
     pub step_overhead_us: f64,
@@ -37,6 +35,11 @@ impl CostModel {
 pub struct Trace {
     /// 每条请求从到达到最后一个 token 完成的延迟（µs），按输入顺序。
     pub latency_us: Vec<f64>,
+    /// 每条请求的 TTFT：到达到第一个 decode token 完成（µs）。
+    pub ttft_us: Vec<f64>,
+    /// 每条请求的 TPOT：首 token 之后每个后续 decode token 的平均间隔。
+    /// `decode_tokens <= 1` 时为 0。
+    pub tpot_us: Vec<f64>,
     /// 全部请求完成的时刻（µs）。
     pub makespan_us: f64,
     /// 模拟中同时驻留的 KV token 峰值。
@@ -47,14 +50,23 @@ pub struct Trace {
 
 impl Trace {
     pub fn mean_latency_us(&self) -> f64 {
-        self.latency_us.iter().sum::<f64>() / self.latency_us.len() as f64
+        mean(&self.latency_us)
     }
 
     pub fn p95_latency_us(&self) -> f64 {
-        let mut sorted = self.latency_us.clone();
-        sorted.sort_by(f64::total_cmp);
-        let index = ((sorted.len() as f64 * 0.95) as usize).min(sorted.len() - 1);
-        sorted[index]
+        percentile(&self.latency_us, 0.95)
+    }
+
+    pub fn mean_ttft_us(&self) -> f64 {
+        mean(&self.ttft_us)
+    }
+
+    pub fn p95_ttft_us(&self) -> f64 {
+        percentile(&self.ttft_us, 0.95)
+    }
+
+    pub fn mean_tpot_us(&self) -> f64 {
+        mean(&self.tpot_us)
     }
 
     pub fn throughput_tokens_per_s(&self, requests: &[Request]) -> f64 {
@@ -63,22 +75,69 @@ impl Trace {
     }
 }
 
+fn mean(values: &[f64]) -> f64 {
+    if values.is_empty() {
+        0.0
+    } else {
+        values.iter().sum::<f64>() / values.len() as f64
+    }
+}
+
+fn percentile(values: &[f64], pct: f64) -> f64 {
+    if values.is_empty() {
+        return 0.0;
+    }
+    let mut sorted = values.to_vec();
+    sorted.sort_by(f64::total_cmp);
+    let index = ((sorted.len() as f64 * pct) as usize).min(sorted.len() - 1);
+    sorted[index]
+}
+
 fn kv_cost(request: &Request) -> u64 {
     (request.prompt_tokens + request.decode_tokens) as u64
+}
+
+fn tpot_us(finish: f64, first_token: f64, decode_tokens: u32) -> f64 {
+    let subsequent = decode_tokens.saturating_sub(1);
+    if subsequent == 0 {
+        0.0
+    } else {
+        (finish - first_token) / f64::from(subsequent)
+    }
 }
 
 // ANCHOR: continuous
 /// 连续批处理：每一步开始时，只要 KV 预算允许就接纳队首请求；每条
 /// 运行中的序列本步 decode 一个 token，完成即离开并归还 KV 预算。
+/// Prefill 在接纳步一次处理完（等价于 chunk = `u32::MAX` 的分块 prefill）。
 pub fn simulate_continuous(requests: &[Request], cost: CostModel, kv_budget: u64) -> Trace {
+    simulate_chunked_prefill(requests, cost, kv_budget, u32::MAX)
+}
+// ANCHOR_END: continuous
+
+// ANCHOR: chunked
+/// 分块 prefill：每条仍在吃 prompt 的序列，每步至多处理 `chunk_tokens`
+/// 个 prompt token；已经进入 decode 的序列仍每步产出 1 个 token。
+/// 长 prompt 因此不会独占整整一步。`chunk_tokens == 0` 按 1 处理。
+pub fn simulate_chunked_prefill(
+    requests: &[Request],
+    cost: CostModel,
+    kv_budget: u64,
+    chunk_tokens: u32,
+) -> Trace {
     #[derive(Clone, Copy)]
     struct Running {
         index: usize,
-        remaining: u32,
+        remaining_prefill: u32,
+        remaining_decode: u32,
         resident: u64,
+        first_token_us: Option<f64>,
     }
 
+    let chunk = chunk_tokens.max(1);
     let mut latency = vec![0.0f64; requests.len()];
+    let mut ttft = vec![0.0f64; requests.len()];
+    let mut tpot = vec![0.0f64; requests.len()];
     let mut now = 0.0f64;
     let mut next_arrival = 0usize;
     let mut running: Vec<Running> = Vec::new();
@@ -86,42 +145,56 @@ pub fn simulate_continuous(requests: &[Request], cost: CostModel, kv_budget: u64
     let mut peak = 0u64;
 
     while next_arrival < requests.len() || !running.is_empty() {
-        // 空转推进：没有可运行请求时，时间跳到下一个到达。
         if running.is_empty() && next_arrival < requests.len() {
             now = now.max(requests[next_arrival].arrival_us as f64);
         }
 
-        // 接纳：按到达顺序（FCFS），预算按 prompt+decode 预留。
-        let mut prefill_tokens: u64 = 0;
         while next_arrival < requests.len()
             && requests[next_arrival].arrival_us as f64 <= now
-            && (resident + kv_cost(&requests[next_arrival]) <= kv_budget
-                // 单条请求超出预算时也要在空闲时单独跑，避免永久卡死。
-                || running.is_empty() && prefill_tokens == 0)
+            && (resident + kv_cost(&requests[next_arrival]) <= kv_budget || running.is_empty())
         {
             let request = requests[next_arrival];
             running.push(Running {
                 index: next_arrival,
-                remaining: request.decode_tokens.max(1),
+                remaining_prefill: request.prompt_tokens,
+                remaining_decode: request.decode_tokens.max(1),
                 resident: kv_cost(&request),
+                first_token_us: None,
             });
             resident += kv_cost(&request);
-            prefill_tokens += request.prompt_tokens as u64;
             next_arrival += 1;
         }
         peak = peak.max(resident);
 
-        // 一步：prefill token + 每条运行序列 1 个 decode token。
-        let decode_tokens = running.len() as u64;
-        now += cost.step_us(prefill_tokens + decode_tokens);
+        let mut work = 0u64;
+        let mut first_decode = Vec::new();
+        for (slot, job) in running.iter_mut().enumerate() {
+            if job.remaining_prefill > 0 {
+                let take = job.remaining_prefill.min(chunk);
+                work += u64::from(take);
+                job.remaining_prefill -= take;
+            }
+            if job.remaining_prefill == 0 && job.remaining_decode > 0 {
+                work += 1;
+                job.remaining_decode -= 1;
+                if job.first_token_us.is_none() {
+                    first_decode.push(slot);
+                }
+            }
+        }
+        now += cost.step_us(work);
+        for slot in first_decode {
+            running[slot].first_token_us = Some(now);
+        }
 
-        // 完成的序列立即离开，释放预算给下一步的接纳。
         let mut index = 0;
         while index < running.len() {
-            running[index].remaining -= 1;
-            if running[index].remaining == 0 {
+            if running[index].remaining_prefill == 0 && running[index].remaining_decode == 0 {
                 let done = running.swap_remove(index);
+                let first = done.first_token_us.unwrap_or(now);
                 latency[done.index] = now - requests[done.index].arrival_us as f64;
+                ttft[done.index] = first - requests[done.index].arrival_us as f64;
+                tpot[done.index] = tpot_us(now, first, requests[done.index].decode_tokens);
                 resident -= done.resident;
             } else {
                 index += 1;
@@ -131,12 +204,14 @@ pub fn simulate_continuous(requests: &[Request], cost: CostModel, kv_budget: u64
 
     Trace {
         latency_us: latency,
+        ttft_us: ttft,
+        tpot_us: tpot,
         makespan_us: now,
         peak_resident_tokens: peak,
         idle_token_steps: 0,
     }
 }
-// ANCHOR_END: continuous
+// ANCHOR_END: chunked
 
 // ANCHOR: static_batching
 /// 静态批处理：凑一个批（至多 `batch_size` 条、受同一 KV 预算约束），
@@ -149,6 +224,8 @@ pub fn simulate_static(
     batch_size: usize,
 ) -> Trace {
     let mut latency = vec![0.0f64; requests.len()];
+    let mut ttft = vec![0.0f64; requests.len()];
+    let mut tpot = vec![0.0f64; requests.len()];
     let mut now = 0.0f64;
     let mut next = 0usize;
     let mut peak = 0u64;
@@ -157,7 +234,6 @@ pub fn simulate_static(
     while next < requests.len() {
         now = now.max(requests[next].arrival_us as f64);
 
-        // 组批：FCFS，直到批满或预算不够。
         let mut batch: Vec<usize> = Vec::new();
         let mut resident: u64 = 0;
         while next < requests.len()
@@ -170,21 +246,19 @@ pub fn simulate_static(
             next += 1;
         }
         if batch.is_empty() {
-            // 预算装不下队首请求也要单独跑，否则永远卡死。
             resident = kv_cost(&requests[next]);
             batch.push(next);
             next += 1;
         }
         peak = peak.max(resident);
 
-        // 整批 prefill 一步。
         let prefill: u64 = batch
             .iter()
             .map(|&index| requests[index].prompt_tokens as u64)
             .sum();
         now += cost.step_us(prefill + batch.len() as u64);
+        let first_now = now;
 
-        // decode：批内最长的序列决定批何时结束。
         let longest = batch
             .iter()
             .map(|&index| requests[index].decode_tokens)
@@ -202,13 +276,17 @@ pub fn simulate_static(
                 entry.1 = entry.1.saturating_sub(1);
             }
         }
-        for (index, _) in &remaining {
-            latency[*index] = now - requests[*index].arrival_us as f64;
+        for &index in &batch {
+            latency[index] = now - requests[index].arrival_us as f64;
+            ttft[index] = first_now - requests[index].arrival_us as f64;
+            tpot[index] = tpot_us(now, first_now, requests[index].decode_tokens);
         }
     }
 
     Trace {
         latency_us: latency,
+        ttft_us: ttft,
+        tpot_us: tpot,
         makespan_us: now,
         peak_resident_tokens: peak,
         idle_token_steps,
@@ -260,7 +338,7 @@ mod tests {
 
     const KV: u64 = 16_384;
 
-    /// 两种调度都必须服务全部请求（守恒），且延迟为正。
+    /// 两种调度都必须服务全部请求（守恒），且延迟、TTFT 为正。
     #[test]
     fn both_schedulers_serve_every_request() {
         let requests = mixed_workload(64, 5);
@@ -269,7 +347,12 @@ mod tests {
             simulate_static(&requests, DEFAULT_COST, KV, 8),
         ] {
             assert_eq!(trace.latency_us.len(), requests.len());
+            assert_eq!(trace.ttft_us.len(), requests.len());
             assert!(trace.latency_us.iter().all(|&latency| latency > 0.0));
+            assert!(trace.ttft_us.iter().all(|&ttft| ttft > 0.0));
+            for (ttft, latency) in trace.ttft_us.iter().zip(&trace.latency_us) {
+                assert!(*ttft <= *latency + 1e-9);
+            }
         }
     }
 
@@ -330,5 +413,67 @@ mod tests {
         let first = simulate_continuous(&requests, DEFAULT_COST, KV);
         let second = simulate_continuous(&requests, DEFAULT_COST, KV);
         assert_eq!(first, second);
+        let chunked = simulate_chunked_prefill(&requests, DEFAULT_COST, KV, 32);
+        assert_eq!(
+            chunked,
+            simulate_chunked_prefill(&requests, DEFAULT_COST, KV, 32)
+        );
+    }
+
+    /// 单条请求的 TTFT / TPOT 必须与成本模型逐步相加一致。
+    #[test]
+    fn ttft_is_first_decode_step_tpot_is_the_rest() {
+        let requests = [Request {
+            arrival_us: 0,
+            prompt_tokens: 10,
+            decode_tokens: 5,
+        }];
+        let trace = simulate_continuous(&requests, DEFAULT_COST, KV);
+        assert!((trace.ttft_us[0] - 244.0).abs() < 1e-9);
+        assert!((trace.tpot_us[0] - 204.0).abs() < 1e-9);
+        assert!((trace.latency_us[0] - (244.0 + 4.0 * 204.0)).abs() < 1e-9);
+    }
+
+    /// `chunk = u32::MAX` 必须与原来的连续批处理逐步重合。
+    #[test]
+    fn unbounded_chunk_matches_continuous() {
+        let requests = mixed_workload(32, 3);
+        let continuous = simulate_continuous(&requests, DEFAULT_COST, KV);
+        let chunked = simulate_chunked_prefill(&requests, DEFAULT_COST, KV, u32::MAX);
+        assert_eq!(continuous, chunked);
+    }
+
+    /// 长 prompt 到达时，分块 prefill 保护已经在 decode 的序列：
+    /// 它们不必等 512 个 prompt token 在同一步里处理完。
+    #[test]
+    fn chunked_prefill_protects_inflight_decode() {
+        let requests = [
+            Request {
+                arrival_us: 0,
+                prompt_tokens: 4,
+                decode_tokens: 40,
+            },
+            Request {
+                arrival_us: 800,
+                prompt_tokens: 512,
+                decode_tokens: 8,
+            },
+        ];
+        let unchunked = simulate_continuous(&requests, DEFAULT_COST, 100_000);
+        let chunked = simulate_chunked_prefill(&requests, DEFAULT_COST, 100_000, 16);
+        assert!(
+            chunked.latency_us[0] < unchunked.latency_us[0],
+            "在飞 decode 的端到端延迟应下降：chunked={:.0} unchunked={:.0}",
+            chunked.latency_us[0],
+            unchunked.latency_us[0]
+        );
+        assert!(
+            chunked.tpot_us[0] < unchunked.tpot_us[0],
+            "在飞 decode 的 TPOT 应下降：chunked={:.1} unchunked={:.1}",
+            chunked.tpot_us[0],
+            unchunked.tpot_us[0]
+        );
+        assert_eq!(chunked.latency_us.len(), 2);
+        assert!(chunked.ttft_us[1] > 0.0);
     }
 }
