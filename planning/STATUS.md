@@ -1,6 +1,6 @@
 # 实时状态
 
-更新日期：2026-08-14
+更新日期：2026-09-14
 
 ## 当前里程碑
 
@@ -8,34 +8,63 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 
 ## 当前目标
 
-读者主路径按 OpenMLSys 系统问题组织九章，并补上当代训练并行、推理服务
-与集群控制面；Burn 用来指出实现落点。项目自洽（版本、证据标签、对照
-矩阵）留在附录与工具链（D025）。静态书站经 GitHub Pages 可读。
+第二写作周期已切到 Burn `0.22.0-pre.3` / CubeCL `0.11.0-pre.3`（Pliron）。
+读者主路径仍按 OpenMLSys 系统问题组织九章；Kernel 编译用 Pliron 作为
+下一代编译基础设施的地基来讲，不把 pins/CI 写进章首（D025）。
 
 ## 进行中
 
+- [x] D027：对齐 Burn 0.22.0-pre.3 与 CubeCL Pliron；重写第 1–4、7 章
+  编译器/分派/ONNX 口径。见
+  `planning/session-logs/2026-09-14-pliron-pre3.md`。
+- [x] D025：正文重编——九章章首、阅读路径、系统结论、产业/crate 地图。
+- [x] D026：并行策略整数实验、服务队列 TTFT/分块 prefill、mean 归约。
 - [ ] 等待发布者决定是否创建候选 tag/发布归档。
-- [x] D025：正文重编——九章章首、阅读路径、系统结论、产业/crate 地图；
-  第 8 章标为可选；主路径去掉「可核对 / CPU-first / 快照」叙事。
-  见 `planning/session-logs/2026-08-14-curriculum-reframe.md`。
-- [x] D026：并行策略整数实验、服务队列 TTFT/分块 prefill、mean 归约
-  反向，以及 `capstone-infra.md` 合读页。
-  见 `planning/session-logs/2026-08-14-infra-labs.md`。
 - [x] 仓库 `origin/main` 已到 `82c0475`（用户手提交的 D025 重编），
   Pages 站点 `https://tsaolun.github.io/mlsys_with_burn/` 此前已可访问；
   本机仍不能代替管理员核对 Settings → Pages 的 Source/environment 保护。
 
 ## 下一步
 
-1. 由发布者审阅 D026 与 `capstone-infra.md`，再决定候选 tag/归档。
-2. 推送后抽查 Pages：`capstone-infra`、第 6 章动手版、第 7 章 TTFT 表。
-3. 在能访问 `tracel-llvm` 固定资产的环境重跑完整 `make check`。
-4. 真机 CUDA/NCCL 仅在 pins 与环境允许时追加可选命令；不得改默认 CPU
+1. 由发布者审阅 D027 后跑完整 `make check`（含 cargo offline gate）。
+   Intel macOS 仍无 `tracel-llvm` macos-x64 资产。
+2. 推送后抽查 Pages：第 4 章 Pliron 节、分派图 Capture、第 7 章 ONNX。
+3. 真机 CUDA/NCCL 仅在 pins 与环境允许时追加可选命令；不得改默认 CPU
    gate（D022）。
-5. 后续内容增量（不阻塞 tag）：KV 抢占/换出、真实数据集训练（需可选
-   下载决策）、GEMM 阶梯更高级。
+4. 后续内容增量（不阻塞 tag）：KV 抢占/换出、真实数据集训练、GEMM
+   阶梯更高级；不把 ONNX fixture 偷运进默认 workspace。
 
 ## 本次交接
+
+- 已完成（2026-09-14）：D027——全书对齐 Burn 0.22.0-pre.3 / CubeCL Pliron。
+  - `pins.toml` snapshot `burn-0.22.0-pre.3`；Burn/CubeCL/CubeK/burn-onnx
+    切到对应 Git tag SHA。
+  - 第 3–4 章 Kernel 编译主线改为 Pliron 方言、共享 Pass、
+    `PlironCompiler`；Fusion/autodiff 明确未迁。
+  - 第 1 章分派图补 Capture 与 NdArray deprecated；写入 `burn-cpu`。
+  - 第 7 章 ONNX：版本对齐仍隔离 importer（D010 理由更新）。
+  - `tools/check_upstreams.py` 接受 tagged manifest 的 crates.io 版本钉，
+    以及本地镜像缺少 `origin` 但 HEAD 已对齐的情况。
+- 验证：
+  - `python3 tools/check_upstreams.py` 与 `--check-local`（Burn 镜像无
+    origin：WARN，HEAD 已对齐）
+  - `cargo test --locked`：全部 workspace 示例，含
+    `ch03-cubecl-kernel`（2）与 `ch04-fusion-inspector`（3）；其余 Flex
+    路径均通过。本机需 `SDKROOT=.../MacOSX15.4.sdk` 规避损坏的
+    Xcode.app / MacOSX27 SDK。
+  - `mdbook build book`、`mdbook test book`
+  - `python3 tools/check_release.py --require-built-book --json`
+    （`ok=true`、`errors=[]`）
+  - `cargo fmt --all --check`、`git diff --check`
+  - `cargo clippy --workspace --all-targets --locked -- -D warnings`
+    （以本次命令结果为准）
+  - 未宣称完整 `make check` 的 offline gate（首次 Pliron 依赖已 fetch）
+- 偏差：`burn-cpu` crate 描述仍写 “MLIR based”，正文以 `cubecl-llvm`
+  源码为准。Cargo.lock 中 CubeCL 可同时出现 crates.io 版本（经 Burn）
+  与 git SHA（经直连示例）。未把 ONNX fixture 编进根 workspace。
+- 下一步：完整 `make check`；发布者审阅 D027。
+
+## 前次交接（2026-08-14）
 
 - 已完成（2026-08-14）：D025 之后的三项内容增量（D026）。
   - `examples/ch06-parallel-strategies`：环形 AllReduce、GPipe/1F1B、
@@ -60,6 +89,9 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 
 ## 已完成
 
+- [x] D027：第二写作周期切到 Burn `0.22.0-pre.3` / CubeCL Pliron；
+  重写编译器主线、分派图、ONNX 隔离理由与 pins。见
+  `planning/session-logs/2026-09-14-pliron-pre3.md`。
 - [x] 修复线上 `$...$` 公式不渲染：自定义 theme 启用 MathJax 美元分隔符
   （D019）；全书 42 个含公式页面 Puppeteer 核验通过。
 - [x] 学习者文风改写（D020）与自洽材料后移附录（D021）：章首五标签/
@@ -86,7 +118,8 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 - [x] 确定项目名为 “MLSys with Burn”。
 - [x] 确定正文采用 CC BY-NC-SA 4.0，原创代码采用 MIT OR Apache-2.0。
 - [x] 确定五个上游仓库保持并列、只读，并由 `pins.toml` 记录快照。
-- [x] 确定以 Burn 0.22.0-pre.1 版本线展开。
+- [x] 确定以 Burn 0.22.0-pre.1 版本线展开（首个写作周期，D003）。
+- [x] 第二写作周期切到 Burn 0.22.0-pre.3 / CubeCL 0.11.0-pre.3（D027）。
 - [x] 完成根 Git、许可证、Agent 规则和实时计划文档。
 - [x] 完成九章 mdBook 骨架和第 2 章 CPU 张量示例。
 - [x] 完成上游 pin 校验工具、Makefile 和 GitHub Actions CI。
@@ -736,20 +769,20 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 
 ## 已知问题
 
-- `burn-onnx` 当前仓库版本为 0.22.0-pre.1，但其 manifest 仍 pin 到较早
-  的 Burn commit；ONNX 章节必须按该关系单独验证，不能假定与本地 Burn
-  HEAD 可互换。
+- `burn-onnx` 与主线 Burn 均发布为 `0.22.0-pre.3`，类型世界冲突已解除；
+  默认实验仍不把它编进根 workspace（D027）。ONNX fixture 端到端跑通
+  仍未做。
 - Burn 的分布式文档仍在演进，第 6、9 章不能只依赖 Burn Book。
 - `burn-rl` 当前固定快照提供环境、policy、replay 和 runner 组合抽象，
   不提供通用 DQN/PPO/SAC、prioritized replay 或 MARL/Actor–Learner
   集群协议；第 8 章 D011 和来源映射已标出这些边界。
-- `tracel-llvm v22.1.4-5` 的 GitHub release **没有 macos-x64 资产**
-  （只有 linux-AArch64/x64、macos-AArch64、windows-x64；2026-08-13
+- `tracel-llvm v22.1.4-6` 的 GitHub release **没有 macos-x64 资产**
+  （只有 linux-AArch64/x64、macos-AArch64、windows-x64；2026-09-14
   经 API 核实）。Intel macOS 上凡依赖 `cubecl-cpu` 的构建都会在
   bundler 下载 `macos-x64.checksums.json` 时 404——这不是缓存问题。
   规避：`ch03-gemm-ladder` 的依赖设计（默认零 CubeCL、wgpu 特性不带
   `cpu`）不受影响；其余 CubeCL CPU 示例在该平台无法本地回归，以
-  CI/Linux 结果为准。
+  CI/Linux 或 darwin arm64 结果为准。
 
 ## 交接模板
 

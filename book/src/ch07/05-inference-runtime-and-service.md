@@ -181,7 +181,7 @@ KV 预算扫描仍把「KV cache 决定并发」变成单调曲线。模型解�
 | 本书讨论的机制 | 常见产业说法 | 对齐点 | 实现落点 |
 |---|---|---|---|
 | `ModuleRecord` / Burnpack | checkpoint / SavedModel | 拓扑+参数可恢复 | `burn-core` / `burn-store` |
-| `burn-onnx` codegen | ONNX Runtime / 导出图 | 图→可执行路径 | 独立仓库，另一份 Burn 提交 |
+| `burn-onnx` codegen | ONNX Runtime / 导出图 | 图→可执行路径 | 独立仓库；版本已对齐，未编进默认 workspace |
 | Device 上的 `forward` | 推理 `session.run` | 无训练 tape 的执行 | 不含鉴权/限流 |
 | 应用层 batcher + 队列 | Triton / 自研 serving | 延迟/吞吐权衡 | 服务框架由应用提供 |
 | 连续批 + 分块 prefill + KV 预算 | vLLM / Orca | 长度方差、步内干扰与显存墙 | `ch07-serving-queue-sim` |

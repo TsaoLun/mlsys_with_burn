@@ -10,7 +10,7 @@
 | 1 导论 | `chapter_introduction` | Burn 分层、Backend 生态 | 中 |
 | 2 编程接口与计算图 | `chapter_programming_interface`、`chapter_computational_graph`、自动微分相关内容 | Tensor、Device、Module、Autodiff、IR | 高 |
 | 3 AI 加速器与编程 | `chapter_accelerator` | GPU 基础、CubeCL、CubeK | 高 |
-| 4 AI 编译器与运行时 | `chapter_frontend_and_ir`、`chapter_backend_and_runtime` | burn-ir、Fusion、CubeCL IR/opt/runtime | 高 |
+| 4 AI 编译器与运行时 | `chapter_frontend_and_ir`、`chapter_backend_and_runtime` | burn-ir、Fusion、CubeCL Pliron IR/opt/runtime、burn-capture | 高 |
 | 5 数据处理系统 | `chapter_data_processing` | burn-dataset、迭代器与流水线 | 中 |
 | 6 训练系统 | `chapter_distributed_training` | burn-train、优化器、多设备与通信 | 高 |
 | 7 模型服务 | `chapter_model_deployment` | burn-onnx、Record、Remote、WASM/no_std | 高 |

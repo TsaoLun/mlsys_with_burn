@@ -21,7 +21,7 @@
   <path class="arr" d="M124 88 V120"/>
   <text class="h" x="24" y="140">Device → Dispatch</text>
   <rect class="box2" x="24" y="152" width="200" height="56" rx="4"/>
-  <text class="t" x="36" y="175">Device::flex / wgpu / cuda …</text>
+  <text class="t" x="36" y="175">Device::flex / cpu / wgpu …</text>
   <text class="s" x="36" y="195">burn-dispatch::DispatchDevice</text>
 
   <path class="arr" d="M224 180 H280"/>
@@ -31,12 +31,12 @@
   <rect class="box2" x="280" y="198" width="160" height="36" rx="4"/>
   <text class="t" x="292" y="221">burn-wgpu / burn-cuda …</text>
   <rect class="box3" x="280" y="244" width="160" height="36" rx="4"/>
-  <text class="t" x="292" y="267">burn-cubecl（桥）</text>
+  <text class="t" x="292" y="267">burn-cpu / burn-cubecl</text>
 
   <path class="arr" d="M440 262 H500"/>
   <text class="h" x="510" y="140">CubeCL Runtime</text>
   <rect class="box2" x="500" y="152" width="196" height="36" rx="4"/>
-  <text class="t" x="512" y="175">CpuRuntime</text>
+  <text class="t" x="512" y="175">CpuRuntime + Pliron/LLVM</text>
   <rect class="box3" x="500" y="198" width="196" height="36" rx="4"/>
   <text class="t" x="512" y="221">WgpuRuntime</text>
   <rect class="box3" x="500" y="244" width="196" height="36" rx="4"/>

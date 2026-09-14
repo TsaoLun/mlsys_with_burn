@@ -32,7 +32,7 @@ impl Error for ExampleError {}
 fn values<const D: usize>(tensor: Tensor<D>) -> Result<Vec<f32>, ExampleError> {
     tensor
         .into_data()
-        .to_vec::<f32>()
+        .try_to_vec::<f32>()
         .map_err(|error| ExampleError::Data(error.to_string()))
 }
 

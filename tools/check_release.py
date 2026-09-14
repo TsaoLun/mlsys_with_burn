@@ -301,7 +301,7 @@ class ReleaseAudit:
             )
             self.require(
                 "burn-onnx" not in content,
-                f"{manifest.relative_to(ROOT)} 不得把 burn-onnx 旧 revision 接入主线",
+                "burn-onnx 不得接入根 workspace 的 Cargo 依赖",
             )
             for git_url in re.findall(r'git\s*=\s*"([^"]+)"', content):
                 self.require(
@@ -314,18 +314,31 @@ class ReleaseAudit:
                 )
 
         lock = tomllib.loads((ROOT / "Cargo.lock").read_text(encoding="utf-8"))
-        lock_sources = [
-            package.get("source", "")
-            for package in lock.get("package", [])
-            if package.get("source")
-        ]
+        packages = lock.get("package", [])
         for name in ("burn", "cubecl", "cubek"):
             repository = repositories[name]
             expected_source = repository["url"].removesuffix(".git")
             revision = repository["rev"]
+            version = repository.get("version")
+            resolved_from_git = any(
+                package.get("name") == name
+                and expected_source in package.get("source", "")
+                and revision in package.get("source", "")
+                for package in packages
+            )
+            resolved_from_crates = bool(
+                version
+                and name in {"cubecl", "cubek"}
+                and any(
+                    package.get("name") == name
+                    and package.get("version") == version
+                    and "crates.io-index" in package.get("source", "")
+                    for package in packages
+                )
+            )
             self.require(
-                any(expected_source in source and revision in source for source in lock_sources),
-                f"Cargo.lock 未锁定 {name} 的 pins.toml revision",
+                resolved_from_git or resolved_from_crates,
+                f"Cargo.lock 未锁定 {name} 的 pins.toml revision 或 crates.io {version}",
             )
 
     def validate_licenses(self) -> None:

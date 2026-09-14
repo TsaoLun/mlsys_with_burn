@@ -37,7 +37,8 @@ Tensor op
 与第 6 章 `burn-train` 的 `ExecutionStrategy`（MultiDevice/DDP 装配）
 只是同名，不要当成同一个类型。
 
-Fusion 按 stream 保存队列。当前实现中的 `StreamId::current()` 与注册操作
+Fusion 按 stream 保存队列。`StreamId` 定义在 `cubecl-environment`，Burn
+再导出给 Fusion 使用。当前实现中的 `StreamId::current()` 与注册操作
 的线程/任务上下文相关。跨 stream 共享 Tensor 时，系统必须建立别名和顺序
 关系，必要时先 drain 来源 stream；否则重排可能在值产生前读取或在使用前
 释放。
@@ -112,8 +113,8 @@ out = exp(t0)
 ## 7. Flex 不是 Fusion CPU
 
 `Device::flex()` 走 burn-flex eager 路径，不生成上述 OperationIr。
-`Device::cpu()` 在启用 `cpu` 与 `fusion` feature 后使用 CubeCL CPU 的
-Fusion 包装。二者都是“CPU 上能跑”，但默认实验与 Fusion 观察不在同一条
-路径上。本章实验必须选择后者；把 Flex 输出正确当作 Fusion 已执行
-是错误证据。
+`Device::cpu()` 在启用 `cpu` 与 `fusion` feature 后使用 `burn-cpu`
+（`CubeBackend<CpuRuntime>` 再包一层 Fusion）。二者都是“CPU 上能跑”，
+但默认实验与 Fusion 观察不在同一条路径上。本章实验必须选择后者；把
+Flex 输出正确当作 Fusion 已执行是错误证据。
 

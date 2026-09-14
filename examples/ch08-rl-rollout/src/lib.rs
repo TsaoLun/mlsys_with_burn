@@ -440,7 +440,7 @@ fn read_rows(tensor: &Tensor<2>) -> Result<Vec<Vec<f32>>, RolloutError> {
     let flat = tensor
         .clone()
         .into_data()
-        .to_vec::<f32>()
+        .try_to_vec::<f32>()
         .map_err(|error| RolloutError::Readback(error.to_string()))?;
     debug_assert_eq!(flat.len(), rows * columns);
     Ok(flat.chunks(columns).map(Vec::from).collect())

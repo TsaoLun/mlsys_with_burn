@@ -27,10 +27,11 @@
 ## 分派与后端契约
 
 `Device` 内部包装 `burn-dispatch::DispatchDevice`。后者是带 feature
-条件的枚举，可以包含 Flex、CUDA、ROCm、WGPU、LibTorch、Remote 或
-Autodiff 等变体。一次张量操作会通过 bridge 和 dispatch 层到达相应后端。
+条件的枚举，可以包含 Flex、CubeCL CPU（`burn-cpu`，`Device::cpu()`）、
+CUDA/ROCm/WGPU、LibTorch、已弃用的 NdArray、Remote、Capture 或 Autodiff
+等变体。一次张量操作会通过 bridge 和 dispatch 层到达相应后端。
 
-![Tensor 操作经 burn-tensor bridge 与 burn-dispatch 的 Dispatch/DispatchDevice，分派到 Flex、CubeCL 后端、LibTorch/NdArray、Remote 或 Autodiff 变体](../img/ch01-dispatch-tree.svg)
+![Tensor 操作经 burn-tensor bridge 与 burn-dispatch 的 Dispatch/DispatchDevice，分派到 Flex、CubeCL 后端、LibTorch、已弃用的 NdArray、Remote、Capture 或 Autodiff 变体](../img/ch01-dispatch-tree.svg)
 
 `burn-backend` 定义 `Backend`、`BackendTypes` 和各类操作契约。具体后端
 只要满足这些契约，就能被上层以统一张量语义使用。统一接口不意味着能力
@@ -48,10 +49,10 @@ Autodiff 等变体。一次张量操作会通过 bridge 和 dispatch 层到达�
 | 层次 | 入口（相对上游仓库） | 默认实验 | 正文位置 |
 |---|---|---|---|
 | Device / dispatch | `burn-tensor` 的 `Device`；`burn-dispatch` 的 `DispatchDevice` | `Device::flex()` | 第 1–2 章 |
-| CPU 后端 | `burn-flex` | 是 | 语义观察 |
-| GPU/图形后端 | `burn-wgpu`、`burn-cuda` 等 crate | 否（可选） | 第 3–4、7 章 |
+| CPU 后端 | `burn-flex`；CubeCL CPU 为 `burn-cpu` | Flex 是默认实验；Fusion 观察走 `Device::cpu()` | 语义观察；第 4 章 |
+| GPU/图形后端 | `burn-wgpu`、`burn-cuda`、`burn-rocm` 等 crate | 否（可选） | 第 3–4、7 章 |
 | CubeCL 桥 | `burn-cubecl`、`burn-cubecl-fusion` | 第 3–4 章相关示例 | Kernel / Fusion |
-| CubeCL Runtime | `CpuRuntime`、`WgpuRuntime`、`CudaRuntime`、`HipRuntime` | CPU；可选 WGPU | 同一 IR、不同设备完成边界 |
+| CubeCL Runtime | `CpuRuntime`（`PlironCompiler` + LLVM）、`WgpuRuntime`、`CudaRuntime`、`HipRuntime` | CPU；可选 WGPU | 同一套 Pliron 方言、不同设备完成边界 |
 
 无独显时仍应把 GPU 拓扑与 Runtime 差异读完；有环境时再按
 [如何运行本书示例](../running-examples.md) 做可选跑通。源码里存在
@@ -63,27 +64,33 @@ Burn 将部分能力设计为后端或设备的装饰层：
 
 - `burn-autodiff` 为后端增加反向自动微分；
 - `burn-fusion` 记录操作流并利用 `burn-ir` 进行融合；
+- `burn-capture` 把同一套 `OperationIr` 收成带显式输入/输出边界的
+  `GraphIr`，捕获时不执行数值；
 - CubeCL 后端还能通过 `burn-cubecl-fusion` 使用面向 Cube 的融合策略。
 
 在 0.22 用户 API 中，梯度跟踪表现为 Device 的能力。启用 `autodiff`
 feature 后，可通过 `.autodiff()` 包装设备。设备相等性主要比较硬件身份，
 是否启用自动微分则需要 `is_autodiff()` 单独检查。
 
-融合并不适用于所有后端。Flex、NdArray 和 LibTorch 可以与自动微分组合，
-但不会因此自动获得 CubeCL 的融合执行路径。第 4 章会讨论 IR 与融合何时
-真正减少内存访问和 Kernel 启动。
+融合并不适用于所有后端。Flex 和 LibTorch 可以与自动微分组合，但不会
+因此自动获得 CubeCL 的融合执行路径。`burn-ndarray` 在 0.22 起标记为
+deprecated，迁移目标是 Flex（纯 Rust CPU）或 CubeCL 后端（包括
+`burn-cpu`）；`burn-candle` 已从本版移除。打开 `burn-cpu` 的
+`Cargo.toml` 仍可能看到 “MLIR based” 的 crate 描述——那是过时的包装
+文字；本版 CPU Compiler 是 `cubecl-llvm` 的 `PlironCompiler`。第 4 章
+会讨论 IR 与融合何时真正减少内存访问和 Kernel 启动。
 
 ## CubeCL：Kernel 语言、编译器与运行时
 
 CubeCL 是 Burn 加速后端的重要基础。它允许用 Rust 风格的 `#[cube]`
-程序描述并行 Kernel，再转换到 CubeCL IR，经过优化后生成 CUDA、HIP、
-SPIR-V、WGSL 或 CPU/MLIR 等目标所需代码。
+程序描述并行 Kernel，再转换到建立在 Pliron 上的 CubeCL IR，经过 Pass
+与 lowering 后生成 CUDA、HIP、SPIR-V、WGSL 或 CPU/LLVM 等目标所需代码。
 
 它负责的不只是“把 Rust 翻译成 GPU 代码”，还包括：
 
-- 设备和客户端运行时；
+- 设备和客户端运行时（含 `cubecl-environment` 的缓存与 bundle）；
 - 工作组、向量化和张量视图等并行抽象；
-- Kernel 编译、缓存和提交；
+- 基于 Pliron 方言的 Kernel 编译、Pass、缓存和提交；
 - 自动调优所需的候选与测量基础。
 
 第 3 章从硬件和编程模型理解 CubeCL，第 4 章再跟踪其 IR 与运行时。
@@ -121,15 +128,16 @@ Burn 仓库还包含：
 - `burn-rl`：强化学习相关组件。
 
 burn-onnx 是独立仓库。它先把 ONNX protobuf 转换为自己的 IR，再生成
-Burn Rust 源码与权重。独立仓库意味着它有自己的 Burn revision；当前
-`burn-onnx/Cargo.toml` 所 pin 的 Burn commit 与本教材示例的 commit
-不同。第 7 章必须显式处理这种兼容关系，而不能只比较版本字符串。
+Burn Rust 源码与权重。本版 `burn-onnx` 与主线 Burn 都发布为
+`0.22.0-pre.3`，crates.io 版本字符串已对齐；教材示例仍不把 ONNX
+importer 编进根 workspace，端到端 fixture 留作可选对照。第 7 章说明
+生成路径，默认实验继续用主线 `ModuleRecord`。
 
 ## 阅读时记住的几件事
 
 - Remote 仍标为 Beta；
 - 量化支持因后端而异，当前路径没有 QAT；
-- burn-onnx 只覆盖其列表中的算子，且依赖另一份 Burn 提交；
+- burn-onnx 只覆盖其列表中的算子；默认示例不跑 ONNX 端到端导入；
 - 集合通信的契约在 backend，Flex 没有实现；
 - 同一 Tensor API 不代表所有设备性能相同。
 

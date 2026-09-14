@@ -25,8 +25,8 @@
 
   <path class="arr" d="M308 96 H340"/>
   <rect class="box3" x="340" y="60" width="140" height="72" rx="4"/>
-  <text class="h" x="352" y="90">CubeCL IR</text>
-  <text class="s" x="352" y="112">JIT / cache</text>
+  <text class="h" x="352" y="90">Pliron IR</text>
+  <text class="s" x="352" y="112">Pass / JIT / cache</text>
 
   <path class="arr" d="M480 96 H512"/>
   <rect class="box" x="512" y="24" width="200" height="40" rx="4"/>

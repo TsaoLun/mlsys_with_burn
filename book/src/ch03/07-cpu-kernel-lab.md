@@ -1,8 +1,10 @@
 # 实验：CPU 上运行 CubeCL Kernel
 
 示例在 `examples/ch03-cubecl-kernel`，依赖本书所用的 CubeCL 版本，并启用
-`cpu`、`std` 和 `stdlib` feature。CPU Runtime 经 LLVM/MLIR 编译 Kernel；
-首次构建会比前两章慢，增量运行会快得多。
+`cpu`、`std` 和 `stdlib` feature。CPU Runtime（`CpuRuntime`）用
+`cubecl-llvm` 的 `PlironCompiler`：Kernel 先作为 Pliron IR 跑 Pass，再
+降到 LLVM。首次构建会比前两章慢（还依赖 `tracel-llvm` 资产），增量运行
+会快得多。
 
 你会核对编程模型与数值正确性；请勿把 CPU 耗时当成 GPU 性能。
 `scale_kernel` 负责 Runtime 边界；`examples/ch03-tile-loads` 里的

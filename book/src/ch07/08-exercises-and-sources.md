@@ -259,7 +259,7 @@ model、handler 拿到的是共享引用还是消息通道，再填实现。
 「`ModelGen` 的转换路线」已给出四阶段骨架，把它当待验证的
 假设：在源码里定位 `OnnxGraphBuilder`、`ParsedOnnxGraph::into_burn`、
 `BurnGraph::codegen` 与 `register_burnpack_loaders`，补全箭头之间
-省略的中间结构。该仓库依赖较早的 Burn revision，只读源码即可，
+省略的中间结构。该仓库与主线 Burn 版本字符串已对齐，仍只读源码即可，
 不要把它接入本书 workspace。
 
 </details>
@@ -309,17 +309,18 @@ API 形状（同步返回，对比 async）上。
 
 </details>
 
-7. 【进阶】对照仓库版本钉扎、`burn-onnx/Cargo.toml` 和根 `Cargo.toml`，解释为什么
-   两个 Burn revision 不能直接共用 `Tensor`/`Module` 类型。
+7. 【进阶】对照 `pins.toml`、`burn-onnx/Cargo.toml` 和根 `Cargo.toml`，解释
+   本版版本字符串已经对齐，为什么默认示例仍不把 `burn-onnx` 编进同一
+   依赖图。
 
 <details>
 <summary>提示</summary>
 
-[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)末段
-已给出结论（`976aa9...` 对 `78f10a...`，同名 package 不同 revision
-即不同类型）；你的任务是把证据链补全：在两份 manifest 里找到各自
-的 `rev` 字段，再从 Cargo 依赖解析的角度说明为什么它们是两个 crate
-实例。这也是本书不把 ONNX 端到端接入同一依赖图的原因。
+[「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)的
+「为什么本书默认示例不直接依赖 burn-onnx」把独立产品、CI 与 fixture
+验证分开了。你的任务是在两份 manifest 里核对 `0.22.0-pre.3`，再说明
+「版本对齐」只解除了类型世界冲突，并不自动等于「已经跑通一份 ONNX
+模型」。这也是本书默认实验继续走 `ModuleRecord` 的原因。
 
 </details>
 

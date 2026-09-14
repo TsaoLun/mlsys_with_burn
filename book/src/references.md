@@ -82,7 +82,9 @@
 - Lattner et al., *MLIR: Scaling Compiler Infrastructure for Domain
   Specific Computation*, CGO 2021。
   [arXiv:2002.11054](https://arxiv.org/abs/2002.11054)
-  ——多层 IR 基础设施的设计论述，可对照 Burn IR 与 CubeCL IR 的分层。
+  ——多层 IR 基础设施的设计论述，可对照 Burn IR、CubeCL 的 Pliron 方言与 MLIR。
+- Pliron 项目文档：[github.com/pliron-org/pliron](https://github.com/pliron-org/pliron)
+  ——CubeCL 本版 Kernel 编译器所基于的可扩展 IR 框架；与 MLIR 论文对照阅读。
 - Ragan-Kelley et al., *Halide: A Language and Compiler for Optimizing
   Parallelism, Locality, and Recomputation in Image Processing
   Pipelines*, PLDI 2013——「算法与调度分离」思想的出处，是理解现代

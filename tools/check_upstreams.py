@@ -85,10 +85,26 @@ def validate_metadata(config: dict[str, Any]) -> None:
         "cubek": repositories["cubek"],
     }
     for name, repository in remote_dependencies.items():
-        if repository["url"].removesuffix(".git") not in lockfile:
-            fail(f"Cargo.lock does not resolve {name} from its GitHub repository")
-        if repository["rev"] not in lockfile:
-            fail(f"Cargo.lock does not contain the pinned {name} revision")
+        url = repository["url"].removesuffix(".git")
+        revision = repository["rev"]
+        version = repository.get("version")
+        resolved_from_git = url in lockfile and revision in lockfile
+        resolved_from_crates = bool(
+            version
+            and f'name = "{name}"' in lockfile
+            and f'version = "{version}"' in lockfile
+        )
+        if resolved_from_git:
+            continue
+        if name in {"cubecl", "cubek"} and resolved_from_crates:
+            # Tagged Burn pins CubeCL/CubeK via crates.io versions that match
+            # the Git tags in pins.toml. Direct example crates may still use
+            # the CubeCL Git SHA.
+            continue
+        fail(
+            f"Cargo.lock does not resolve {name} from {url}@{revision} "
+            f"or crates.io {version}"
+        )
 
 
 def validate_checkouts(config: dict[str, Any]) -> None:
@@ -104,30 +120,50 @@ def validate_checkouts(config: dict[str, Any]) -> None:
                 f"{name} is at {actual_revision}, expected {repository['rev']}"
             )
 
-        actual_url = git(path, "remote", "get-url", "origin").removesuffix("/")
-        expected_url = repository["url"].removesuffix(".git").removesuffix("/")
-        if actual_url.removesuffix(".git") != expected_url:
-            fail(f"{name} origin is {actual_url}, expected {repository['url']}")
+        try:
+            actual_url = git(path, "remote", "get-url", "origin").removesuffix("/")
+        except subprocess.CalledProcessError:
+            print(
+                f"WARN: {name} checkout has no origin remote; "
+                "HEAD already matches the pin"
+            )
+        else:
+            expected_url = repository["url"].removesuffix(".git").removesuffix("/")
+            if actual_url.removesuffix(".git") != expected_url:
+                fail(
+                    f"{name} origin is {actual_url}, expected {repository['url']}"
+                )
 
         status = git(path, "status", "--short")
         if status:
             print(f"WARN: {name} checkout is not clean:\n{status}")
 
     relationships = config["relationships"]
-    expected_manifest_revisions = {
+    repositories = config["repositories"]
+    expected_manifest_pins = {
         ROOT / "burn/Cargo.toml": (
-            relationships["burn_cubecl_rev"],
-            relationships["burn_cubek_rev"],
+            (relationships["burn_cubecl_rev"], repositories["cubecl"].get("version")),
+            (relationships["burn_cubek_rev"], repositories["cubek"].get("version")),
         ),
         ROOT / "burn-onnx/Cargo.toml": (
-            relationships["burn_onnx_burn_rev"],
+            (relationships["burn_onnx_burn_rev"], repositories["burn"].get("version")),
         ),
     }
-    for manifest, revisions in expected_manifest_revisions.items():
+    for manifest, pins in expected_manifest_pins.items():
         content = manifest.read_text()
-        for revision in revisions:
-            if not SHA_PATTERN.fullmatch(revision) or revision not in content:
-                fail(f"{manifest} does not contain expected revision {revision}")
+        for revision, version in pins:
+            if not SHA_PATTERN.fullmatch(revision):
+                fail(f"{manifest} expected revision is not a SHA: {revision}")
+            if revision in content:
+                continue
+            if version and f'version = "={version}"' in content:
+                # Tagged Burn / burn-onnx manifests pin crates.io versions
+                # that correspond to the Git tags recorded in pins.toml.
+                continue
+            fail(
+                f"{manifest} contains neither revision {revision} "
+                f"nor crates.io version ={version}"
+            )
 
 
 def main() -> None:

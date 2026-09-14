@@ -297,7 +297,7 @@ pub fn run_capstone() -> Result<CapstoneReport, Box<dyn Error>> {
 
             let gradients = loss.backward();
             let gradients = GradientsParams::from_grads(gradients, &model);
-            model = optimizer.step(0.05.into(), model, gradients);
+            model = optimizer.step(0.05, model, gradients);
         }
         if batches == 0 {
             return Err(Box::new(CapstoneError::InvalidConfiguration(

@@ -5,7 +5,8 @@ CubeCL 同时包含 Kernel 语言、IR、编译器和 Runtime。本节聚焦程�
 
 ## 1. `#[cube]` 不是普通 Rust 函数
 
-`#[cube]` 过程宏读取 Rust 风格语法，并为受支持的表达式构造 CubeCL IR。
+`#[cube]` 过程宏读取 Rust 风格语法，并为受支持的表达式构造 CubeCL IR
+（本版是 Pliron 方言上的操作，见第 4 章）。
 因此它能复用泛型、trait 和编译期分支等 Rust 抽象，但不能把任意 host Rust
 代码原样放到设备执行。
 
@@ -98,8 +99,8 @@ Kernel IR 可以由不同 Runtime 编译，并不意味着各 Runtime 的能力�
 
 | Runtime | 源码位置（示意） | 典型目标 | 本书默认 |
 |---|---|---|---|
-| `CpuRuntime` | `crates/cubecl-cpu/src/runtime.rs` | LLVM/MLIR CPU | 默认实验 |
-| `WgpuRuntime` | `crates/cubecl-wgpu/src/runtime.rs` | WGSL 等图形栈 | 可选 `--features wgpu` |
+| `CpuRuntime` | `crates/cubecl-cpu/src/runtime.rs`；Compiler 在 `cubecl-llvm` | LLVM（`PlironCompiler`） | 默认实验 |
+| `WgpuRuntime` | `crates/cubecl-wgpu/src/runtime.rs` | WGSL / SPIR-V / MSL | 可选 `--features wgpu` |
 | `CudaRuntime` | `crates/cubecl-cuda/src/runtime.rs` | NVIDIA GPU | 源码导读；非默认示例 |
 | `HipRuntime` | `crates/cubecl-hip/src/runtime.rs` | AMD GPU | 源码导读；非默认示例 |
 

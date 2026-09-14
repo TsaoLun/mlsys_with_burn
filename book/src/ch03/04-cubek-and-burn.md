@@ -35,7 +35,7 @@ Tensor::matmul
   → 候选策略或 LocalTuner
   → cubek::matmul::launch::launch_ref
   → CubeK Routine / Blueprint
-  → CubeCL IR 与具体 Runtime
+  → CubeCL 的 Pliron IR 与具体 Runtime
 ```
 
 CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单元的变体。
@@ -75,7 +75,7 @@ CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单�
    ——`Strategy` 是一个很大的枚举：Naive、CpuGemm、Simple/CMMA/MMA 族、
    double buffering、ordered、specialized、TMA、VecMat 及 unit 变体，
    每个变体携带自己的 Blueprint 参数。Routine 据此计算 cube 拓扑并
-   生成 Blueprint，最后交给 CubeCL IR 与具体 Runtime。
+   生成 Blueprint，最后交给 CubeCL 的 Pliron IR 与具体 Runtime。
 
 这六层里，最早的两处性能优化（vec-mat 重解释与 broadcast-rhs 折叠）
 都发生在**任何 kernel 还不存在的时候**。“最快的数据搬运是不搬运”：
@@ -108,7 +108,7 @@ GEMM 阶梯实验手写的 16×16 kernel，本质是把 `global` 装载与
 `cpu_gemm`、`batch` 与 `selector`）负责按问题形状与设备能力选出
 一种装配。到这里，第 2 节的六层调用链有了完整的收尾：API 校验 →
 策略选择 →（可选 autotune，见第 6 节）→ Routine 装配四层组件 →
-CubeCL IR → Runtime 编译执行。
+CubeCL 的 Pliron IR → Runtime 编译执行。
 
 ## 3. 覆盖范围与边界
 

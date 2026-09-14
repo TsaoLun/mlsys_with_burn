@@ -39,7 +39,7 @@ Tensor 作为 Rust 值参与移动和 clone。公开后端契约要求适合跨�
 - 哪些变换保持语义；
 - 如何 lowering 到 Kernel 或远程协议。
 
-Burn 的 `OperationIr`、Fusion 搜索图和 CubeCL IR 处于不同层。第二章只
+Burn 的 `OperationIr`、Fusion 搜索图和 CubeCL 的 Pliron IR 处于不同层。第二章只
 使用 autodiff tape 理解反向依赖，第 4 章再研究这些 IR 的结构和转换。
 
 ## 调度直觉
@@ -77,6 +77,6 @@ Kernel”；二者不要混称。数据加载与训练执行的流水线属于�
 
 - Burn IR 中的 OperationIr 与 TensorId；
 - Fusion 如何按 stream 搜索可融合块，以及 sync 如何切断窗口；
-- CubeCL 如何从 Scope 生成 KernelDefinition 并 JIT；
+- CubeCL 如何从 Scope 生成 KernelDefinition，再经 Pliron Pass 与 JIT；
 - 运行时如何管理内存生命周期、缓存、调优与重放。
 

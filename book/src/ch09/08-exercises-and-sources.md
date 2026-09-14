@@ -448,8 +448,8 @@ cluster telemetry 和 CPU simulator 是本书的框架无关系统设计。
 
 ## Burn/CubeCL 固定源码入口
 
-主 Burn revision 是 `976aa9c5ec1d2dd3412710f99759e3c44bdff03d`，
-CubeCL revision 是 `be278a1e76aed881e2cc6b165414ee6103ca4634`：
+主 Burn revision 是 `13f0a12b71ad83c1f9edeac22dea325dcb612397`，
+CubeCL revision 是 `b566e954468010303cf41465fc8b6be6499e2001`：
 
 - `burn/crates/burn-train/src/learner/supervised/strategies/base.rs`
 - `burn/crates/burn-train/src/learner/supervised/strategies/ddp/strategy.rs`

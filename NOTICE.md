@@ -25,11 +25,12 @@ CubeK 与 burn-onnx 的具体许可证和版权归属以各固定上游 checkout
 
 ## 固定快照与发布边界
 
-本轮发布以 `pins.toml` 中的 `burn-0.22.0-pre.1` 写作快照为准。Burn、
+本轮发布以 `pins.toml` 中的 `burn-0.22.0-pre.3` 写作快照为准。Burn、
 CubeCL、CubeK、OpenMLSys 和 burn-onnx 均由完整 Git revision 标识；
-burn-onnx 与主线 Burn 使用不同 revision，因此不进入默认端到端实验。
-默认示例是 CPU-first；CUDA、NCCL、真实网络、ONNX fixture、DDP、DQN/
-MARL 和 GPU 集群属于需要额外环境的可选比较轨道。
+burn-onnx 与主线 Burn 版本字符串已对齐，仍不进入默认端到端实验。
+CubeCL Kernel IR 以 Pliron 为基础设施。默认示例是 CPU-first；CUDA、NCCL、
+真实网络、ONNX fixture、DDP、DQN/MARL 和 GPU 集群属于需要额外环境的
+可选比较轨道。
 
 ## 独立性声明
 

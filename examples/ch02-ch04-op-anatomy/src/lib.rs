@@ -34,7 +34,7 @@ impl Error for AnatomyError {}
 fn values(tensor: Tensor<1>) -> Result<Vec<f32>, AnatomyError> {
     tensor
         .into_data()
-        .to_vec::<f32>()
+        .try_to_vec::<f32>()
         .map_err(|error| AnatomyError::Data(format!("{error:?}")))
 }
 
@@ -106,7 +106,7 @@ pub fn broadcast_add_backward() -> Result<([usize; 2], Vec<f32>), AnatomyError> 
     let dims = grad_b.dims();
     let grad_values = grad_b
         .into_data()
-        .to_vec::<f32>()
+        .try_to_vec::<f32>()
         .map_err(|error| AnatomyError::Data(format!("{error:?}")))?;
     Ok((dims, grad_values))
 }

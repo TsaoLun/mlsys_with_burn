@@ -80,7 +80,7 @@ pub fn inspect_add_exp(split_by_sync: bool) -> Result<FusionSummary, InspectErro
         let output = intermediate.exp();
         let values = output
             .to_data()
-            .to_vec::<f32>()
+            .try_to_vec::<f32>()
             .map_err(|error| InspectError(format!("读取输出失败：{error}")))?;
         device
             .sync()
@@ -152,7 +152,7 @@ fn inspect_add_mul_exp_once(stream: StreamId) -> Result<TripleFusionSummary, Ins
         let output = ((left + right) * scale).exp();
         let values = output
             .to_data()
-            .to_vec::<f32>()
+            .try_to_vec::<f32>()
             .map_err(|error| InspectError(format!("读取输出失败：{error}")))?;
         device
             .sync()

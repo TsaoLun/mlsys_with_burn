@@ -42,7 +42,7 @@ cargo run -p ch01-stack-probe --locked
 输出应类似：
 
 ```text
-snapshot: burn-0.22.0-pre.1
+snapshot: burn-0.22.0-pre.3
 device: Device<Flex(...)>
 default float dtype: F32
 default int dtype: I32

@@ -78,7 +78,7 @@ pub fn probe_execution_stack() -> Result<StackReport, ProbeError> {
         .map_err(|error| ProbeError::Sync(error.to_string()))?;
     let values = tensor
         .to_data()
-        .to_vec::<f32>()
+        .try_to_vec::<f32>()
         .map_err(|error| ProbeError::Data(error.to_string()))?;
     let observed_value = values
         .first()
@@ -104,7 +104,7 @@ mod tests {
     fn reports_pinned_flex_execution() {
         let report = probe_execution_stack().expect("Flex CPU 探测应当成功");
 
-        assert_eq!(report.snapshot, "burn-0.22.0-pre.1");
+        assert_eq!(report.snapshot, "burn-0.22.0-pre.3");
         assert!(report.device.contains("Flex"));
         assert_eq!(report.float_dtype, "F32");
         assert_eq!(report.int_dtype, "I32");
@@ -114,6 +114,6 @@ mod tests {
 
     #[test]
     fn embedded_pins_contain_the_burn_revision() {
-        assert!(PINS.contains("976aa9c5ec1d2dd3412710f99759e3c44bdff03d"));
+        assert!(PINS.contains("13f0a12b71ad83c1f9edeac22dea325dcb612397"));
     }
 }

@@ -15,7 +15,7 @@ OpenMLSys 把「编程接口」和「计算图」分成两章；本书合在一�
 
 张量程序如何同时表达编译期约束和运行时数据？Module 如何管理参数？
 Eager 运算产生的依赖如何形成反向传播所需的动态图？自动微分 tape、融合
-IR 和设备 graph capture 为什么不能混为一谈？
+IR、GraphIr 捕获和设备 graph capture 为什么不能混为一谈？
 
 ## 学习目标
 
@@ -29,7 +29,7 @@ IR 和设备 graph capture 为什么不能混为一谈？
 5. 用算子、张量边、依赖和控制流解释计算图；
 6. 解释 eager 前向与一阶反模式 autodiff tape；
 7. 使用 `require_grad`、`backward` 和 `grad` 核对链式法则；
-8. 区分 autodiff tape、Burn IR / Fusion 计划与 device graph capture。
+8. 区分 autodiff tape、Burn IR / Fusion 计划、GraphIr 捕获与 device graph capture。
 
 改 API、反向规则或分派时先看哪一层，见
 [一次调用会经过哪些层](crate-map.md)。

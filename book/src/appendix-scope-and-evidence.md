@@ -8,10 +8,10 @@
 正文与示例对齐以下固定版本：
 
 - OpenMLSys：`9c289782ccbb165ac8ad7c960ecffc12942a5560`
-- Burn：`976aa9c5ec1d2dd3412710f99759e3c44bdff03d`（版本线 `0.22.0-pre.1`）
-- CubeCL：`be278a1e76aed881e2cc6b165414ee6103ca4634`
-- CubeK：`f82a6d07ebf35a1d446893b32712458744d80f13`
-- burn-onnx：`af2dfb43af43bf363dc2d7d858d933d86e2a65a8`（使用较早的 Burn 提交，只作源码对照，不进入根 workspace 的 Cargo 依赖）
+- Burn：`13f0a12b71ad83c1f9edeac22dea325dcb612397`（版本线 `0.22.0-pre.3`）
+- CubeCL：`b566e954468010303cf41465fc8b6be6499e2001`（`0.11.0-pre.3`；Kernel IR 为 Pliron）
+- CubeK：`73743e34b2aeeb7c60d1b0bbc2caf70ed71aff09`（`0.3.0-pre.3`）
+- burn-onnx：`fe36b3b6c02fb5709e56b732f8d1e43c87a01773`（版本线 `0.22.0-pre.3`，与主线 Burn 对齐；只作源码对照，不进入根 workspace 的 Cargo 依赖）
 
 仓库根目录 `pins.toml` 与 `Cargo.lock` 是构建侧真相；本表供阅读对照。
 

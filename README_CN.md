@@ -14,15 +14,16 @@ Burn → CubeCL → CubeK 为贯穿实现：从张量接口到 Kernel，从数�
 
 ## 项目状态
 
-九章候选版，示例对齐 Burn `0.22.0-pre.1`。进度与已知限制见
+九章候选版，示例对齐 Burn `0.22.0-pre.3`；CubeCL Kernel IR 已迁到
+Pliron。进度与已知限制见
 [`planning/STATUS.md`](planning/STATUS.md)。
 
 ## 依赖来源
 
 构建与 CI 从 GitHub 获取 Burn，revision 记录在 [`pins.toml`](pins.toml)。
 Burn 的 manifest 决定兼容的 CubeCL 与 CubeK revision。项目 Cargo
-manifest 禁止使用本地 path 依赖。`burn-onnx` 使用另一份 Burn 提交，
-只作源码阅读，不进入根 workspace。
+manifest 禁止使用本地 path 依赖。`burn-onnx` 与主线 Burn 均为
+`0.22.0-pre.3`，只作源码阅读，不进入根 workspace。
 
 可以在项目根目录放置以下可选、只读的源码镜像：
 

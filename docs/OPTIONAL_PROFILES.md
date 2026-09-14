@@ -58,8 +58,8 @@ cargo run  -p ch03-gemm-ladder --features wgpu --release --locked
 
 - **目的**：阅读 `burn-onnx` 固定 revision 的 ONNX→BurnGraph→codegen
   边界；不是根 workspace 默认依赖。
-- **约束**：D010——旧 Burn revision，禁止 `path`/`[patch]` 拉进根
-  workspace；不要与 `ch07-record-roundtrip` 混成一条 `cargo test`。
+- **约束**：D010/D027——版本字符串已对齐，仍禁止 `path`/`[patch]`
+  拉进根 workspace；不要与 `ch07-record-roundtrip` 混成一条 `cargo test`。
 - **建议做法**：独立 checkout / 独立 manifest（若维护者提供）或只读源码；
   任何端到端跑通结果单独记录环境与 revision。
 - **正文位置**：第 7 章 ONNX 节与部署闭环图。

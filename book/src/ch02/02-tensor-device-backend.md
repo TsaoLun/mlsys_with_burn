@@ -87,7 +87,8 @@ $128 \times 1024 \times 4\ \text{B} = 512\ \text{KiB}$；改用 2 字节的
 把同一份数据 `convert_dtype(DType::F64)` 后，shape 不变而字节数从 24
 变成 48：dtype 决定的是每个元素的解释宽度。源码里同宽度转换可以
 原地复用 buffer，跨宽度则克隆新 buffer，因此 dtype 决策同时也是内存
-管理决策。
+管理决策。同 dtype 读回主机用 `try_to_vec`；需要改元素类型时用
+`try_to_vec_as`。`to_vec` 在 0.22 起标记为 deprecated。
 
 值得记住的一点：这里的 `Bytes` 类型与第 7 章 Burnpack 容器写入 tensor
 数据的是同一种。内存中的张量字节和 artifact 里的张量字节共享同一份
@@ -100,7 +101,7 @@ shape、dtype 与偏移元数据。
 （`DispatchDevice`）；张量经分派桥（`BridgeTensor` → Dispatch）到达具体
 后端——桥接层负责路由，不另定一套数学语义：
 
-![Tensor 经 BridgeTensor 与 Dispatch/DispatchDevice 分派到 Flex、CubeCL 后端、LibTorch/NdArray、Remote 或 Autodiff 变体（与第 1 章为同一张图）](../img/ch01-dispatch-tree.svg)
+![Tensor 经 BridgeTensor 与 Dispatch/DispatchDevice 分派到 Flex、CubeCL 后端、LibTorch、已弃用的 NdArray、Remote、Capture 或 Autodiff 变体（与第 1 章为同一张图）](../img/ch01-dispatch-tree.svg)
 
 Cargo feature 决定哪些分派变体被编译进程序，Device 工厂方法选择其中一个
 实例。教材默认使用 `Device::flex()`（纯 Rust eager CPU，不走

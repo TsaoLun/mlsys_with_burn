@@ -135,7 +135,7 @@ Burn 的当前用户路径是命令式（imperative）eager 执行：Rust 语句
 Module / Tensor API
       → Device 选择与 burn-dispatch
       → Backend op（Flex 或 CubeCL 桥）
-      → （可选）Fusion 计划 / CubeCL IR
+      → （可选）Fusion 计划 / CubeCL Pliron IR
       → CubeCL Runtime（CPU / WGPU / CUDA / HIP…）
       → Kernel launch → 设备完成 → host read/sync
 ```
@@ -151,6 +151,6 @@ GPU 的吞吐”。
 |---|---|---|---|
 | `Tensor` + `Device` | PyTorch Tensor + device | 统一用户 API、运行时选设备 | API 相似 ≠ 算子集/性能相同 |
 | autodiff tape | autograd tape | 按实际路径记依赖 | 不是静态整图 |
-| Fusion / CubeCL IR | TorchInductor / XLA 等编译栈（概念） | 表达式可被改写再执行 | 不能直接比墙钟 |
+| Fusion / CubeCL Pliron IR | TorchInductor / XLA 等编译栈（概念） | 表达式可被改写再执行 | 不能直接比墙钟 |
 | CubeCL Runtime | CUDA runtime / 图形 API | launch、buffer、同步 | 完成边界因栈而异 |
 

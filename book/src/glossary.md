@@ -12,7 +12,7 @@
 | 分派桥 | BridgeTensor / Dispatch | Tensor 与具体后端之间的运行时桥接层；不是第三种数学语义 | [第 2 章](ch02-programming-and-graph.md) |
 | 后端契约 | Backend / BackendTypes | 后端实现层契约，不等于用户手里的 Device | [第 2 章](ch02-programming-and-graph.md) |
 | 默认 CPU 后端 | Flex / `Device::flex()` | 纯 Rust eager CPU；默认实验路径，**不**走 Fusion/CubeCL | [第 1 章](ch01-introduction.md) |
-| Fusion CPU 设备 | `Device::cpu()` | 启用 `cpu`+`fusion` 后走 CubeCL CPU Fusion；与 Flex 不同路径 | [第 4 章](ch04-compiler-and-runtime.md) |
+| Fusion CPU 设备 | `Device::cpu()` | 启用 `cpu`+`fusion` 后走 `burn-cpu`（CubeCL CPU Fusion）；与 Flex 不同路径 | [第 4 章](ch04-compiler-and-runtime.md) |
 | 自动微分记录 | autodiff tape | 一阶反向模式动态 tape，位于 `burn-autodiff` | [第 2 章](ch02-programming-and-graph.md) |
 | 切断依赖 | `detach()` | 切断旧图形成新叶子，保留 require-grad 意图 | [第 2 章](ch02-programming-and-graph.md) |
 | 状态保存 | ModuleRecord | Burn 的参数 artifact 表示 | [第 7 章](ch07-model-serving.md) |
@@ -31,8 +31,10 @@
 | 算术强度 | arithmetic intensity | FLOP/字节（教学模型可用 FLOP/加载元素）；是复用方向指标，不是实测性能 | [第 3 章](ch03-accelerator.md) |
 | 融合表示 | Burn IR / OperationIr | Fusion 计划的中间表示；与 autodiff tape 不同层 | [第 4 章](ch04-compiler-and-runtime.md) |
 | 融合器 | fuser | Fusion 里接受/拒绝一组操作并生成融合块的组件（如 ElementWise） | [第 4 章](ch04-compiler-and-runtime.md) |
-| Fusion 流 | Fusion stream / `StreamId` | Fusion 延迟队列的隔离键；不是 CUDA stream，也不是集群作业队列 | [第 4 章](ch04-compiler-and-runtime.md) |
-| CubeCL 表示 | Scope / KernelDefinition | CubeCL 侧的 IR 对象，不称“计算图” | [第 4 章](ch04-compiler-and-runtime.md) |
+| Fusion 流 | Fusion stream / `StreamId` | 延迟队列隔离键；类型定义在 `cubecl-environment`，经 Burn 再导出。不是 CUDA stream，也不是集群作业队列 | [第 4 章](ch04-compiler-and-runtime.md) |
+| 图捕获 IR | GraphIr / `burn-capture` | 带显式输入输出边界的操作序列；捕获时不执行数值 | [第 4 章](ch04-compiler-and-runtime.md) |
+| CubeCL 表示 | Scope / KernelDefinition / Pliron 方言 | CubeCL 侧的 IR 对象，不称“计算图”；方言在 `cubecl-ir` | [第 4 章](ch04-compiler-and-runtime.md) |
+| 可扩展 IR 框架 | Pliron | Rust 写成、受 MLIR 启发；CubeCL Kernel 编译器的基础设施 | [第 4 章](ch04-compiler-and-runtime.md) |
 | 设备重放 | graph capture | backend/device 级执行重放，仅在 Runtime 支持时存在 | [第 4 章](ch04-compiler-and-runtime.md) |
 | 同步边界 | read / readback / `Device::sync` | 完成边界；flush 只是提交/推进，不代表设备完成 | [第 4 章](ch04-compiler-and-runtime.md) |
 

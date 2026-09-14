@@ -78,7 +78,7 @@ cargo run  -p ch06-training-loop --locked
 
 ```bash
 git clone https://github.com/tracel-ai/burn.git
-git -C burn checkout 976aa9c5ec1d2dd3412710f99759e3c44bdff03d
+git -C burn checkout 13f0a12b71ad83c1f9edeac22dea325dcb612397
 ```
 
 这些 checkout 只用于阅读；不要改成 Cargo `path` 依赖。在线对照时也应
@@ -94,7 +94,7 @@ git -C burn checkout 976aa9c5ec1d2dd3412710f99759e3c44bdff03d
 |---|---|---|
 | `wgpu` | 有图形驱动，巩固第 3 章同一 Kernel | `cargo test -p ch03-cubecl-kernel --features wgpu --locked` |
 | `wgpu`（GEMM 阶梯） | 想实测共享内存 tile 的差距 | `cargo run -p ch03-gemm-ladder --features wgpu --release --locked` |
-| ONNX 对照 | 阅读 burn-onnx 边界（依赖版本与本书示例不同） | 独立环境；不要混进本书默认示例依赖 |
+| ONNX 对照 | 阅读 burn-onnx 边界（版本已对齐，仍不编进默认 workspace） | 独立环境；不要混进本书默认示例依赖 |
 | CUDA / 集合通信 | 本机驱动与固定源码均允许时 | 先读第 3/6/9 章源码入口，再自建实验 |
 
 `wgpu` 最小命令：

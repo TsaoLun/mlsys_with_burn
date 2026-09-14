@@ -14,7 +14,7 @@ explosion；若特化太少，又可能保留低效的动态逻辑。
 
 - 用户 Tensor 程序；
 - Burn Fusion IR；
-- CubeCL Kernel IR；
+- CubeCL 的 Pliron 方言 IR；
 - Runtime 编译产物与设备 graph。
 
 本章只需记住：Kernel 不是直接把 Rust 源码交给 GPU，而是经过宏展开、IR
@@ -94,7 +94,7 @@ pub struct MatmulProblemDefinition {
 Tuner，Tuner 内再按键缓存——所以换设备必然重测，换 shape 只在
 跨桶时重测。
 
-## 3. 从 TVM/MLIR 到 CubeCL
+## 3. 从 TVM/MLIR 到 CubeCL / Pliron
 
 OpenMLSys 介绍 TVM、Ansor、MLIR、TBE 和 AKG，核心问题仍然成立：
 
@@ -103,8 +103,12 @@ OpenMLSys 介绍 TVM、Ansor、MLIR、TBE 和 AKG，核心问题仍然成立：
 - 如何搜索 tile、向量化、内存层次与并行映射；
 - 如何在多种硬件上 lowering 并验证正确性。
 
-本书选择 CubeCL/CubeK 作为连续实现栈，不表示其他系统已过时。TVM 与
-MLIR 的深入比较放到第 4 章；厂商专用 TBE/AKG 只作为生态历史边界。
+本书选择 CubeCL/CubeK 作为连续实现栈，不表示其他系统已过时。本版
+CubeCL 把 Kernel IR 迁到 Pliron——Rust 写成的 MLIR 风格框架：方言、
+Pass、rewrite 与 dialect conversion 成为一等机制，CPU 路径经
+`pliron-llvm` 降到 LLVM。这解决的是“编译器基础设施”，不是“换一套
+用户 Kernel 语法”。TVM 与 MLIR 的深入比较放到第 4 章；厂商专用
+TBE/AKG 只作为生态历史边界。
 
 ## 4. CUDA、Triton 与 CUTLASS 对照
 

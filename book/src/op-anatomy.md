@@ -136,7 +136,9 @@ fn float_tanh(tensor: FloatTensor<Self>) -> FloatTensor<Self> {
 
 CubeCL 后端不写标量循环，而是请求一个一元 elementwise kernel：
 `BasicFloatUnaryKind::Tanh` 最终 lower 成目标平台的 `tanh` 指令或
-内建函数（第 4 章的 lowering/JIT/缓存全流程从这里开始）。
+内建函数。从这里开始进入第 4 章：`#[cube]` 展开登记 Pliron 操作，
+再经 `KernelDefinition`、共享 Pass 和目标 Compiler（CPU 上是
+`PlironCompiler`）完成 JIT。
 
 ## 7. Fusion 前端：先描述，再决定怎么执行
 

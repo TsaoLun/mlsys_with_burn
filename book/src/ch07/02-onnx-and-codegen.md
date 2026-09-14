@@ -140,10 +140,10 @@ loader 应用 snapshot 时，还可能触发 dtype 转换、设备分配和 back
 
 ## 为什么本书默认示例不直接依赖 `burn-onnx`
 
-本书示例使用的 Burn revision 是 `976aa9...`，而 `burn-onnx` 的
-manifest 把 `burn`、`burn-flex` 和 `burn-store` 指向 `78f10a...`。依赖图中
-即使出现相同的 package name，Rust 也会把不同 revision 的类型视为不同
-类型；例如旧 `burn::Tensor` 不能自动传给当前示例里的 `burn::Tensor`。
+本版 `burn-onnx` 与主线 Burn 都发布为 `0.22.0-pre.3`，crates.io 版本
+字符串已经对齐。即便如此，ONNX importer 仍是独立产品：它有自己的
+CI、算子覆盖和生成代码生命周期。把 importer 编进根 workspace 会把
+“读懂转换路径”和“跑通一份 ONNX fixture”混成一个不可隔离的验证。
 
 所以本章分两条阅读线：
 
@@ -152,9 +152,8 @@ manifest 把 `burn`、`burn-flex` 和 `burn-store` 指向 `78f10a...`。依赖�
 2. 用本书示例里的 Burn `ModuleRecord` 做 CPU 往返保存与恢复，观察当前
    参数状态 API。
 
-若将来 `burn-onnx` 与本书示例的 Burn 对齐，再增加小型 ONNX fixture 时，
-应同时比较 ONNX Runtime reference、生成 model 的输出和不同 backend 的
-输出，而不是只把 crate 塞进同一依赖图。
+将来增加小型 ONNX fixture 时，应同时比较 ONNX Runtime reference、生成
+model 的输出和不同 backend 的输出，而不是只把 crate 塞进同一依赖图。
 
 ## 验证转换时建议记下什么
 

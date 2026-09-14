@@ -29,11 +29,11 @@ rust-version = "1.95"
 
 [workspace.dependencies]
 # Build and CI always resolve Burn from GitHub. The revision identifies the
-# 0.22.0-pre.1 writing snapshot; Burn's own manifest pins CubeCL and CubeK.
+# 0.22.0-pre.3 writing snapshot; Burn's own manifest pins CubeCL and CubeK.
 # Local source mirrors are intentionally never wired through `path`.
-burn = { git = "https://github.com/tracel-ai/burn.git", rev = "976aa9c5ec1d2dd3412710f99759e3c44bdff03d", default-features = false, features = ["std", "flex", "autodiff"] }
-burn-fusion = { git = "https://github.com/tracel-ai/burn.git", rev = "976aa9c5ec1d2dd3412710f99759e3c44bdff03d", default-features = false }
-cubecl = { git = "https://github.com/tracel-ai/cubecl", rev = "be278a1e76aed881e2cc6b165414ee6103ca4634", default-features = false, features = ["std", "stdlib", "cpu"] }
+burn = { git = "https://github.com/tracel-ai/burn.git", rev = "13f0a12b71ad83c1f9edeac22dea325dcb612397", default-features = false, features = ["std", "flex", "autodiff"] }
+burn-fusion = { git = "https://github.com/tracel-ai/burn.git", rev = "13f0a12b71ad83c1f9edeac22dea325dcb612397", default-features = false }
+cubecl = { git = "https://github.com/tracel-ai/cubecl", rev = "b566e954468010303cf41465fc8b6be6499e2001", default-features = false, features = ["std", "stdlib", "cpu"] }
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

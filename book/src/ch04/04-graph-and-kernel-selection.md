@@ -88,7 +88,7 @@ Burn 可以把 fused optimization 与 unfused 操作组合为一个执行策略�
 计划执行时，burn-cubecl 的 `CubeOptimization` 分派到具体 optimization：
 ElementWise 路径把 trace 生成为 CubeCL Kernel；Matmul/Reduce 路径组合
 对应的 CubeK launch 与前后 trace；无法纳入的位置通过 FallbackOperation
-调用底层操作。由此产生的 CubeCL KernelDefinition 才进入下一节的优化、
-lowering 和 Runtime launch。Fusion block 是上层计划，不能直接等同于一份
+调用底层操作。由此产生的 CubeCL KernelDefinition 才进入下一节的 Pliron
+Pass、lowering 和 Runtime launch。Fusion block 是上层计划，不能直接等同于一份
 KernelDefinition。
 

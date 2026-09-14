@@ -27,10 +27,10 @@
 固定快照：
 
 - OpenMLSys：`9c289782ccbb165ac8ad7c960ecffc12942a5560`
-- Burn：`976aa9c5ec1d2dd3412710f99759e3c44bdff03d`
-- CubeCL：`be278a1e76aed881e2cc6b165414ee6103ca4634`
-- CubeK：`f82a6d07ebf35a1d446893b32712458744d80f13`
-- burn-onnx：`af2dfb43af43bf363dc2d7d858d933d86e2a65a8`
+- Burn：`13f0a12b71ad83c1f9edeac22dea325dcb612397`
+- CubeCL：`b566e954468010303cf41465fc8b6be6499e2001`
+- CubeK：`73743e34b2aeeb7c60d1b0bbc2caf70ed71aff09`
+- burn-onnx：`fe36b3b6c02fb5709e56b732f8d1e43c87a01773`
 
 ## 核心路径
 
@@ -140,7 +140,8 @@
   → `ch04/05-cubecl-lowering-and-jit.md`、`ch04/06-memory-streams-execution.md`；
   `C/S/L=verified R=source-only E=verified`。
 - `chapter_backend_and_runtime/op_compiler.md`
-  → `ch04/05-cubecl-lowering-and-jit.md`；保留编译链，未声称通用 AOT；
+  → `ch04/05-cubecl-lowering-and-jit.md`；保留编译链，对照 Pliron Pass
+  与目标 Compiler，未声称通用 AOT；
   `C/S/L=verified R=source-only E=verified`。
 - `chapter_backend_and_runtime/summary.md`
   → `ch04/08-exercises-and-sources.md`；`C/S/L/E=verified R=source-only`。
@@ -305,9 +306,10 @@ AI、机器人和机器学习附录），不进入本书首版九章主线；排
 - 训练与分布式：`burn/crates/burn-train/src/`、
   `burn/crates/burn-communication/src/`；
 - IR/Fusion：`burn/crates/burn-ir/src/`、`burn/crates/burn-fusion/src/`、
-  `burn/crates/burn-cubecl-fusion/src/`；
-- CubeCL runtime：`cubecl/crates/cubecl-core/src/`、
-  `cubecl/crates/cubecl-runtime/src/`；
+  `burn/crates/burn-cubecl-fusion/src/`、`burn/crates/burn-capture/src/`；
+- CubeCL runtime / compiler：`cubecl/crates/cubecl-core/src/`、
+  `cubecl/crates/cubecl-runtime/src/`、`cubecl/crates/cubecl-ir/src/dialect/`、
+  `cubecl/crates/cubecl-opt/`、`cubecl/crates/cubecl-llvm/`；
 - CubeK 算子：`cubek/crates/cubek-matmul/src/`、
   `cubek/crates/cubek-reduce/src/`、`cubek/crates/cubek-attention/src/`；
 - RL：`burn/crates/burn-rl/src/`；

@@ -3,16 +3,18 @@
 ## 小结
 
 中间表示让不同阶段围绕合适粒度工作：Burn OperationIr 描述 Tensor 级
-操作和资源状态，CubeCL Scope/KernelDefinition 描述设备 Kernel。自动微分
-tape、Fusion IR、CubeCL IR 和设备 graph capture 目标不同。
+操作和资源状态，CubeCL 的 Pliron 方言与 KernelDefinition 描述设备
+Kernel。自动微分 tape、Fusion IR、Pliron 上的 CubeCL IR、GraphIr 捕获
+和设备 graph capture 目标不同。
 
 Burn Fusion 按 stream 注册操作，搜索合法执行块，并选择 fused、unfused
 或组合计划。同步和读回形成物化边界。TensorStatus、HandleContainer 与
 CubeCL 内存池支撑生命周期和复用；ComputeClient 的 launch 通常异步，
 read/sync 才是等待边界。
 
-CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。不同后端
-不共享完全相同的优化管线，本版也不能被描述为完整统一 AOT 工具链。
+CubeCL Compiler 按目标在同一套 Pliron IR 上执行 Pass 和 lowering，再
+JIT 编译并缓存。不同后端不共享完全相同的优化管线，本版也不能被描述为
+完整统一 AOT 工具链。
 
 ## 练习
 
@@ -44,7 +46,7 @@ CubeCL Compiler 按目标执行优化和 lowering，再 JIT 编译并缓存。�
 [「编译栈与中间表示」](01-stack-and-ir.md)第 2 节写了三种形态各自
 擅长的分析，第 3 节的分层表格是现成对照素材。想一想：Tensor 级
 子图搜索为什么落在 OperationIr 这类图表示，而 unit 级指令优化要
-转成 CFG/SSA 风格做局部数据流分析；答案取决于各优化需要的信息。
+在 Pliron 的 SSA / region 上做局部数据流分析；答案取决于各优化需要的信息。
 
 </details>
 
@@ -306,8 +308,10 @@ Inspector，断言 `drain()` 结果互不包含对方的操作；stream 隔离�
 <summary>提示</summary>
 
 `KernelDefinition` 的字段就在本章列出的
-`cubecl/crates/cubecl-runtime/src/kernel.rs`。先抄下字段清单，再反查
-`KernelBuilder` 从哪里收集它们，与
+`cubecl/crates/cubecl-runtime/src/kernel.rs`（`body: Scope`、`info`、
+`settings`）。`Scope` 内部是 Pliron `Context` / `ModuleOp`。先抄下字段
+清单，再反查 `cubecl-core/src/compute/builder.rs` 的 `KernelBuilder::build`
+从哪里收集它们，与
 [「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
 第 1 节列出的输入（Scope、参数、CubeDim、设置）逐项对上。
 
@@ -319,10 +323,12 @@ Inspector，断言 `drain()` 结果互不包含对方的操作；stream 隔离�
 <summary>提示</summary>
 
 以[「CubeCL Lowering、JIT 与缓存」](05-cubecl-lowering-and-jit.md)
-第 2 节为地图：两条路径都会用到本章列出的
-`cubecl/crates/cubecl-opt/`，但接入位置与额外步骤不同。分别在两个
-Compiler 的源码里搜索对 Optimizer 的调用，再确认 CPP 侧多出的
-shared-memory 分析与 Scope post-processing 挂在哪一步。
+第 2 节为地图：两条路径都消费 `KernelDefinition`，共享 `cubecl-opt`
+里的部分 Pass，但 conversion 不同。CPU 看 `cubecl-llvm` 的
+`PlironCompiler::compile_ir`（SROA / CSE / BranchToSCF / CubeToLLVM）；
+SPIR-V 与 CPP 分别在 `cubecl-spirv`、`cubecl-cpp` 搜索对
+`KernelDefinition` 的 `compile`。不要把 `CUBECL_DEBUG_PLIRON` 的 dump
+当成 CUDA 源码。
 
 </details>
 
@@ -409,11 +415,14 @@ TVM、MLIR、Halide 等编译系统论文见附录
 - `burn/crates/burn-cubecl/src/fusion.rs`
 - `burn/crates/burn-cubecl-fusion/src/optim/`
 - `burn/crates/burn-flex/ARCHITECTURE.md`
-- `cubecl/crates/cubecl-ir/`
+- `cubecl/crates/cubecl-ir/`（含 `src/dialect/`）
 - `cubecl/crates/cubecl-opt/`
+- `cubecl/crates/cubecl-llvm/`（CPU 的 `PlironCompiler`）
+- `cubecl/crates/cubecl-environment/`
 - `cubecl/crates/cubecl-runtime/src/kernel.rs`
 - `cubecl/crates/cubecl-runtime/src/client.rs`
 - `cubecl/crates/cubecl-runtime/src/memory_management/`
+- `burn/crates/burn-capture/`
 
 LLVM、MLIR、Halide、TVM/Ansor 和自动微分文献可用于比较 IR、schedule 与
 搜索设计。在线文档必须记录版本，不能覆盖本书固定源码事实。
@@ -422,7 +431,7 @@ LLVM、MLIR、Halide、TVM/Ansor 和自动微分文献可用于比较 IR、sched
 
 1. 编译器做保持语义的变换；运行时把计划落实到分配、调度、launch 与同步。
 2. 前端关注 OperationIr / Pass / autodiff 边界；后端关注选择、内存、stream 与 JIT。
-3. 同一套 Fusion/CubeCL IR 可以落到不同 Runtime；同步在设备上更昂贵。
+3. 同一套 Fusion 计划可以落到不同 Runtime；CubeCL 侧是同一套 Pliron 方言、不同 Compiler。同步在设备上更昂贵。
 4. FusionInspector 让你看到计划切分；迷你 Pass 让你亲手写出非法 fast-math 的后果。
 5. 改融合规则打开 `burn-fusion`，改 JIT 缓存键打开 CubeCL Compiler。
 6. Fusion block 数、cache hit 和墙钟时间不是同一个量。

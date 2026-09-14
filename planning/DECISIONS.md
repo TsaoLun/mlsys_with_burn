@@ -47,6 +47,9 @@
 - 原因：公开构建和 CI 不应依赖特定目录布局。根目录下可选的 Burn、
   CubeCL、CubeK、burn-onnx 和 OpenMLSys clone 被 Git 忽略，仅供 Agent
   快速搜索和源码阅读。
+- 后续（2026-09-14，D027）：发布 tag 的 Burn `Cargo.toml` 以 crates.io
+  版本钉 CubeCL/CubeK；教材示例对 CubeCL 仍使用 `pins.toml` 中的 GitHub
+  SHA。禁止 `path` / `[patch]` 指向本地镜像这一条不变。
 
 ## D007：先回补第 1–4 章再写系统篇后续章
 
@@ -106,6 +109,9 @@
   本章不声称根 workspace 已完成 ONNX 导入或 Remote/WASM 端到端部署。
   将来更新 pin 时，必须先对齐 burn-onnx 的 Burn revision，再增加真正的
   ONNX fixture 与目标平台验证。
+- 后续（2026-09-14，D027）：`burn-onnx` 与主线 Burn 均发布为
+  `0.22.0-pre.3`，crates.io 版本对齐，类型世界冲突解除。隔离决定保留，
+  理由改为独立产品、CI 与未跑通的 ONNX fixture。
 
 ## D011：第 8 章以确定性环境隔离 burn-rl 抽象与具体 RL 算法
 
@@ -381,3 +387,29 @@
   改变 \(p,m,\mathrm{chunk}\) 看方向；本书已有第 9 章模拟器先例。
 - 影响：workspace / Makefile / running-examples / 附录证据账本同步
   登记。练习不得再把已实现的分块 prefill 当作【挑战】实现题。
+
+## D027：第二写作周期基线 Burn 0.22.0-pre.3 / CubeCL Pliron
+
+- 日期：2026-09-14
+- 决策：第二写作周期以 Burn `0.22.0-pre.3`
+  （`13f0a12b71ad83c1f9edeac22dea325dcb612397`）为基线，配套 CubeCL
+  `0.11.0-pre.3`（`b566e954468010303cf41465fc8b6be6499e2001`）、CubeK
+  `0.3.0-pre.3`（`73743e34b2aeeb7c60d1b0bbc2caf70ed71aff09`）与
+  burn-onnx `0.22.0-pre.3`（`fe36b3b6c02fb5709e56b732f8d1e43c87a01773`）。
+  Kernel 编译叙事以 Pliron 为 CubeCL 下一代编译基础设施的地基：方言、
+  SSA/region、共享 Pass 与目标 Compiler。`KernelDefinition` 仍是
+  compile/launch 接口。禁止把 Fusion IR 或 autodiff tape 写成已经迁到
+  Pliron。发布 tag 的 Burn / burn-onnx manifest 以 crates.io 版本钉
+  CubeCL、CubeK、Burn；教材 Cargo 对 CubeCL 直连示例仍用 GitHub SHA。
+  禁止 `path` / `[patch]` 指向本地镜像。burn-onnx 版本对齐后仍不进入
+  根 workspace。
+- 原因：官方 pre.3 说明「CubeCL has migrated to Pliron」；首周期 D003
+  的 pre.1 快照已不能描述 CPU 编译路径（不再是自维护 petgraph IR +
+  「经 MLIR」）。tagged Cargo.toml 不再内嵌 cubecl git SHA，D006 的字面
+  关系需要按 crates.io 对应 tag 理解。
+- 影响：`pins.toml` snapshot 名为 `burn-0.22.0-pre.3`；正文第 1–4、7 章
+  编译器/分派/ONNX 口径重写；D003 保留为首周期历史；D010 隔离理由改为
+  独立产品与未跑通 fixture。`burn-cpu` crate 描述仍可能写 “MLIR based”，
+  以 `cubecl-llvm` 源码为准。
+- 状态：正文与 pins 已切换；验证见
+  `planning/session-logs/2026-09-14-pliron-pre3.md`。

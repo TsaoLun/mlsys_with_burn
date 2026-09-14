@@ -40,8 +40,9 @@ KV cache 改变了哪些成本？
 ![部署主路径：训练状态 → artifact → convert/validate/optimize → runtime model，再经 pre/post 与 batch/queue 服务边界](img/ch07-serving-pipeline.svg)
 
 `ModuleRecord` 验证「参数能否恢复到一个 module」；`burn-onnx` 把 ONNX
-图生成 Burn Rust 源码。仓库里的 burn-onnx 仍指向另一份 Burn 提交，因此
-ONNX 路径与 Record 实验分开讲。
+图生成 Burn Rust 源码。本版 burn-onnx 与主线 Burn 都是 `0.22.0-pre.3`，
+但默认示例仍不把 importer 编进根 workspace：ONNX 路径与 Record 实验
+分开讲。
 
 服务侧的路由、鉴权、限流和灰度是应用系统的职责。生成式场景额外的
 prefill / decode 与 KV 预算，用第 7 章队列实验观察机制。

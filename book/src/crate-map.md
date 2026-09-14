@@ -18,9 +18,11 @@
 | 运行时按设备分派 | `burn-dispatch` | 第 1 章的 `DispatchDevice` |
 | 反向公式、checkpoint | `burn-autodiff` 的 `ops/` | `burn-backend-tests` 里同名 `should_diff_*`；换算子从 `mean`/`sum`/`add` 对照开始 |
 | CPU eager 实现 | `burn-flex` | 默认示例走这里，不经过 CubeCL |
-| GPU / JIT Kernel | `burn-cubecl`，再进 `cubecl/` | 第 3 章 `#[cube]` |
+| GPU / JIT Kernel | `burn-cubecl`、`burn-cpu`，再进 `cubecl/` | 第 3 章 `#[cube]`；IR 在 `cubecl-ir` 的 Pliron 方言 |
 | 高性能 matmul / 注意力 | `cubek/` 的对应 crate | 第 3 章 Strategy 与 tune key |
 | 融合是否发生、如何回退 | `burn-fusion`、`burn-cubecl-fusion` | 第 4 章 Fusion 计划 |
+| Kernel Pass / lowering | `cubecl-opt`、`cubecl-llvm` / `cubecl-spirv` / `cubecl-cpp` | 第 4 章：共享 Pass 与目标 Compiler |
+| 图捕获（不执行） | `burn-capture`、`burn-ir` 的 `GraphIr` | 捕获操作序列与输入输出边界 |
 | IR 词汇表（有没有这个算子） | `burn-ir` 的 `operation.rs` | 新算子通常要在这里挂号 |
 
 ## 数据、训练与产物
@@ -33,7 +35,7 @@
 | 本机多设备 / DDP 策略 | `burn-train` 的 `learner/supervised/strategies/` | collective 在 backend，不在 train |
 | `all_reduce` 契约 | `burn-tensor` 的 `distributed.rs`、`burn-backend` 的 `DistributedOps` | Flex **没有** collective 实现 |
 | 参数导出与加载 | `burn-core` 的 `module/`、`burn-store` | 第 7 章 Burnpack |
-| ONNX → Rust 代码生成 | 独立仓库 `burn-onnx` | 与本书示例不是同一份 Burn 提交 |
+| ONNX → Rust 代码生成 | 独立仓库 `burn-onnx` | 版本已与主线对齐，仍不编进默认 workspace |
 | 环境、replay、Policy 组合 | `burn-rl` | 第 8 章；具体算法由应用实现 |
 
 ## 怎么判断改对了层

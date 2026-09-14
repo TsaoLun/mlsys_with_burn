@@ -15,16 +15,17 @@ OpenMLSys or Tracel project and is not affiliated with either organization.
 ## Project Status
 
 This is the nine-chapter candidate edition aligned with Burn
-`0.22.0-pre.1`. See [`planning/STATUS.md`](planning/STATUS.md) for progress
+`0.22.0-pre.3`. CubeCL `0.11.0-pre.3` uses Pliron as its kernel IR.
+See [`planning/STATUS.md`](planning/STATUS.md) for progress
 and remaining limitations.
 
 ## Dependency Sources
 
 Builds and CI resolve Burn from its GitHub repository at the exact revision
 recorded in [`pins.toml`](pins.toml). Burn's own manifest pins the compatible
-CubeCL and CubeK revisions for the `0.22.0-pre.1` writing snapshot. Project
+CubeCL and CubeK revisions for the `0.22.0-pre.3` writing snapshot. Project
 Cargo manifests must not use local path dependencies. The pinned `burn-onnx`
-checkout references a different Burn revision and is therefore a source-audit
+checkout matches Burn `0.22.0-pre.3` on crates.io and remains a source-audit
 input, not a dependency of the main workspace.
 
 Optional, read-only source mirrors may be placed in the project root:

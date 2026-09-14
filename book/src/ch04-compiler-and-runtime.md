@@ -6,13 +6,14 @@
 
 这是 OpenMLSys「前端与 IR」「后端与运行时」两章的合并。产业里对应
 XLA、TVM、nvFuser、PyTorch 2 compile 那一层。autodiff tape（第 2 章）
-记录的是反向依赖，和这里的 Fusion IR、CubeCL IR 不是同一张图。
+记录的是反向依赖，和这里的 Fusion IR、CubeCL 的 Pliron IR 不是同一张图。
+CubeCL 已把 Kernel IR 迁到 Pliron，作为下一代编译基础设施的地基。
 
 ## 本章问题
 
 系统如何在不改变模型语义的前提下变换计算、生成 Kernel，并管理设备上的
-资源与执行？动态图、自动微分 tape、Fusion IR、CubeCL IR 和设备 graph
-为什么必须分层理解？
+资源与执行？动态图、自动微分 tape、Fusion IR、CubeCL 的 Pliron IR、
+GraphIr 捕获和设备 graph 为什么必须分层理解？
 
 ## 学习目标
 
@@ -23,7 +24,7 @@ XLA、TVM、nvFuser、PyTorch 2 compile 那一层。autodiff tape（第 2 章）
 3. 区分 Rust 类型、运行时张量元数据与编译器分析结果；
 4. 描述张量操作如何注册为 OperationIr 并进入 Fusion stream；
 5. 解释融合为何减少中间读写，以及同步如何切断延迟片段；
-6. 沿 CubeCL Scope、KernelDefinition、Compiler、JIT 和缓存追踪 Kernel；
+6. 沿 CubeCL Scope、Pliron 方言、KernelDefinition、Compiler、JIT 和缓存追踪 Kernel；
 7. 用生命周期、TensorStatus 和 HandleContainer 解释安全复用条件；
 8. 观察融合计划的切分，而不把它当成硬件 launch 计数。
 
@@ -43,7 +44,7 @@ XLA、TVM、nvFuser、PyTorch 2 compile 那一层。autodiff tape（第 2 章）
 Tensor 操作
   → burn-ir / burn-fusion
   → burn-cubecl-fusion / CubeK 或回退
-  → CubeCL Scope → KernelDefinition → Compiler
+  → CubeCL Scope（Pliron ModuleOp）→ KernelDefinition → Compiler
   → 设备 Runtime（allocate / schedule / launch → read/sync）
 ```
 

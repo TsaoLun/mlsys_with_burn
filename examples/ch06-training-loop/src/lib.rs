@@ -74,7 +74,7 @@ pub fn run_training(steps: usize, learning_rate: f64) -> Result<TrainingReport, 
 
         let gradients = loss.backward();
         let gradients = GradientsParams::from_grads(gradients, &model);
-        model = optimizer.step(learning_rate.into(), model, gradients);
+        model = optimizer.step(learning_rate, model, gradients);
     }
     // ANCHOR_END: train_step
 
