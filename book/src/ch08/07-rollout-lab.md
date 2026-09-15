@@ -133,7 +133,7 @@ phase=replay capacity=1 sample=1 rounds=8 updates=8 buffer_len=1 initial_right_q
 phase=replay capacity=6 sample=2 rounds=10 updates=20 buffer_len=6 initial_right_q=...（随机采样，数值会变）
 ```
 
-前两行在固定源码版本下是确定的：在线路径的 `initial_right_q=1.2125`
+前两行在本书所用版本下是确定的：在线路径的 `initial_right_q=1.2125`
 大于 1，是因为初始 `Right` 先在自然终止前得到 reward 1，reset 后同一
 状态/动作又经历了一次含 bootstrap 的非终止更新——同一条物理转移在不同
 episode 位置可以产生不同 target。回放路径在 `capacity = 1` 时精确为 0，

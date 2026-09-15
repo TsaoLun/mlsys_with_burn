@@ -57,8 +57,10 @@ CubeCL 把 Kernel 操作拆进方言，而不是一个无所不包的 opcode 枚
 入口 ABI、`CubeToLLVM`、SimplifyCFG、Mem2Reg，最后
 `builtin_to_llvm_pass()`。SPIR-V 与 CPP（CUDA/HIP/Metal）走各自的
 Compiler：它们消费同一份 `KernelDefinition`，但 conversion 与代码生成
-不同。因此“CubeCL 优化后 IR”必须注明具体 Compiler；打开
-`CUBECL_DEBUG_PLIRON` 打印的是 Pliron dump，不是 CUDA 源码。
+不同。因此“CubeCL 优化后 IR”必须注明具体 Compiler。设置
+`CUBECL_DEBUG_PLIRON` 会在构建时打开 dump 特性，运行时把它当作**目录**：
+每个 kernel 在其中写下 Pliron / LLVM IR，不是往终端打印 CUDA 源码；
+改完环境变量后需要重新编译才生效。
 
 ## 3. Lowering 与代码生成
 
@@ -85,9 +87,8 @@ lowering 可能处理：
 具体目标。某个 Runtime 不支持的操作必须在编译前过滤、lowering 时报错，
 或由上层选择其他策略。
 
-CPU 路径曾经常被写成“经 MLIR 编译”。本版事实是：**IR 层是 Pliron
-（MLIR 风格），代码生成走 `pliron-llvm` / LLVM**。`cubecl-cpu` 依赖
-`cubecl-llvm`，`CpuCompiler` 就是 `PlironCompiler`。
+IR 层是 Pliron（MLIR 风格），代码生成走 `pliron-llvm` / LLVM。
+`cubecl-cpu` 依赖 `cubecl-llvm`，`CpuCompiler` 就是 `PlironCompiler`。
 
 ## 4. JIT 的首次成本
 
@@ -137,7 +138,7 @@ cache 命中只表示某一层结果可复用，不表示设备 module 已加载
 
 ## 5. 编译缓存与调优缓存不同
 
-- **编译缓存**：KernelId 到目标编译产物；
+- **编译缓存**：`stable_hash(KernelId)` 加上 `build_id` 到目标编译产物；
 - **autotune cache**：问题 tune key 到候选选择；
 - **pipeline/module cache**：运行时已加载对象；
 - **metadata cache**：shape/stride 等辅助设备数据；

@@ -8,7 +8,7 @@ fn main() {
     let kv_budget = 16_384;
     let requests = mixed_workload(64, 5);
 
-    println!("64 条混合长度请求（prompt 32–512，decode 16–256），KV 预算 {kv_budget} token：");
+    println!("64 条混合长度请求（prompt 32–511，decode 16–255），KV 预算 {kv_budget} token：");
     println!(
         "{:>12}  {:>10}  {:>10}  {:>10}  {:>10}  {:>10}  {:>8}",
         "调度", "平均 ms", "p95 ms", "p95 TTFT", "平均 TPOT", "总时长 ms", "空转槽步"

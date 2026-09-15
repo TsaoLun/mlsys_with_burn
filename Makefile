@@ -26,6 +26,7 @@ book:
 	mdbook build book
 
 mdbook-test:
+	# 正文 Rust 块均为 rust,ignore；此处不编译示例。语义由 cargo test 覆盖。
 	mdbook test book
 
 check-upstreams:

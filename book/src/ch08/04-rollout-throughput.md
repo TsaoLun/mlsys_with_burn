@@ -133,8 +133,6 @@ kernel 或异步 queue 仍可能影响结果。一个可恢复的实验需要保
 tensor random；它们提供机制，但没有替应用建立跨 worker 的统一随机
 种子协议。
 
-## 本节小结
-
 异步 runner 的价值是重叠环境、推理和 learner 的工作，代价是 queue、
 顺序、reset、shutdown 和复现协议。`burn-train` 已提供单环境、多环境、
 off-policy 编排入口；系统仍需根据真实 simulator 和硬件测量，而不能

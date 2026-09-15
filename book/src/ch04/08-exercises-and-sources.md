@@ -153,7 +153,7 @@ capture 窗口为什么要求 persistent pool 一类分配约束。
 
 ### Rust 与实验题
 
-1. 【基础】运行已交付的 `inspect_add_mul_exp`，确认三操作 ElementWise block；再
+1. 【基础】运行示例里的 `inspect_add_mul_exp`，确认三操作 ElementWise block；再
    分别在 add 后、mul 后插入同步，比较报告切分。
 
 <details>
@@ -207,7 +207,7 @@ Inspector，断言 `drain()` 结果互不包含对方的操作；stream 隔离�
 
 </details>
 
-5. 【进阶】把 `FusionSummary` 序列化为稳定的教材快照；不要序列化完整 Debug 文本。
+5. 【进阶】把 `FusionSummary` 序列化为稳定的对照文本；不要序列化完整 Debug 文本。
 
 <details>
 <summary>提示</summary>
@@ -216,7 +216,7 @@ Inspector，断言 `drain()` 结果互不包含对方的操作；stream 隔离�
 稳定字段，而不是内部结构的 Debug 文本。沿同样思路做字段级序列化，
 并说明理由——[「实验：观察 Fusion 执行计划」](07-fusion-inspector-lab.md)
 第 2、6 节解释了 test-util 不是长期稳定接口、完整日志文本会随版本
-漂移，不适合当作快照比对对象。
+漂移，不适合当作对照文本。
 
 </details>
 
@@ -404,7 +404,7 @@ value 是可执行产物还是“哪个候选胜出”的记录，失效条件�
 
 TVM、MLIR、Halide 等编译系统论文见附录
 [参考文献](../references.md#第-4-章-ai-编译器与运行时系统)。
-本书所用版本源码中的权威入口：
+本书所用版本里可以打开这些文件：
 
 - `burn/crates/burn-ir/src/`
 - `burn/crates/burn-fusion/src/ops/`
@@ -425,7 +425,7 @@ TVM、MLIR、Halide 等编译系统论文见附录
 - `burn/crates/burn-capture/`
 
 LLVM、MLIR、Halide、TVM/Ansor 和自动微分文献可用于比较 IR、schedule 与
-搜索设计。在线文档必须记录版本，不能覆盖本书固定源码事实。
+搜索设计。在线文档必须记录版本，不能覆盖本书所用版本里能核对到的事实。
 
 ## 本章系统结论
 

@@ -46,7 +46,7 @@ shape 和缺失 tensor；生产系统还应在加载前验证 checksum 和版本
 ## 3. 打开 Burnpack 字节
 
 `from_bytes` 能跑通，只说明 API 层契约成立。部署时更底层的问题是：
-这串字节是不是我期望的格式、什么版本、参数数据从哪里开始？固定版本
+这串字节是不是我期望的格式、什么版本、参数数据从哪里开始？本书所用版本里
 `burn-pack` 的容器布局很简单，可以不用任何序列化库直接读：
 
 ```text
@@ -109,17 +109,17 @@ burnpack magic=NRUB version=1 metadata_bytes=133 data_section_start=256 total_by
 
 1. 把内存 bytes 改成临时 `.bpk` 文件，测试文件错误和 checksum；
 2. 改用 `DTypePolicy::CastToModule`，比较 F32/F16 或其他目标 dtype；
-3. 引入 `burn-store` 的 SafeTensorsStore，并记录路径 remap 和
+3. 引入 `burn-store` 的 `SafetensorsStore`，并记录路径 remap 和
    `ApplyResult`；
 4. 为模型加一个版本 metadata 和固定 reference 输入；
-5. 在 host 上用 `burn-onnx::ModelGen` 生成一个 fixture，并先对齐它与
-   本书示例使用的 Burn revision，再单独组织依赖；
+5. 在 host 上用 `burn-onnx::ModelGen` 生成一个导入样例，确认它与
+   本书所用的 Burn 版本类型兼容后，再单独组织依赖；
 6. 把已加载的 model 放到服务 runner，单独测 queue、pre/post 和
    p95/p99；
 7. 具备匹配网络和 backend 后，再尝试 Remote 或浏览器客户端。
 
-第 5 步不能跳过：`burn-onnx` 固定快照仍指向较早 Burn revision，
-本章没有把两个 revision 的 generated model 类型混进同一依赖图。
+第 5 步不能跳过：版本号相同只解除了类型冲突，并不等于已经跑通
+一份 ONNX 模型。本章没有把 importer 和 Record 实验编进同一依赖图。
 
 ## 6. 接到第 5–6 章
 

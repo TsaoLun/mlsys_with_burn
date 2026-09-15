@@ -451,6 +451,12 @@ class ReleaseAudit:
                             "行内公式跨行；请合并到一行或改用 $$...$$"
                         )
                         inline_open_line = None
+                elif dollar_count > 0 and inline_open_line is None:
+                    pieces = stripped.split("$")
+                    for formula in pieces[1::2]:
+                        formula_errors.extend(
+                            formula_issues(source, line_number, formula)
+                        )
             self.require(
                 not display_open,
                 f"{source.relative_to(ROOT)} 的 $$ display math 未闭合",

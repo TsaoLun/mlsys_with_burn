@@ -20,7 +20,7 @@ Burn / CubeCL 提供 `ExecutionStrategy`、`DistributedContext`、
 【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
-## 概念题
+### 概念题
 
 1. 【基础】为什么“集群有足够 GPU”不等于一个同步作业可以立即启动？请分别从
    显存、成组调度和通信域回答。
@@ -137,7 +137,7 @@ Burn / CubeCL 提供 `ExecutionStrategy`、`DistributedContext`、
 </details>
 
 
-## Rust 与 API 题
+### Rust 与 API 题
 
 1. 【基础】为 `Job` 增加 tenant、priority 和 memory quota，保持资源不满足时不
    允许部分启动。
@@ -234,7 +234,7 @@ schema 版本字段；`lease_version` 的语义见
 
 入口是本章列出的
 `burn/crates/burn-train/src/learner/supervised/strategies/base.rs`
-（以 `pins.toml` 的 revision 为准，而不是在线最新文档）；命名
+（以[如何运行本书示例](../running-examples.md)里的依赖版本为准，而不是在线最新文档）；命名
 边界见[「作业队列、资源向量与成组调度」](03-job-queue-and-resource-scheduling.md)
 的“Burn 入口不是作业调度器”：adapter 拿到的只是调用者给的设备
 列表，没有队列、租约和 rank rendezvous。
@@ -242,7 +242,7 @@ schema 版本字段；`lease_version` 的语义见
 </details>
 
 
-## 性能与系统题
+### 性能题
 
 1. 【进阶】固定 job 数和 step 数，比较 FIFO 与 topology-aware 的 queue wait、
    makespan、cross-rack bytes 和 collective time。
@@ -334,7 +334,7 @@ placement（测试
 </details>
 
 
-## 源码题
+### 源码题
 
 1. 【进阶】阅读 `burn/crates/burn-train/src/learner/supervised/strategies/base.rs`，
    区分 `MultiDevice` 与 `DistributedDataParallel` 的设备范围和优化策略。
@@ -375,7 +375,7 @@ placement（测试
 [「拓扑感知放置与集合通信成本」](04-topology-aware-placement-and-communication.md)
 的“Burn 的 collective 边界”列出这组入口的分工（启动/关闭
 server、注册参数、提交同步、`all_reduce`/`sync_collective`）。
-按 `pins.toml` 固定 revision 读 `ops.rs`，画“注册 → 提交 →
+按本书所用版本读 `ops.rs`，画“注册 → 提交 →
 完成”的时序，标出哪些方法有默认实现、哪些必须由 backend 提供。
 
 </details>
@@ -425,31 +425,9 @@ server、注册参数、提交同步、`all_reduce`/`sync_collective`）。
 </details>
 
 
-## OpenMLSys v1 来源
+## 延伸阅读
 
-本章逐文件参考本书所用版本
-`9c289782ccbb165ac8ad7c960ecffc12942a5560`：
-
-- `openmlsys/v1/zh_chapters/chapter_distributed_training/index.md`：
-  保留分布式训练的动机、并行方法和集合通信/参数服务器地图；
-- `overview.md`：保留算力、内存、经济性和硬件故障动机；
-- `methods.md`：保留数据、模型、混合和流水线并行，以及通信与微批次问题；
-- `cluster.md`：保留 GPU 服务器、rack、ToR、Spine、跨机柜瓶颈和节点内
-  互连层次；
-- `collective.md`：保留 Broadcast、Reduce、AllReduce、AllGather、
-  Scatter 和 `alpha + beta * bytes` 成本模型；
-- `parameter_servers.md`：保留同步/异步更新、straggler、Push/Pull、
-  副本、热点和一致性取舍；
-- `summary.md`：保留规模化训练、AllReduce、参数服务器和故障动机。
-
-旧章节中的硬件规格、厂商性能数字、图片、具体框架实现和外部链接不被
-当作 Burn 的当前能力。新增的 queue、quota、lease、failure detector、
-cluster telemetry 和 CPU simulator 是本书的框架无关系统设计。
-
-## Burn/CubeCL 固定源码入口
-
-主 Burn revision 是 `13f0a12b71ad83c1f9edeac22dea325dcb612397`，
-CubeCL revision 是 `b566e954468010303cf41465fc8b6be6499e2001`：
+本书所用版本：
 
 - `burn/crates/burn-train/src/learner/supervised/strategies/base.rs`
 - `burn/crates/burn-train/src/learner/supervised/strategies/ddp/strategy.rs`

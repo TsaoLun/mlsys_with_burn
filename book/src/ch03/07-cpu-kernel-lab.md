@@ -71,10 +71,7 @@ unsafe block 只覆盖必须证明的 raw 边界。`input_handle` 由同一个 i
 对 $16\times16\times16$、tile 边长为 $8$ 的理想化模型：
 
 ```text
-naive_loads = 8192
-tiled_loads = 1024
-naive_intensity = 1.0
-tiled_intensity = 8.0
+tile model 16x16x16 tile8: naive_loads=8192, tiled_loads=1024, naive_intensity=1.0, tiled_intensity=8.0
 ```
 
 它说明“一次全局加载服务多个乘加”如何降低加载次数，但不模拟 bank
@@ -108,15 +105,16 @@ cargo test -p ch03-cubecl-kernel --locked
 
 scale 测试使用包含负数、零和小数的输入，并与 host reference 做精确比较。
 整数缩放对这些 `f32` 值可精确表示；换成近似函数或累加时应使用容差断言。
-CubeCL CPU 路径依赖 `tracel-llvm` 的平台资产；当前上游 `v22.1.4-5` 提供
-`macos-AArch64` / `linux-x64` 等，但不提供 `macos-x64`。
+CubeCL CPU 路径依赖 `tracel-llvm` 的平台资产；当前上游 `v22.1.4-6` 提供
+`macos-AArch64` / `linux-x64` 等，但不提供 `macos-x64`。Intel Mac 上
+失败是资产 404，换机器重试无效。
 
 ## 6. 观察编译边界
 
 修改 `scale` 会产生不同的 comptime 特化。input 长度本身是 buffer 的运行时
 元数据，但本例还把它交给 `CubeDim::new` 选择 launch 拓扑；CubeDim 属于
 编译键，因此某些长度变化也可能触发不同编译配置。可以设置 CubeCL 日志
-观察编译与缓存，但配置接口随快照演进；实验命令以源码中的
+观察编译与缓存，但配置接口会随版本变化；实验命令以源码中的
 `CubeClRuntimeConfig` 为准。
 
 不要用删掉 guard 的方式“观察越界”。unchecked raw buffer 错误可能不是
@@ -198,7 +196,7 @@ launch，用一次读回充当完成边界：
   1024       12676.8        2857.9    4.44
 ```
 
-这是本书第一处真实设备测量，请按第 5 节测量协议的口径读它：数字
+这是本书第一处真实设备测量，请按第 5 节的测量协议来读：数字
 只描述这台机器这次运行，换设备、驱动、shape 或后端都可能不同；
 方向与复用模型一致——共享内存 tile 把每个输入元素的全局读取次数
 除以 tile 边长，本机观测到约 4–5 倍差距。先看正确性再看时间仍是

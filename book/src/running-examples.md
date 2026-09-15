@@ -30,9 +30,16 @@ cargo test -p ch01-stack-probe --locked
 cargo test -p ch01-stack-probe --locked --offline
 ```
 
-> 已知边界：CubeCL CPU 路径依赖 `tracel-llvm` 的 LLVM 资产，个别平台
-> 或缓存环境下首次构建可能较慢或失败；可换机器重试，或先跑不依赖
-> CubeCL 的第 1、2 章示例。
+> 已知边界：CubeCL CPU 路径依赖 `tracel-llvm` 的 LLVM 资产。
+> `v22.1.4-6` 的 GitHub release **没有 macos-x64 包**（有 linux 与
+> Apple Silicon）。Intel Mac 上 `ch03-cubecl-kernel`、
+> `ch04-fusion-inspector` 等走 `cubecl-cpu` 的示例会在下载
+> `macos-x64.checksums.json` 时 404——这不是缓存问题，换机器重试无效。
+> 可先跑第 1、2 章，以及不拉 `cubecl-cpu` 的 `ch03-gemm-ladder`、
+> `ch03-tile-loads`、`ch04-mini-pass-pipeline`。
+>
+> 正文里的 Rust 代码块标记为 `rust,ignore`：`mdbook test` 不会编译它们。
+> 示例语义由各 crate 的 `cargo test --locked` 覆盖。
 
 ## 示例与章节对照
 
@@ -72,7 +79,7 @@ cargo run  -p ch06-training-loop --locked
 
 ## 阅读上游源码
 
-示例构建不依赖本地源码镜像。若你想打开各章练习中列出的
+示例构建不依赖本地源码检出。若你想打开各章练习中列出的
 `burn/...`、`cubecl/...`、`openmlsys/...` 文件，请按根目录
 `pins.toml` 中的 URL 和 revision 检出对应仓库，例如：
 
@@ -94,8 +101,8 @@ git -C burn checkout 13f0a12b71ad83c1f9edeac22dea325dcb612397
 |---|---|---|
 | `wgpu` | 有图形驱动，巩固第 3 章同一 Kernel | `cargo test -p ch03-cubecl-kernel --features wgpu --locked` |
 | `wgpu`（GEMM 阶梯） | 想实测共享内存 tile 的差距 | `cargo run -p ch03-gemm-ladder --features wgpu --release --locked` |
-| ONNX 对照 | 阅读 burn-onnx 边界（版本已对齐，仍不编进默认 workspace） | 独立环境；不要混进本书默认示例依赖 |
-| CUDA / 集合通信 | 本机驱动与固定源码均允许时 | 先读第 3/6/9 章源码入口，再自建实验 |
+| ONNX 对照 | 阅读 burn-onnx 边界（版本号相同，默认示例仍不依赖 importer） | 独立环境；不要混进本书默认示例依赖 |
+| CUDA / 集合通信 | 本机驱动与本书所用版本源码均允许时 | 先读第 3/6/9 章源码入口，再自建实验 |
 
 `wgpu` 最小命令：
 
@@ -121,5 +128,5 @@ mdbook serve book   # 本地预览
 
 按章学习通常不必运行全仓库检查：每个示例自己的
 `cargo test -p <名称> --locked` 就够了。如果你修改了示例代码、想确认
-全书仍然自洽，仓库根目录提供了 `make check`：它会构建本书、检查格式、
+全书示例与正文仍然一致，仓库根目录提供了 `make check`：它会构建本书、检查格式、
 执行各章默认 CPU 示例，并核对依赖版本与正文一致。

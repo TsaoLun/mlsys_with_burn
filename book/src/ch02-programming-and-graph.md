@@ -27,7 +27,7 @@ IR、GraphIr 捕获和设备 graph capture 为什么不能混为一谈？
 3. 描述张量运算如何经 bridge 和 dispatch 到达具体后端；
 4. 用 `Module` 和前向方法组织一个最小模型；
 5. 用算子、张量边、依赖和控制流解释计算图；
-6. 解释 eager 前向与一阶反模式 autodiff tape；
+6. 解释 eager 前向与一阶反向模式 autodiff tape；
 7. 使用 `require_grad`、`backward` 和 `grad` 核对链式法则；
 8. 区分 autodiff tape、Burn IR / Fusion 计划、GraphIr 捕获与 device graph capture。
 

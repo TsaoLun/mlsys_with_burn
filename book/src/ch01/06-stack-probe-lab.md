@@ -51,7 +51,7 @@ observed value after sync: 7
 ```
 
 设备的 Debug 细节可能随内部实现变化，不应把整个字符串当作稳定 API。
-请确认其中包含 `Flex`。默认整数 dtype 也以你本机输出为准。
+请确认其中包含 `Flex`。本示例的测试断言默认整数 dtype 为 `I32`。
 
 ## 3. 运行测试
 

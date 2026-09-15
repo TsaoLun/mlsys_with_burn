@@ -42,7 +42,7 @@
 | 层次 | 主要内容 | 主要目的 |
 |---|---|---|
 | Rust/Tensor API | Module、控制流、Tensor 操作 | 用户表达 |
-| autodiff tape | 前向依赖与反向步骤 | 一阶反模式求导 |
+| autodiff tape | 前向依赖与反向步骤 | 一阶反向模式求导 |
 | Burn OperationIr / Fusion | Tensor 操作、shape、dtype、资源状态 | 子图搜索与执行计划 |
 | GraphIr / Capture | 有显式输入输出边界的操作序列 | 图捕获与重放，不执行数值 |
 | CubeCL Pliron IR | dialect 上的 op、region、SSA 值 | Kernel 优化与 dialect conversion |

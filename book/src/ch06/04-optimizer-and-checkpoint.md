@@ -48,7 +48,7 @@ ParamId + path
 
 `ModuleOptimizer::step` 的学习率参数是 `impl Into<ModuleLearningRate>`：
 标量 `f64` 可以直接传入，不必再写 `.into()`。`ModuleLrScheduler` 负责
-推进一个或多个 scheduler。固定源码允许默认组和特定 `ParamGroup` 使用
+推进一个或多个 scheduler。实现允许默认组和特定 `ParamGroup` 使用
 不同 schedule，并把 scheduler state 保存为 `LrSchedulerRecord`。
 
 训练系统至少要记录：

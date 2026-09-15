@@ -123,7 +123,7 @@ fragment）都带来新的同步或填充规则，双缓冲一节已列出四条
 </details>
 
 
-### 已交付实验题
+### 实验题
 
 1. 【基础】修改 `scale_kernel` 为 `output[i] = input[i] * scale + bias`，先扩展
    host reference，再扩展 Kernel 和测试。
@@ -180,7 +180,7 @@ Kernel 在两类 Runtime 上与 host reference 一致，不含带宽或占用率
 </details>
 
 
-### 扩展 Kernel 题（未随章交付）
+### 扩展 Kernel 题
 
 1. 【进阶】将 `scale` 从 comptime 整数改为运行时标量。记录生成 launch API 的差异。
 
@@ -284,8 +284,9 @@ Safety 文档随定义在
 <details>
 <summary>提示</summary>
 
-策略枚举在 `cubek/crates/cubek-matmul/src/strategy/strategy.rs`，
-统一入口的转发在同 crate 的 `launch.rs`；比较时沿
+顶层三支在 `cubek/crates/cubek-matmul/src/strategy.rs`；Naive 在
+`multi_level/strategy.rs`，`CpuGemm` 与 `Cmma` 在
+`tiled/strategy.rs`。统一入口的转发在同 crate 的 `launch.rs`；比较时沿
 [「GPU 并行与存储模型」](02-gpu-machine-model.md)「矩阵单元不是
 通用乘法器」给的约束轴（Runtime、dtype、tile shape、设备 feature）
 逐项过——正文提醒过，不能由 crate 名推断一定用上矩阵单元。
@@ -360,7 +361,7 @@ CubeDim 参与编译配置，某些长度变化可能再次触发编译；计时
 默认策略在哪一层注入，看
 [「CubeK 与 Burn 算子路径」](04-cubek-and-burn.md)走查的第 2 步
 （`burn/crates/burn-cubecl/src/ops/tensor.rs` 的 `float_matmul`）；
-报告体例按[「算子编译、调优与生态」](06-compilation-and-tuning.md)
+报告写法按[「算子编译、调优与生态」](06-compilation-and-tuning.md)
 「测试、Benchmark 与性能声明」的五条来，尤其写明 autotune 搜索是否
 计入首次计时、结论覆盖哪些 shape。
 
@@ -371,7 +372,7 @@ CubeDim 参与编译配置，某些长度变化可能再次触发编译；计时
 
 Roofline、CUDA 与 tile 编译器的论文见附录
 [参考文献](../references.md#第-3-章-ai-加速器与编程)。
-本书所用版本源码中的权威入口：
+本书所用版本里可以打开这些文件：
 
 - `cubecl/README.md`
 - `cubecl/examples/gelu/`
@@ -382,7 +383,10 @@ Roofline、CUDA 与 tile 编译器的论文见附录
 - `cubek/GUIDE.md`
 - `cubek/crates/cubek-matmul/src/`
 - `cubek/crates/cubek-matmul/src/launch.rs`（统一入口到 Strategy 的转发）
-- `cubek/crates/cubek-matmul/src/strategy/strategy.rs`（策略空间枚举）
+- `cubek/crates/cubek-matmul/src/strategy.rs`（顶层 Tiled / MultiLevel / Auto）
+- `cubek/crates/cubek-matmul/src/multi_level/strategy.rs`（多级算法族）
+- `cubek/crates/cubek-matmul/src/tiled/strategy.rs`（`Cmma`、`CpuGemm`）
+- `cubek/crates/cubek-matmul/src/tune_key.rs`（autotune 键）
 - `cubek/crates/cubek-reduce/src/`
 - `burn/crates/burn-tensor/src/tensor/api/numeric.rs`（`Tensor::matmul` 的校验与 vec-mat 重解释）
 - `burn/crates/burn-cubecl/src/ops/tensor.rs`（`float_matmul` 的策略选择）

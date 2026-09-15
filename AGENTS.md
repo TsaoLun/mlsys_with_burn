@@ -42,6 +42,12 @@ reader-facing story.
   which crate implements it here. Keep pins, evidence labels, and CI language
   out of chapter landings and learning objectives (D025).
 - Do not claim that Burn supports a feature without checking the pinned source.
+  Authority is `pins.toml` (`rev` / matching crates.io `version`), then the
+  Cargo git checkout or crates.io tree for that pin. A root-directory mirror
+  (`burn/`, `cubecl/`, `cubek/`, `burn-onnx/`) is valid only when `HEAD`
+  equals the pin and the pin object exists in that git store. CubeK is often
+  resolved from crates.io (`0.3.0-pre.3`), not a git checkout. Never grep a
+  stale pre.1 mirror and write the result into the book.
 - Record OpenMLSys source files and material changes in each chapter.
 - Do not mechanically translate Python syntax. Redesign examples around Rust
   ownership, types, traits, errors, and backend abstraction.

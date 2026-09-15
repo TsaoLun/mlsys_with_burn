@@ -1,6 +1,6 @@
 # 实时状态
 
-更新日期：2026-09-14
+更新日期：2026-09-15
 
 ## 当前里程碑
 
@@ -17,6 +17,9 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 - [x] D027：对齐 Burn 0.22.0-pre.3 与 CubeCL Pliron；重写第 1–4、7 章
   编译器/分派/ONNX 口径。见
   `planning/session-logs/2026-09-14-pliron-pre3.md`。
+- [x] pre.3 正文路径与门禁：CubeK/checkpoint/1F1B/第 9 章成本模型、
+  失效路径、行内公式检查、练习体例。见
+  `planning/session-logs/2026-09-15-pre3-content-gates.md`。
 - [x] D025：正文重编——九章章首、阅读路径、系统结论、产业/crate 地图。
 - [x] D026：并行策略整数实验、服务队列 TTFT/分块 prefill、mean 归约。
 - [ ] 等待发布者决定是否创建候选 tag/发布归档。
@@ -26,15 +29,37 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 
 ## 下一步
 
-1. 由发布者审阅 D027 后跑完整 `make check`（含 cargo offline gate）。
-   Intel macOS 仍无 `tracel-llvm` macos-x64 资产。
-2. 推送后抽查 Pages：第 4 章 Pliron 节、分派图 Capture、第 7 章 ONNX。
+1. 发布者审阅本批正文后推送；Linux 或 darwin arm64 上跑完整
+   `make check`（含 cargo offline gate）。Intel macOS 仍无
+   `tracel-llvm` macos-x64 资产。
+2. 推送后抽查 Pages：第 3 章 CubeK 走查、算子解剖 checkpoint、第 6 章
+   1F1B、第 9 章通信表。
 3. 真机 CUDA/NCCL 仅在 pins 与环境允许时追加可选命令；不得改默认 CPU
    gate（D022）。
 4. 后续内容增量（不阻塞 tag）：KV 抢占/换出、真实数据集训练、GEMM
    阶梯更高级；不把 ONNX fixture 偷运进默认 workspace。
 
 ## 本次交接
+
+- 已完成（2026-09-15）：按 pre.3 pin 修正正文路径与成本模型；四个只读
+  镜像已 fetch 到 pin（不提交）。读者正文按系统课口吻改写。
+  - CubeK 顶层三支 Strategy；checkpoint 默认不重算；1F1B 两套数法分开；
+    第 9 章三套通信模型点名。
+  - 失效路径、ONNX `import/`、实验输出标签、capstone 建议。
+  - 行内公式检查；练习分类 `###`；去掉 ch08/09「本节小结」标题。
+  - 读者可见过程词再扫：口径/固定源码/pre.3/根 workspace/权威入口等
+    改成系统课口吻；程序输出与附录版本账本保留。
+- 验证：
+  - `mdbook build book`
+  - `python3 tools/check_release.py --require-built-book --json`
+    （`ok=true`、`errors=[]`）
+  - `python3 tools/check_upstreams.py --check-local`
+  - `cargo test --locked -p ch06-training-loop --all-targets`（4 项）
+  - `cargo fmt --all --check`、`git diff --check`
+- 偏差：未跑完整 `make check`。
+- 下一步：发布者审阅后推送；在有 tracel-llvm 资产的平台跑完整 gate。
+
+## 前次交接（2026-09-14）
 
 - 已完成（2026-09-14）：D027——全书对齐 Burn 0.22.0-pre.3 / CubeCL Pliron。
   - `pins.toml` snapshot `burn-0.22.0-pre.3`；Burn/CubeCL/CubeK/burn-onnx
@@ -92,6 +117,9 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 - [x] D027：第二写作周期切到 Burn `0.22.0-pre.3` / CubeCL Pliron；
   重写编译器主线、分派图、ONNX 隔离理由与 pins。见
   `planning/session-logs/2026-09-14-pliron-pre3.md`。
+- [x] pre.3 正文路径与门禁（2026-09-15）：CubeK / checkpoint / 1F1B /
+  第 9 章成本模型、失效路径、行内公式检查与练习体例。见
+  `planning/session-logs/2026-09-15-pre3-content-gates.md`。
 - [x] 修复线上 `$...$` 公式不渲染：自定义 theme 启用 MathJax 美元分隔符
   （D019）；全书 42 个含公式页面 Puppeteer 核验通过。
 - [x] 学习者文风改写（D020）与自洽材料后移附录（D021）：章首五标签/
@@ -776,6 +804,11 @@ M5：首个稳定版审计准备（可与内容修订并行；M5 tag 不阻塞�
 - `burn-rl` 当前固定快照提供环境、policy、replay 和 runner 组合抽象，
   不提供通用 DQN/PPO/SAC、prioritized replay 或 MARL/Actor–Learner
   集群协议；第 8 章 D011 和来源映射已标出这些边界。
+- 根目录只读镜像可能仍停在 D027 之前的 pre.1 HEAD；pin 对象若不在
+  该 git 库中，`git show <pin>:<path>` 会失败。核验必须以
+  `pins.toml` 的 SHA / 对应 crates.io 版本为准（Cargo checkout 或
+  registry 源码）。过期 `cubek/` 镜像曾把 `src/strategy/` 目录结构
+  写进第 3 章；镜像 HEAD 不等于 pin 时不得作为核验依据。
 - `tracel-llvm v22.1.4-6` 的 GitHub release **没有 macos-x64 资产**
   （只有 linux-AArch64/x64、macos-AArch64、windows-x64；2026-09-14
   经 API 核实）。Intel macOS 上凡依赖 `cubecl-cpu` 的构建都会在

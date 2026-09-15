@@ -21,7 +21,7 @@ Burn 提供单设备、本机多设备和 DDP 的不同入口。`MultiDevice`
 【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
-## 概念题
+### 概念题
 
 1. 【基础】为什么保存 model parameters 不能等价于保存完整 optimizer state？
 
@@ -100,7 +100,10 @@ AllReduce 语义段。
 <details>
 <summary>提示</summary>
 
-见第 6 章 1F1B 配图与空泡占比公式。
+空泡占比写成 $\frac{p-1}{m+p-1}$。对照
+[「本机多设备与数据并行」](05-local-data-parallel.md) 的配图：3 个
+阶段、16 个 micro-batch 时应为 $2/18$，不是把分母少算 1。1F1B 相对
+GPipe 主要省的是峰值激活，不是把空泡公式改掉。
 
 </details>
 
@@ -117,7 +120,7 @@ AllReduce 语义段。
 </details>
 
 
-## Rust 与 API 题
+### Rust 与 API 题
 
 1. 【基础】把实验中的 `Linear` 替换为包含两个 `Linear` 的自定义 `Module`，检查
    `GradientsParams` 是否能为两个参数建立正确映射。
@@ -205,7 +208,7 @@ metric 在事件处理线程上被惰性物化，输出因此要能跨线程存�
 </details>
 
 
-## 源码题
+### 源码题
 
 1. 【进阶】阅读 `burn-train/src/learner/train_val.rs`，追踪 `TrainStep::step`、
    `TrainOutput::new` 和默认 `optimize` 的所有权流。
@@ -355,7 +358,7 @@ ring 的每设备流量近似 $2S$ 但延迟项按 $2(p-1)$ 步增长；小消�
 
 </details>
 
-7. 【进阶】取同一组 \((p,m)\)，用交叉相乘证明 1F1B 的空闲比例小于
+7. 【进阶】取同一组 \((p,m)\)，用交叉相乘证明动手表里「分槽 1F1B」的空闲比例小于
    GPipe flush，并指出该模型把每个 F/B 槽当成等长的简化。
 
 <details>
@@ -369,7 +372,7 @@ GPipe 分母是 \(m+p-1\)，1F1B 是 \(2m+p-1\)。真实流水线 F 与 B 耗时
 </details>
 
 
-## 延伸阅读与固定源码入口
+## 延伸阅读
 
 本书所用的 Burn 版本：
 
@@ -389,14 +392,7 @@ GPipe 分母是 \(m+p-1\)，1F1B 是 \(2m+p-1\)。真实流水线 F 与 B 耗时
 - `burn/examples/custom-training-loop/src/lib.rs`
 - `burn/examples/text-classification/examples/ag-news-train.rs`
 
-OpenMLSys v1：
-
-- `openmlsys/v1/zh_chapters/chapter_distributed_training/overview.md`
-- `openmlsys/v1/zh_chapters/chapter_distributed_training/methods.md`
-- `openmlsys/v1/zh_chapters/chapter_distributed_training/collective.md`
-- `openmlsys/v1/zh_chapters/chapter_distributed_training/parameter_servers.md`
-- `openmlsys/v1/zh_chapters/chapter_distributed_training/cluster.md`
-
+对照 OpenMLSys 原作的文件级改编见[来源与改编总录](../appendix-sources.md#第-6-章)。
 Horovod、GPipe、ZeRO、参数服务器等系统的论文集中在附录
 [参考文献](../references.md#第-6-章-训练系统)。对照阅读时记录版本、
 通信后端、进程模型、梯度归一化和 checkpoint 协议，比较才有意义。

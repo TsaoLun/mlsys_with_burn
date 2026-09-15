@@ -81,18 +81,19 @@ $S\_0,S\_1,\ldots,S\_{p-1}$，把一个大 batch 拆成 $m$ 个 micro-batch 后�
 ![1F1B 调度的 micro-batch 时间线：S0–S2 三个阶段的 warm-up 与 cool-down 空泡](../img/ch06-pipeline-1f1b.svg)
 
 具体 schedule 可能不同，但都会面对 warm-up/cool-down 的 pipeline bubble、
-micro-batch 数量、激活保存和 backward 依赖。这个代价可以定量：设每个
-micro-batch 在每个阶段的前向+反向耗时为 $t$，则理想 1F1B 的总时长约为
-$(m + p - 1)\,t$，而其中有用的 micro-batch 工作只有 $m\,t$，空泡占比
+micro-batch 数量、激活保存和 backward 依赖。把每个 micro-batch 在每个
+阶段的前向+反向合在一起记作 $t$，则 GPipe 式整段 flush 与文献里常见的
+1F1B 都经历约 $(m + p - 1)\,t$ 的跨度，其中有用工作 $m\,t$，空泡占比
 
 $$
 \frac{p-1}{m+p-1}.
 $$
 
-3 个阶段、3 个 micro-batch（上图）空泡占 $2/5 = 40\%$；把 $m$ 增到
-16 则降到 $2/17 \approx 12\%$。增加 $m$ 可以摊薄 bubble，
-却可能增加激活缓存（每个在途 micro-batch 的激活都要跨阶段保存）；
-重计算可以降低内存，却增加算力。阶段之间还要定义
+两者的 warm-up/drain 比例相同；1F1B 真正省下的是**峰值激活**：GPipe
+大约要为 $m$ 份在途 micro-batch 留激活，1F1B 大约只留 $p$ 份。3 个
+阶段、3 个 micro-batch（上图）空泡占 $2/5 = 40\%$；把 $m$ 增到 16
+则降到 $2/18 \approx 11\%$。增加 $m$ 可以摊薄 bubble，却可能增加
+激活缓存；重计算可以降低内存，却增加算力。阶段之间还要定义
 通信 tensor 的 layout、dtype、stream 和失败恢复点。
 
 Burn 的 `ExecutionStrategy` 没有在源码中提供上述 stage scheduler、
@@ -124,5 +125,5 @@ micro-batch 编排或 activation recomputation 协议。这个时间线是框架
 
 这些测试比只比较 `num_devices = 1` 和 `num_devices = 2` 的墙钟时间更有
 解释力。CPU Flex 实验选择单设备路径，因为 Flex 没有可运行的
-collective；本节的 `MultiDevice` API 来自固定源码对照，不是本实验的运行
+collective；本节的 `MultiDevice` API 来自源码对照，不是本实验的运行
 结果。

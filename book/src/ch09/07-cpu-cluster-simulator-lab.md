@@ -46,8 +46,9 @@ admission：队首作业无法完整放置时，不会先启动它的部分 rank
 
 ## 3. 通信成本：三个域，不是两个
 
-模拟器把一个同步 step 中的一次 AllReduce 的 Reduce+Bcast 近似成
-`2(p-1)` 轮，并把放置结果中的每个 GPU pair 分进三个通信域：
+模拟器把一个同步 step 中的一次 AllReduce 收成 $2(p-1)$ 个线性 hop
+（教学用的逐步传递，不是树形 Reduce+Bcast），字节量按
+$S(p-1)$ 计，并把放置结果中的每个 GPU pair 分进三个通信域：
 
 | 域 | 判定 | 成本处理 |
 |---|---|---|
@@ -74,11 +75,12 @@ checkpoint replay 重做的 step 也分别累计到 `collective_time_us` 与
 
 1. 释放本次 attempt 的 GPU；
 2. 把最近 checkpoint 定位到 step 2；
-3. 记录 `replayed_steps = 1`；
+3. 记录 `replayed_steps = 1`（只数 checkpoint 到失败点：step 3 − 2）；
 4. 把失败前已执行的 3 个 step 的 collective 成本计入该 job；
 5. 以 `attempt + 1` 重新进入队列；
-6. 重新成组准入，把 step 2–4 的 compute、collective 和 checkpoint 再执行
-   一次。
+6. 重新成组准入，把半开区间 `[2, 6)` 即 step 2、3、4、5 的 compute、
+   collective 和 checkpoint 再执行一次。
+   `replayed_steps` 不是这次重跑了几步。
 
 一个失败只注入一次；`max_retries` 控制允许的恢复次数。真实系统还要
 加入 checkpoint 写入失败、旧 attempt 消息、存储版本和租约过期。

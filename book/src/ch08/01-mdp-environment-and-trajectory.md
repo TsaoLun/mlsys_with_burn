@@ -126,8 +126,6 @@ $$
 收益。后面的异步环境和 batching 只是在这些项之间重新安排工作，不改变
 它们的存在。
 
-## 本节小结
-
 MDP 给出决策问题的数学边界，`Environment` 给出一条可组合的 Rust
 接口；轨迹则是将多个 step 按顺序保存的系统数据结构。写 rollout 时，
 先确定 state/observation、done/truncated 和 reset 协议，再讨论模型或

@@ -131,8 +131,6 @@ checkpoint 继续训练而重置了 epsilon step 或 replay 分布，新的训�
 
 否则“reward 上升”可能只是 episode 更长、探索减少或环境版本不同。
 
-## 本节小结
-
 RL 算法实现位于 `PolicyLearner` 与应用 model 之间，训练编排位于
 `RLTraining`/`OffPolicyStrategy`。Burn 为两者提供可组合的接口，但
 不替用户选择 bootstrap、探索、target state、loss、optimizer 和恢复

@@ -21,7 +21,7 @@
 | 融合器 | fuser；Fusion 接受/拒绝操作块的组件 | 不把 Inspector 的 fuser 名当成设备 Kernel 名 |
 | Fusion 流 | Fusion stream / `StreamId` | 不与 CUDA stream 或集群作业队列混称 |
 | ExecutionStrategy 同名 | Fusion 块内策略 vs `burn-train` 训练策略 | 不把两处同名类型当成同一个 API |
-| 自动微分表示 | autodiff tape（一阶反模式） | 不称“Burn 计算图” |
+| 自动微分表示 | autodiff tape（一阶反向模式） | 不称“Burn 计算图”；不写「反模式」 |
 | 融合表示 | Burn IR / OperationIr；Fusion 计划 | 不与 tape 混称 |
 | CubeCL 表示 | Scope / KernelDefinition / Pliron 方言 IR | 不称“计算图” |
 | 可扩展 IR 框架 | Pliron（CubeCL Kernel 编译器的基础设施） | 不把 Fusion / autodiff 说成已经迁到 Pliron |

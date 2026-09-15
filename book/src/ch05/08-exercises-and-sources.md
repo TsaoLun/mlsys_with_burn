@@ -19,7 +19,7 @@ worker 实现能并行读取、批处理、传播错误并复用 worker pool，
 【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
-## 概念题
+### 概念题
 
 1. 【基础】为什么 `Dataset::get_many` 的“请求顺序”与多 worker loader 的“到达
    顺序”是两个不同的性质？
@@ -106,7 +106,7 @@ $1000 = 31 \times 32 + 8$ 说明 `FixBatchStrategy` 总会发出尾批。
 </details>
 
 
-## Rust 与实验题
+### Rust 与实验题
 
 1. 【基础】把 `PrepareSample` 改成带 `Result` 的自定义 Dataset，验证 worker
    能把真实读取错误传播给主 iterator。
@@ -228,7 +228,7 @@ I/O 还是不可重试的格式错误），再回答重试后哪些样本会重�
 </details>
 
 
-## 源码题
+### 源码题
 
 1. 【进阶】阅读 `burn-dataset/src/dataset/base.rs`，找出越界和真实读取错误的
    不同契约。
@@ -396,7 +396,7 @@ attempt、RNG 派生与错误分类；`examples/ch05-data-pipeline` 的
 ## 延伸阅读
 
 数据管道系统的论文见附录[参考文献](../references.md#第-5-章-数据处理系统)。
-本书所用版本源码中的权威入口：
+本书所用版本里可以打开这些文件：
 
 - `burn/crates/burn-dataset/src/dataset/base.rs`
 - `burn/crates/burn-dataset/src/dataset/in_memory.rs`

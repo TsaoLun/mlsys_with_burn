@@ -128,10 +128,9 @@ Burn 仓库还包含：
 - `burn-rl`：强化学习相关组件。
 
 burn-onnx 是独立仓库。它先把 ONNX protobuf 转换为自己的 IR，再生成
-Burn Rust 源码与权重。本版 `burn-onnx` 与主线 Burn 都发布为
-`0.22.0-pre.3`，crates.io 版本字符串已对齐；教材示例仍不把 ONNX
-importer 编进根 workspace，端到端 fixture 留作可选对照。第 7 章说明
-生成路径，默认实验继续用主线 `ModuleRecord`。
+Burn Rust 源码与权重。本书所用版本里，它与主线 Burn 的版本号相同，但
+默认示例仍不依赖 ONNX importer：读转换路径和跑通一份导入样例是两件事。
+第 7 章说明生成路径，默认实验继续用主线 `ModuleRecord`。
 
 ## 阅读时记住的几件事
 

@@ -147,7 +147,7 @@ GPU 的吞吐”。
 
 ## 产业对照（概念对齐，不是性能对等）
 
-| 本书 / Burn·CubeCL | 常见产业说法 | 对齐点 | 不要外推 |
+| 本书 / Burn·CubeCL | 常见产业说法 | 对齐点 | 别读成 |
 |---|---|---|---|
 | `Tensor` + `Device` | PyTorch Tensor + device | 统一用户 API、运行时选设备 | API 相似 ≠ 算子集/性能相同 |
 | autodiff tape | autograd tape | 按实际路径记依赖 | 不是静态整图 |

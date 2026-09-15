@@ -70,12 +70,16 @@ CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单�
 5. **CubeK 入口**（`cubek-matmul/src/launch.rs` 的 `launch_ref`）：
    几乎只是一个转发——`strategy.launch_ref(...)`。它存在的意义是把
    “统一的调用签名”与“巨大的策略空间”解耦。
-6. **策略与 Routine 层**（`cubek-matmul/src/strategy/` 与
-   `routines/`）：回答“tile 多大、要不要双缓冲、用不用矩阵指令？”
-   ——`Strategy` 是一个很大的枚举：Naive、CpuGemm、Simple/CMMA/MMA 族、
-   double buffering、ordered、specialized、TMA、VecMat 及 unit 变体，
-   每个变体携带自己的 Blueprint 参数。Routine 据此计算 cube 拓扑并
-   生成 Blueprint，最后交给 CubeCL 的 Pliron IR 与具体 Runtime。
+6. **策略与 Routine 层**（`cubek-matmul/src/strategy.rs`）：回答
+   “走哪套 kernel 架构、tile 多大、要不要双缓冲、用不用矩阵指令？”
+   读者打开的 `Strategy` 只有三支：`Tiled`、`MultiLevel` 和默认的
+   `Auto`。算法族不在这一层摊开——`multi_level::Strategy` 里才是
+   Naive、Simple/CMMA/MMA、双缓冲、ordered、specialized、TMA、
+   VecMat 和 unit 等变体；`tiled::Strategy` 里是面向 tile DSL 的
+   `Cmma` 与 `CpuGemm`。`Auto` 在开启 multi-level 时先试
+   `SimpleCyclicCmma`，设备不支持再落到 `SimpleUnit`。Routine 据此
+   计算 cube 拓扑并生成 Blueprint，交给 CubeCL 的 Pliron IR 与具体
+   Runtime。
 
 这六层里，最早的两处性能优化（vec-mat 重解释与 broadcast-rhs 折叠）
 都发生在**任何 kernel 还不存在的时候**。“最快的数据搬运是不搬运”：
@@ -85,8 +89,9 @@ CubeK 同时包含朴素算法、CPU 友好的 blocking GEMM 和面向矩阵单�
 
 ### 第七层：Routine 内部的四层组件
 
-Routine 生成的完整 matmul 由 `cubek-matmul/src/components/` 的四层
-组件装配而成。每层的职责，源码模块注释写得比任何转述都准：
+Routine 生成的完整 matmul 由
+`cubek-matmul/src/multi_level/components/` 的四层组件装配而成。每层
+的职责，源码模块注释写得比任何转述都准：
 
 | 层 | 源码注释（意译） | 对应的机器模型概念 |
 |---|---|---|
@@ -104,11 +109,12 @@ GEMM 阶梯实验手写的 16×16 kernel，本质是把 `global` 装载与
 `Register` tile 压平在一个函数里的极简形态——CubeK 把它们拆成可
 独立替换的组件，才能让同一套装载协议组合五种 tile 后端。
 
-`routines/` 目录（`naive`、`gemm`、`cmma`、`gemv_unit_perpendicular`、
-`cpu_gemm`、`batch` 与 `selector`）负责按问题形状与设备能力选出
-一种装配。到这里，第 2 节的六层调用链有了完整的收尾：API 校验 →
-策略选择 →（可选 autotune，见第 6 节）→ Routine 装配四层组件 →
-CubeCL 的 Pliron IR → Runtime 编译执行。
+`multi_level/routines/`（`naive`、`gemm`、`gemv_unit_perpendicular`、
+`batch` 与 `selector`）按问题形状与设备能力选出一种装配；`cmma` 与
+`cpu_gemm` 在 `tiled/` 下，不是 crate 根上的兄弟模块。到这里，上面
+六层调用链有了完整的收尾：API 校验 → 策略选择 →（可选 autotune，见
+[算子编译、调优与生态](06-compilation-and-tuning.md)）→ Routine
+装配四层组件 → CubeCL 的 Pliron IR → Runtime 编译执行。
 
 ## 3. 覆盖范围与边界
 
@@ -120,11 +126,11 @@ reduce、attention forward、pool、interpolate、FFT、random 和 quantization
 - 部分 direct convolution 和 transpose 路径由 burn-cubecl 自己实现；
 - deformable convolution 会组合自定义 Kernel 与矩阵乘；
 - attention 带 bias、softcap 或自定义 scale 时会走 fallback；
-- CubeK 仓库中的 resample 没有被该 Burn 快照引用。
+- CubeK 仓库中的 resample 没有被本书所用的 Burn 版本引用。
 
 CubeK attention 目录中存在 backward 实现代码，但文档与测试仍带有未完成
 标记，Burn 侧也没有调用路径。因此本书只把 FlashAttention forward 作为
-已核验集成，不宣称 backward 已接入 Burn。
+已经接到 Burn 的调用路径，不宣称 backward 已接入 Burn。
 
 ## 4. 为什么必须保留 fallback
 

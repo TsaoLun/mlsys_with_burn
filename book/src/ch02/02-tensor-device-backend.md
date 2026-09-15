@@ -106,7 +106,7 @@ shape、dtype 与偏移元数据。
 Cargo feature 决定哪些分派变体被编译进程序，Device 工厂方法选择其中一个
 实例。教材默认使用 `Device::flex()`（纯 Rust eager CPU，不走
 Fusion/CubeCL），因此无需 GPU 驱动。第 4 章观察 Fusion 时改用
-`Device::cpu()`，二者不要混为同一条证据路径。
+`Device::cpu()`，二者不要当成同一种执行路径。
 
 ## Backend trait 位于实现层
 

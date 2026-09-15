@@ -17,7 +17,8 @@ AllGather、ReduceScatter 或点对点 activation 传输。每种语义对字节
 
 ## `alpha + beta * bytes` 只是第一层模型
 
-OpenMLSys v1 用简化的点对点模型：
+OpenMLSys v1 原文把点对点消息写成 $a + b \times l$。本书用同一模型，
+记号改成
 
 $$
 T\_{\text{message}} = \alpha + \beta \cdot l.
@@ -37,8 +38,9 @@ T(\text{algorithm},\text{topology},p,\text{bytes},\text{dtype}).
 $$
 
 同一个 `AllReduce` 在同机柜和跨机柜放置上可能有不同的 `beta` 或额外
-排队项。一个教学模拟器可以把 Reduce+Bcast 近似为 `2(p-1)` 个逻辑轮，
-再对跨机柜 pair 加 penalty；它不能替代 NCCL 的真实 ring/tree 算法测量。
+排队项。本章模拟器把一次 AllReduce 收成 $2(p-1)$ 个线性 hop，这是教学
+用的逐步传递代理，不是 OpenMLSys 里树形 Reduce+Bcast 的 $\log p$
+轮数，也不能替代 NCCL 的真实 ring/tree 测量。
 
 ## 把第 6 章一次 AllReduce 放进机柜模型
 
@@ -46,18 +48,26 @@ $$
 改放置，不改算法：
 
 取教学数：$p=4$，$S=256\ \mathrm{MB}$，机柜内有效
-$\beta_{\mathrm{in}}=0.25\ \mu\mathrm{s}/\mathrm{KB}$，跨机柜有效
-$\beta_{\mathrm{x}}=1\ \mu\mathrm{s}/\mathrm{KB}$，并忽略 $\alpha$
+$\beta\_{\mathrm{in}}=0.25\ \mu\mathrm{s}/\mathrm{KB}$，跨机柜有效
+$\beta\_{\mathrm{x}}=1\ \mu\mathrm{s}/\mathrm{KB}$，并忽略 $\alpha$
 轮次差以便突出字节项。则每设备字节项近似 $2S\cdot\beta$：
 
 | 放置 | 主导链路 | 近似字节项（每设备） |
 |---|---|---|
 | 四卡同一机柜 | 机柜内 | $2\times 256\times 10^3 \times 0.25\ \mu\mathrm{s} \approx 128\ \mathrm{ms}$ |
-| 两两跨两个机柜 | 含上行 | 按更慢的 $\beta_{\mathrm{x}}$ 估 $\approx 512\ \mathrm{ms}$ |
+| 两两跨两个机柜 | 含上行 | 按更慢的 $\beta\_{\mathrm{x}}$ 估 $\approx 512\ \mathrm{ms}$ |
 
-数字只说明：**同一份 $S$ 的集合通信，拓扑可以把通信时间差出一个数量级
-直觉**；真实 NCCL 还有树/环切换、聚合与争用。控制面决定你能不能拿到
-“同机柜四卡”；数据面（第 6 章 `DistributedOps`）决定拿到之后如何归约。
+数字只说明：**同一份 $S$ 的集合通信，跨机柜相对同机柜大约慢 4 倍**
+（$512/128$）；这是两个教学 $\beta$ 的比值，不是一个数量级。真实
+NCCL 还有树/环切换、聚合与争用。
+
+这张表用的是第 6 章环算法的带宽近似 $2S\cdot\beta$（大 $p$ 时每设备
+流量趋近 $2S$，本表再忽略 $\alpha$ 与 $(p-1)/p$）。下一节模拟器按
+$S(p-1)$ 计字节、$2(p-1)$ 计轮数：同样 $p=4$、$S=256$ MB、
+$\beta=0.25\ \mu\mathrm{s}/\mathrm{KB}$ 时，表上是 128 ms，模拟器约
+192 ms。环算法的精确体积是 $2(p-1)S/p$（此处 96 ms）。三套数不要混着
+对。控制面决定你能不能拿到“同机柜四卡”；数据面（第 6 章
+`DistributedOps`）决定拿到之后如何归约。
 二者见图：
 
 ![控制面负责队列与放置，数据面负责 rank 间 collective；设备 Runtime 另层](../img/ch06-ch09-control-data-planes.svg)
@@ -117,8 +127,6 @@ $$
 如果读者有两张可用 CUDA GPU，可以把本节扩展为 backend test：
 记录设备、driver、CUDA/NCCL、rank 启动方式、消息大小、同步边界和错误
 处理，并把结果与 CPU 模拟器分开报告。
-
-## 本节小结
 
 拓扑感知 collective 优化的因果链是：
 

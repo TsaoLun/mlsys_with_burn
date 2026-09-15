@@ -14,7 +14,7 @@
 | 你想动的行为 | 先打开 | 旁边还要看 |
 |---|---|---|
 | 用户 API 形状与文档 | `burn-tensor` 的 `tensor/api/` | 编译期秩 `D`、类别 `K` |
-| 后端必须实现哪些算子 | `burn-backend` 的 `ops/tensor.rs` | 缺实现 = 该后端编不过 |
+| 后端必须实现哪些算子 | `burn-backend` 的 `backend/ops/tensor.rs` | 缺实现 = 该后端编不过 |
 | 运行时按设备分派 | `burn-dispatch` | 第 1 章的 `DispatchDevice` |
 | 反向公式、checkpoint | `burn-autodiff` 的 `ops/` | `burn-backend-tests` 里同名 `should_diff_*`；换算子从 `mean`/`sum`/`add` 对照开始 |
 | CPU eager 实现 | `burn-flex` | 默认示例走这里，不经过 CubeCL |
@@ -33,9 +33,9 @@
 | DataLoader 与 Batcher | `burn-core` 的 `data/` | Device 投放发生在 Batcher |
 | 训练循环、Learner、checkpoint | `burn-train`、`burn-optim` | 第 6 章状态机 |
 | 本机多设备 / DDP 策略 | `burn-train` 的 `learner/supervised/strategies/` | collective 在 backend，不在 train |
-| `all_reduce` 契约 | `burn-tensor` 的 `distributed.rs`、`burn-backend` 的 `DistributedOps` | Flex **没有** collective 实现 |
+| `all_reduce` 契约 | `burn-tensor` 的 `tensor/distributed.rs`、`burn-backend` 的 `DistributedOps` | Flex **没有** collective 实现 |
 | 参数导出与加载 | `burn-core` 的 `module/`、`burn-store` | 第 7 章 Burnpack |
-| ONNX → Rust 代码生成 | 独立仓库 `burn-onnx` | 版本已与主线对齐，仍不编进默认 workspace |
+| ONNX → Rust 代码生成 | 独立仓库 `burn-onnx` | 版本号与主线相同，默认示例仍不依赖 importer |
 | 环境、replay、Policy 组合 | `burn-rl` | 第 8 章；具体算法由应用实现 |
 
 ## 怎么判断改对了层

@@ -105,8 +105,6 @@ DDP 需要 collective participant、同步和梯度归一化。Burn 的
 Ape-X、IMPALA 和 Ray 对这六个问题都有公开的工程答案，出处见附录
 [参考文献](../references.md#第-8-章-强化学习系统)。
 
-## 本节小结
-
 Burn 提供的是可组合的单进程环境、policy、batching 和 learner
 接口，以及多个环境的 rollout 编排。多智能体联合决策、league/self-play、
 Actor–Learner 跨节点协议和容错仍是应用系统与后续章节的工作；把多个

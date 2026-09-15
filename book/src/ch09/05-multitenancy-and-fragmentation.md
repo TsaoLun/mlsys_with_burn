@@ -80,8 +80,6 @@ Burn `ModuleRecord`、`LearningCheckpointer` 和 CubeCL memory pool 解决
 前几项都不能替代最后一项。把 checkpoint 文件保存成功写成“集群资源
 已经安全释放”，会把 artifact 状态和控制面状态混为一谈。
 
-## 本节小结
-
 多租户系统要同时管理配额、租约、性能隔离、故障隔离和资源碎片。GPU
 总数、device abstraction 和 runtime memory usage 都只是节点内的局部
 事实；把它们聚合成租户视图与租约状态，正是控制面协议的工作。

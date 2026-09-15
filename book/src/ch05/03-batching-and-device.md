@@ -54,8 +54,11 @@ let loader = DataLoaderBuilder::new(batcher)
 ```
 
 - `batch_size` 使用 `FixBatchStrategy`；未设置时默认大小为 1；
-- `shuffle(seed)` 在每次创建 iterator 时启用一次新的随机排列；
-- `num_workers(None)` 或 `num_workers(0)` 使用当前线程读取；
+- `shuffle(seed)` 在**单线程**路径上，每次创建 iterator 都会重新排列
+  整个数据集；多线程路径只在首次 `iter()` 做一次全局预 shuffle，之后
+  每个 worker 只重排自己的分片（见
+  [多线程加载与保序性边界](05-multithread-and-order.md)）；
+- 不调用 `num_workers`，或传入 `0`，使用当前线程读取；
 - `num_workers(n > 0)` 使用 `MultiThreadDataLoader`；
 - `set_device` 只决定 Batcher 收到的目标 Device，不改变 Dataset 的存储。
 
@@ -69,7 +72,7 @@ Batcher 中 padding，或明确丢弃/补齐最后一批；不能从 `batch_size
 ## 失败传播
 
 单线程 loader 在 `get_many` 失败时返回 `Err`。多线程 worker 发生真实的
-Dataset 错误时，固定源码通过消息把错误转成迭代器的 `Err`，而不是让
+Dataset 错误时，实现通过消息把错误转成迭代器的 `Err`，而不是让
 消费者无限等待。越界仍属于 Dataset 契约中的程序错误，不能用 `Result`
 替代所有边界检查。
 

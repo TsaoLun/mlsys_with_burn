@@ -91,8 +91,6 @@ rank rendezvous、资源配额或节点故障处理。
 本章后续会用 Burn 源码回答“数据面有哪些入口”，再用模拟器回答“控制面
 还需要哪些协议”。两者必须分开验证。
 
-## 本节小结
-
 集群系统的第一个抽象不是 GPU 数量，而是带有内存、通信、故障域和目标的
 workload card。`queue wait`、`collective`、`checkpoint` 和 `recovery`
 都应成为可观测的时间项。Burn/CubeCL 本版可以作为设备和通信数据面

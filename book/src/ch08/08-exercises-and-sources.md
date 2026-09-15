@@ -22,7 +22,7 @@ Actor–Learner 或 MARL league。具体 loss、optimizer、target network、
 【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
-## 概念题
+### 概念题
 
 1. 【基础】为什么 observation 不一定等于 environment state？部分可观测时，策略
    可能需要保存哪些历史信息？
@@ -157,7 +157,7 @@ done 如何切断 bootstrap。留给你的核心问题：截断 step 对三种 t
 </details>
 
 
-## Rust 与 API 题
+### Rust 与 API 题
 
 1. 【基础】给 `CounterEnv` 实现一个 `ToObservation<Tensor<2>>` adapter，并测试
    position/step 的 shape 和 device。
@@ -272,7 +272,7 @@ batch size 不超过上限。
 </details>
 
 
-## 源码题
+### 源码题
 
 1. 【进阶】阅读 `burn/crates/burn-rl/src/environment/base.rs`，指出
    `MAX_STEPS`、`done` 和 `truncated` 的职责。
@@ -453,7 +453,7 @@ batch 会分离。
 <summary>提示</summary>
 
 [「Transition、回放与采样」](03-replay-and-sampling.md)给出两个
-支点：内存估算式把容量与每字段字节数联系起来；「本节小结」明确
+支点：内存估算式把容量与每字段字节数联系起来；该节末段明确
 优先级采样与 n-step 不在 `TransitionBuffer` 的能力内，这是一道
 自行扩展设计题。从“`sample` 的所有字段共用同一 indices”这个
 不变量出发，推 n-step 需要额外读哪些相邻行、优先级需要在 push、
@@ -492,7 +492,7 @@ agent 的策略变化，不是网络拓扑或调度顺序问题。
 </details>
 
 
-## 延伸阅读与固定源码入口
+## 延伸阅读
 
 教材（Sutton & Barto）与 DQN、PPO、Ape-X、IMPALA、Ray 等论文见附录
 [参考文献](../references.md#第-8-章-强化学习系统)。
@@ -513,14 +513,7 @@ agent 的策略变化，不是网络拓扑或调度顺序问题。
 - `burn/examples/dqn-agent/src/agent.rs`
 - `burn/examples/dqn-agent/src/training.rs`
 
-OpenMLSys v1：
-
-- `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/index.md`
-- `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/rl_introduction.md`
-- `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/single_node_rl.md`
-- `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/marl.md`
-- `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/marl_sys.md`
-- `openmlsys/v1/zh_chapters/chapter_reinforcement_learning/summary.md`
+对照 OpenMLSys 原作的文件级改编见[来源与改编总录](../appendix-sources.md#第-8-章)。
 
 ## 本章系统结论
 

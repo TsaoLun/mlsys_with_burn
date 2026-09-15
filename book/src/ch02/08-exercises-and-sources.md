@@ -7,7 +7,7 @@ Burn 0.22 将用户 Tensor 表示为 `Tensor<D, K>`：秩和张量类别进入 R
 burn-dispatch 到达具体 Backend。
 
 Module 递归组织层与 Param，Config 负责初始化配置，ModuleRecord 保存模型
-状态。Eager 前向执行实际算子，autodiff Device 同时构建一阶反模式动态
+状态。Eager 前向执行实际算子，autodiff Device 同时构建一阶反向模式动态
 tape；backward 产生 Gradients，但不会自动执行优化器更新。
 
 计算图是依赖关系的通用概念。autodiff tape、Burn IR/Fusion 和 backend
@@ -137,7 +137,7 @@ Device 工厂方法，能用到没编译进程序的后端吗？
 <summary>提示</summary>
 
 把 `detached_leaf_gradient` 当模板，把 detach 施加到 `right` 上；
-[「detach 与 inner」](05-autodiff.md)写明固定版本的 detach 保留
+[「detach 与 inner」](05-autodiff.md)写明本书所用版本里 detach 保留
 require-grad 意图。问：`set_require_grad(false)` 关掉的又是什么？
 
 </details>
@@ -293,7 +293,7 @@ visitor 对 `Param` 与普通字段的处理，再拿 BatchNorm 统计量自测�
 ## 延伸阅读
 
 接口与自动微分的论文见附录[参考文献](../references.md#第-2-章-编程接口与计算图)。
-本书所用版本源码中的权威入口：
+本书所用版本里可以打开这些文件：
 
 - `burn/crates/burn-tensor/src/tensor/api/base.rs`
 - `burn/crates/burn-tensor/src/tensor/api/float.rs`

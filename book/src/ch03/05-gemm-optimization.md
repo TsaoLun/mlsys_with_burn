@@ -154,7 +154,7 @@ fragment 之间转换。CubeK 的 component、routine 和 blueprint 正是为组
 至少记录：
 
 - 矩阵 shape、batch、布局和 dtype；
-- Runtime、设备型号和软件快照；
+- Runtime、设备型号和软件版本；
 - warm-up、同步点、重复次数与统计量；
 - 是否包含编译和 autotune 的首次成本；
 - 数值容差及 reference；

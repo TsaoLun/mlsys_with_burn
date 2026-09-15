@@ -50,7 +50,7 @@ Autotune level 控制搜索成本和候选广度，不等于“越高永远越�
 ### 一个 tune key 长什么样
 
 「按 tune key 缓存」的 key 不是随手拼的字符串。matmul 的键
-（`cubek-matmul/src/strategy/tune_key.rs`）由两部分组成：
+（`cubek-matmul/src/tune_key.rs`）由两部分组成：
 
 ```rust,ignore
 pub struct MatmulAutotuneKey {
@@ -65,7 +65,7 @@ pub struct MatmulProblemDefinition {
     pub lhs_pow2_factor: u8,      // stride 对齐到的 2 的幂，
     pub lhs_stride_factor: u8,    // 封顶 2^10——注释：128 字节
     // …rhs 同理…                  // swizzle 的重复周期
-    pub elem_lhs: StorageType,    // dtype 参与键
+    pub elem_lhs: ElemType,       // dtype 参与键
     pub matrix_layout_lhs: MatrixBatchLayout,  // 布局参与键
     // …
 }
@@ -112,7 +112,7 @@ TBE/AKG 只作为生态历史边界。
 
 ## 4. CUDA、Triton 与 CUTLASS 对照
 
-OpenMLSys v2 将 CUDA、Triton 和 CUTLASS 列入第 3 章，但 v2 快照没有
+OpenMLSys v2 将 CUDA、Triton 和 CUTLASS 列入第 3 章，但 v2 没有
 正文。本书只建立概念坐标：
 
 - **CUDA C++** 直接暴露 NVIDIA 线程、内存和指令生态；
@@ -124,7 +124,7 @@ OpenMLSys v2 将 CUDA、Triton 和 CUTLASS 列入第 3 章，但 v2 快照没有
 它们解决的问题有重叠，但类型系统、后端范围、成熟度和性能路径不同。不能
 仅凭 API 相似就宣称语义或性能等价。本书不引入前三者为构建依赖。
 
-| 本书 / CubeCL | 常见产业说法 | 对齐点 | 不要外推 |
+| 本书 / CubeCL | 常见产业说法 | 对齐点 | 别读成 |
 |---|---|---|---|
 | Cube / Unit / Plane | block / thread / warp | 并行层次心智模型 | 非 ABI；plane 宽度非常数 |
 | `CpuRuntime` / `WgpuRuntime` / `CudaRuntime` | CPU / 图形 API / CUDA runtime | 同一 IR 多后端 | 源码有类型 ≠ 默认已测吞吐 |

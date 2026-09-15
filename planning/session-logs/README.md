@@ -32,6 +32,9 @@ Agent 开始工作时依次阅读：
 
 ## 索引
 
+- [`2026-09-15-pre3-content-gates.md`](2026-09-15-pre3-content-gates.md)：
+  按 pre.3 pin 修正 CubeK/checkpoint/1F1B/第 9 章成本模型、失效路径与
+  行内公式检查。
 - [`2026-09-14-pliron-pre3.md`](2026-09-14-pliron-pre3.md)：
   D027 对齐 Burn 0.22.0-pre.3 与 CubeCL Pliron，重修编译器主线。
 - [`2026-08-14-infra-labs.md`](2026-08-14-infra-labs.md)：

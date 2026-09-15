@@ -11,7 +11,7 @@ cargo run -p ch07-serving-queue-sim --locked
 
 ## 先看训练切分
 
-`ch06-parallel-strategies` 打印四张整数表。读的时候只抓这几件事：
+`ch06-parallel-strategies` 打印三张整数表，外加一行张量并行 AllGather。读的时候只抓这几件事：
 
 1. 环形 AllReduce 每设备发送 \(2(p-1)S/p\) 字节。\(p\) 从 4 到 32 时，
    这一项趋近 \(2S\)，但 α 步数从 6 涨到 62。小梯度、多卡时，延迟项会
@@ -19,8 +19,9 @@ cargo run -p ch07-serving-queue-sim --locked
 2. GPipe 空闲比例 \((p-1)/(m+p-1)\)。同样 4 个 stage，\(m=1\) 时空闲
    \(3/4\)，\(m=64\) 时变成 \(3/67\)。加 micro-batch 是在填气泡，不是
    在发明一种新并行。
-3. 1F1B 把分母换成 \(2m+p-1\)，同一组 \((p,m)\) 下空泡更小，warm-up /
-   drain 仍在。公式把每个 F/B 槽当成等长。
+3. 示例把每个前向槽和反向槽分开计，1F1B 分母写成 \(2m+p-1\)。这是对照
+   整数表的分槽计数；把前向+反向合成 \(t\) 时，GPipe 与 1F1B 的
+   warm-up/drain 比例相同，1F1B 主要省的是激活显存。
 4. ZeRO-1 只把优化器状态除以 \(n\)；ZeRO-3 三份都除。省下的显存，下一
    次前向要用参数 AllGather 买回来。张量并行的一层 AllGather 是同一类
    \((p-1)S/p\) 流量，只是切的是隐藏维，不是状态。
@@ -33,7 +34,7 @@ cargo run -p ch07-serving-queue-sim --locked
 `ch07-serving-queue-sim` 在同一组混合长度请求上比较静态批、连续批和
 分块 prefill。把这三列分开看：
 
-| 指标 | 它在回答 | 常见误读 |
+| 指标 | 它在回答什么 | 常见误读 |
 |---|---|---|
 | 端到端延迟 | 从到达到最后一个 token | 把它当成 TTFT |
 | TTFT | 用户等到第一个 decode token | 把它当成「模型算得快」 |

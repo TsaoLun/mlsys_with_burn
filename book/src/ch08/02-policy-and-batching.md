@@ -95,8 +95,6 @@ policy 交给异步层。
 所有权安排避免多个环境线程同时修改 module，但也要求 update、device
 切换和 action 请求服从同一消息顺序。
 
-## 本节小结
-
 `Policy` 描述“如何从 observation 产生 action”，`PolicyLearner` 描述
 “如何更新 policy”，`Environment` 描述“动作如何改变世界”。通过
 `ToObservation`、`ToAction` 和 `Batchable` 连接三者，Rust 类型系统把

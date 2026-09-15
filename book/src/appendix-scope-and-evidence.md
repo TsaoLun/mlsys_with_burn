@@ -11,7 +11,7 @@
 - Burn：`13f0a12b71ad83c1f9edeac22dea325dcb612397`（版本线 `0.22.0-pre.3`）
 - CubeCL：`b566e954468010303cf41465fc8b6be6499e2001`（`0.11.0-pre.3`；Kernel IR 为 Pliron）
 - CubeK：`73743e34b2aeeb7c60d1b0bbc2caf70ed71aff09`（`0.3.0-pre.3`）
-- burn-onnx：`fe36b3b6c02fb5709e56b732f8d1e43c87a01773`（版本线 `0.22.0-pre.3`，与主线 Burn 对齐；只作源码对照，不进入根 workspace 的 Cargo 依赖）
+- burn-onnx：`fe36b3b6c02fb5709e56b732f8d1e43c87a01773`（版本线 `0.22.0-pre.3`，与主线 Burn 版本号相同；只作源码对照，不进入本书默认 Cargo 依赖）
 
 仓库根目录 `pins.toml` 与 `Cargo.lock` 是构建侧真相；本表供阅读对照。
 
@@ -93,17 +93,18 @@
 
 ### 第 7 章 模型服务
 
-- `CPU 可运行验证`：当前 workspace 的 `ModuleRecord`/Burnpack 参数往返保存与恢复、
+- `CPU 可运行验证`：本书默认示例的 `ModuleRecord`/Burnpack 参数往返保存与恢复、
   恢复后的 inference，以及纯 Rust 的 PTQ 校准与 int8 GEMM 误差实验
   （`ch07-ptq-calibration`）；
 - `源码核验`：burn-onnx 的 graph/codegen/load strategy、Remote、
-  WASM/no_std 和当前 workspace 的 artifact 入口；
+  WASM/no_std 和本书默认示例的 artifact 入口；
 - `协议/成本模型`：manifest、checksum、版本、rollback、batch/queue、
   安全威胁模型，以及连续批处理、TTFT/TPOT、分块 prefill 与 KV 预算的
   虚拟时间队列模型（`ch07-serving-queue-sim`）；
-- `可选平台实验`：真实 ONNX fixture、服务治理、浏览器/Remote 部署和
+- `可选平台实验`：真实 ONNX 导入样例、服务治理、浏览器/Remote 部署和
   设备性能；
-- `未覆盖`：burn-onnx 旧 revision 与当前 workspace Burn 的端到端混用。
+- `未覆盖`：把 ONNX importer 编进默认示例、以及尚未跑通的导入样例
+  端到端。版本号已经相同；默认示例不依赖 importer，是因为它仍是独立产品，导入路径也尚未作为本书默认实验跑通。
 
 ### 第 8 章 强化学习系统
 
@@ -136,7 +137,7 @@
 - `源码核验`：Burn `PartialDataset`、DataLoader、autodiff、SGD 和
   `ModuleRecord`；
 - `协议/成本模型`：数据契约、错误 topology 和 artifact 验证；
-- `可选平台实验`：GPU、分布式训练、ONNX fixture 和服务治理；
+- `可选平台实验`：GPU、分布式训练、ONNX 导入样例和服务治理；
 - `未覆盖`：把二维回归或 CPU elapsed time 外推成生产性能。
 
 ### 训练与服务成本实验
@@ -254,7 +255,7 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
   bubble 和单调 checkpoint commit 的纯 Rust 协议模型测试。
 - **固定入口**：`burn/crates/burn-train/src/`、
   `burn/crates/burn-communication/src/` 和
-  `burn/crates/burn-core/src/tensor/distributed.rs`。
+  `burn/crates/burn-tensor/src/tensor/distributed.rs`。
 - **可运行观察**：`ch06-training-loop` 的纯 Rust 协议 helper 测试
   weighted average、staleness、quorum、pipeline slots 和 checkpoint
   version；另由 CPU autodiff loop 验证单设备训练；
@@ -269,8 +270,8 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 - **OpenMLSys 文件**：`chapter_model_deployment/model_converter_and_optimizer.md`、
   `model_compression.md`、`model_inference.md`、`model_security.md`。
 - **本书模型**：manifest 的 version/payload length/checksum、回滚条件和
-  同 shape 动态 batching 契约（contract）；当前 workspace 的 artifact 与 burn-onnx revision
-  分开。
+  同 shape 动态 batching 契约（contract）；本书默认示例的 artifact 与 burn-onnx
+  源码分开阅读。
 - **固定入口**：`burn/crates/burn-core/src/store/`、
   `burn/crates/burn-core/src/module/base.rs` 和
   `burn-onnx/crates/burn-import/src/`。
@@ -279,8 +280,8 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
   验证 payload length、版本、rollback 和 dynamic batch；
   `ch07-serving-queue-sim` 给出静态批 / 连续批 / 分块 prefill 的
   TTFT、TPOT 与 KV 预算曲线。
-- **不可直接比较**：manifest/checksum 不是完整供应链安全；旧 revision
-  的 ONNX fixture、HTTP、Remote、WASM 和 GPU service 是可选/未覆盖。
+- **不可直接比较**：manifest/checksum 不是完整供应链安全；尚未跑通的
+  ONNX 导入样例、HTTP、Remote、WASM 和 GPU service 是可选/未覆盖。
 
 ### 第 8 章：强化学习
 
@@ -335,7 +336,7 @@ OpenMLSys 的推荐系统、联邦学习、可解释 AI、机器人和机器学�
 矩阵以固定 OpenMLSys v1 revision
 `9c289782ccbb165ac8ad7c960ecffc12942a5560` 的中文章节为输入，逐文件
 记录映射到本书哪一章哪一节、保留了什么、改写了什么，以及结论靠什么支撑。
-各章文件级改编说明见[来源与改编总录](appendix-sources.md)；对照矩阵是全书总账，二者口径一致。
+各章文件级改编说明见[来源与改编总录](appendix-sources.md)；对照矩阵是全书总账，二者说法一致。
 
 ## 对照矩阵的 C/S/R/L/E 字段
 

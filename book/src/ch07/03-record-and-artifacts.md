@@ -83,7 +83,7 @@ layout 会在保存和加载时做转置。只看一个 tensor 的 shape 而不�
 
 `ModuleSnapshot` 的 snapshot 可以延迟 materialize tensor data；这对检查
 大模型的 path、shape 和 dtype 有用，但“lazy”不等于设备端 zero-copy。
-固定源码也提示，文件 mmap、静态 bytes 和 backend 内部 tensor allocation
+源码也提示，文件 mmap、静态 bytes 和 backend 内部 tensor allocation
 是不同层次的复制问题。
 
 ## 格式、拓扑和安全
@@ -114,6 +114,6 @@ SafeTensors 这类纯 tensor 数据格式可以避免加载时执行任意模型
 互相替代。Burn 的 `ModuleRecord`、Remote endpoint 或
 `PeerAuthorizer` 只提供可组合接口，不能单独构成上述安全产品。
 
-本章实验刻意只覆盖最小边界：本书示例中的 Burn Linear module 经过
+本章实验只覆盖最小边界：本书示例中的 Burn Linear module 经过
 `ModuleRecord → Burnpack bytes → ModuleRecord → module` 后，CPU forward
 输出保持一致。下一节再讨论压缩和图优化为什么必须用精度/性能数据证明。

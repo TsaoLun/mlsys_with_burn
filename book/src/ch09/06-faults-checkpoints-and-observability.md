@@ -57,7 +57,7 @@ $C^* \approx \sqrt{2 \times 60 \times 14400} \approx 1315\ \text{s} \approx 22\ 
 
 把“发现故障→保住进度→恢复训练”写成闭环，每个环节的归属就清楚了：
 
-| 容错闭环的环节 | Burn 快照提供什么 | 缺口由谁补 |
+| 容错闭环的环节 | Burn 提供什么 | 缺口由谁补 |
 |---|---|---|
 | 保住进度：保存 learner 训练状态 | `LearningCheckpointer`、文件与异步 checkpointer | —— |
 | 发现故障：心跳与 failure detector | 无；通信 server 生命周期只随 Rust 对象创建/销毁 | 集群控制面（本章模拟器的故障 trace 是它的协议模型） |
@@ -121,8 +121,6 @@ admit as a gang → replay missing steps → complete
 
 该状态机验证的是协议不变量：资源归还、重试次数、checkpoint replay
 和最终完成。它没有模拟真实 GPU 错误率、网络包丢失或分布式存储吞吐。
-
-## 本节小结
 
 可恢复集群需要故障域、版本化 checkpoint、幂等重试和跨层遥测。哪个
 环节由谁提供，本节的容错闭环表已经给出；其中协议不变量（资源归还、

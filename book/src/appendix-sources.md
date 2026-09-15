@@ -190,7 +190,7 @@ OpenMLSys v2 固定版本的第 5 章仍是 TODO；本章依据 v1 中文文件�
 - `overview.md`：保留算力、内存、分而治之和 time-to-accuracy 问题，删除
   固定历史硬件数字与原图编号；
 - `methods.md`：保留数据/模型/混合/流水线并行的语义，具体 Burn 只实现
-  已核验的本机多设备和 DDP API；
+  已对照过的本机多设备和 DDP API；
 - `collective.md`：保留集合通信算子、$\alpha+\beta l$ 成本和梯度平均，
   以 `DistributedContext`、backend `all_reduce` 和同步边界重写；
 - `parameter_servers.md`：保留同步/异步、straggler、热点和副本一致性，
@@ -223,7 +223,7 @@ Burn 版本定位和未承诺能力见
 
 没有复制 OpenMLSys 的 MindSpore/PyTorch/ARM 汇编代码、图片或 Mate30
 性能数字。完整 revision 关系、逐文件核验和不作出的能力承诺见
-[范围、证据与对照附录](appendix-scope-and-evidence.md)。本书把 burn-onnx 与当前 workspace 的 Burn 版本分开验证，避免混用未对齐依赖。
+[范围、证据与对照附录](appendix-scope-and-evidence.md)。本书把 burn-onnx 与主线 Burn 分开阅读：版本号已经相同，默认示例仍不依赖 importer。
 
 ## 第 8 章
 

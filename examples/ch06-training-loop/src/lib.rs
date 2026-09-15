@@ -185,6 +185,18 @@ mod tests {
             run_training(1, 0.0),
             Err(TrainingError::InvalidLearningRate)
         );
+        assert_eq!(
+            run_training(1, f64::NAN),
+            Err(TrainingError::InvalidLearningRate)
+        );
+        assert_eq!(
+            run_training(1, f64::INFINITY),
+            Err(TrainingError::InvalidLearningRate)
+        );
+        assert_eq!(
+            run_training(1, -1.0),
+            Err(TrainingError::InvalidLearningRate)
+        );
     }
 
     #[test]

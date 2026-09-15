@@ -40,7 +40,7 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <summary>提示</summary>
 
 素材在[「Burn 技术栈」](04-burn-stack.md)的「分派与后端契约」与
-「能力边界」两段：融合路径、量化支持都因后端而异；同步的例子是
+「阅读时记住的几件事」：融合路径、量化支持都因后端而异；同步的例子是
 [「实验：探测执行栈」](06-stack-probe-lab.md)里 `sync()` 对 Flex
 很轻量、对异步后端才是真正等待点的注解。
 
@@ -113,7 +113,7 @@ Kernel 语言、IR 和运行时，CubeK 提供建立在其上的高性能算子�
 <details>
 <summary>提示</summary>
 
-按 `pins.toml` 检出仓库后读 `[features]` 表：等号右边混着依赖名与
+读 `burn/crates/burn/Cargo.toml` 的 `[features]` 表：等号右边混着依赖名与
 feature 引用（如 `train` 还引用 `optim`、`dataset`），间接项要再追
 一层；[「Burn 技术栈」](04-burn-stack.md)「可组合能力」一节可核对。
 
@@ -142,22 +142,23 @@ feature 引用（如 `train` 还引用 `optim`、`dataset`），间接项要再�
 
 </details>
 
-4. 【进阶】比较仓库根目录版本钉扎与 `burn-onnx/Cargo.toml` 使用的
-   revision。只有版本号相同，为什么仍不足以断言 API 兼容？
+4. 【进阶】burn-onnx 与主线 Burn 的版本号已经相同。为什么这仍不足以断言
+   API 已经冻结、可以把 importer 编进默认示例？
 
 <details>
 <summary>提示</summary>
 
-对照根目录 `pins.toml` 与 `burn-onnx/Cargo.toml` 各自 pin 的 Burn
-commit；[「Burn 技术栈」](04-burn-stack.md)「训练、状态与模型交换」
-一段指出两者不同。问自己：预发布期一个版本号对应多少个 commit？
+crates.io 上版本号相同，不等于两边的 git commit 已经冻成同一份代码，
+更不等于已经跑通一份 ONNX 模型。[「Burn 技术栈」](04-burn-stack.md)
+「训练、状态与模型交换」说明 importer 是独立产品；第 7 章默认实验
+继续走 `ModuleRecord`。
 
 </details>
 
 
 ### 实验题
 
-1. 【基础】在不修改根依赖快照的前提下，为 `StackReport` 增加默认 bool dtype，
+1. 【基础】在不修改根目录 Cargo 依赖版本的前提下，为 `StackReport` 增加默认 bool dtype，
    更新测试和实验说明。
 
 <details>
@@ -201,7 +202,7 @@ commit；[「Burn 技术栈」](04-burn-stack.md)「训练、状态与模型交�
 
 原理与产业背景的论文见附录[参考文献](../references.md#第-1-章-导论)。
 源码阅读入口如下，路径均相对于本书所用版本的源码仓库（如何获取见
-[如何运行本书示例](../running-examples.md) 的「阅读固定源码」）：
+[如何运行本书示例](../running-examples.md) 的「阅读上游源码」）：
 
 - `burn/crates/burn/src/lib.rs`：Burn 能力总览与限制；
 - `burn/crates/burn-backend/src/backend/base.rs`：Backend 设计契约；

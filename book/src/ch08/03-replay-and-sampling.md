@@ -78,7 +78,7 @@ $w = 10^3$ 步/秒意味着 learner 正在用 100 秒前的行为策略产生的
 - `select`：按 indices 选 batch；
 - `slice_assign_inplace`：把一个样本写入第 0 维的某一行。
 
-固定版本为 `Tensor<2>` 提供了实现；上游 DQN example 则为自己的
+本书所用版本为 `Tensor<2>` 提供了实现；上游 DQN example 则为自己的
 `ObservationTensor<2>` 和 `DiscreteActionTensor<2>` 实现同一接口，并在
 写入时处理 autodiff/device 的 inner tensor。这展示了 Rust 泛型的价值：
 replay 只知道“可批量切片”，而不需要知道具体网络的字段。
@@ -115,8 +115,6 @@ Q-learning 可以通过 bootstrap 使用这类数据，但 policy gradient 通�
 的一部分。生产训练系统还应考虑优雅 shutdown、数据版本、优先级采样、
 n-step return、跨进程共享和 checkpoint 一致性；这些都不由当前
 `TransitionBuffer` 自动提供。
-
-## 本节小结
 
 Replay 的核心不是“随机打乱”，而是一个有容量、有覆盖策略、有数据语义
 的训练协议。`TransitionBuffer` 已验证的能力是单进程 tensor 环形存储

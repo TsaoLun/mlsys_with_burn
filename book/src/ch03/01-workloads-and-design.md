@@ -86,7 +86,7 @@ CubeCL Runtime / Compiler
 CPU、WGPU、CUDA、ROCm 等具体 Runtime
 ```
 
-这里的后端集合受 Cargo feature、平台和固定版本限制；“同一种 Kernel
+这里的后端集合受 Cargo feature、平台和本书所用版本限制；“同一种 Kernel
 语言”不等于“所有设备支持相同指令和性能”。
 
 ## 4. 正确性、可移植性与性能
@@ -98,5 +98,6 @@ CPU、WGPU、CUDA、ROCm 等具体 Runtime
 - **性能**：当前 shape 和设备上，这个策略是否优于其他实现？
 
 CPU Runtime 很适合验证前两个问题中的一部分，但不能回答 GPU 的合并访存、
-占用率和矩阵单元吞吐。后续实验会刻意保持这条边界。
+占用率和矩阵单元吞吐。后续实验保持这条边界：CPU 上验证语义，不把
+结果写成 GPU 吞吐。
 

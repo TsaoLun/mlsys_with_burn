@@ -8,10 +8,11 @@ shape、dtype 和 bytes，但不保存可以独立执行的 topology。`burn-sto
 feature 开启后增加 snapshot、Burnpack/SafeTensors/PyTorch store、过滤、
 重命名和 adapter。
 
-固定 `burn-onnx` 的 `ModelGen` 将 ONNX graph 解析成 Burn graph，生成 Rust
+`burn-onnx` 的 `ModelGen` 将 ONNX graph 解析成 Burn graph，生成 Rust
 source，并收集 Burnpack 权重。`File`、`Embedded`、`Bytes` 和 `None`
-决定权重从哪里进入生成的 model。由于该仓库固定快照的 manifest 仍依赖旧
-Burn revision，本章对 ONNX 的源码对照与本书 Record 实验保持分离。
+决定权重从哪里进入生成的 model。本书所用版本里 burn-onnx 与主线 Burn
+版本号相同；默认示例仍不依赖 importer，因为 ONNX 路径还要单独跑导入
+样例，不能和 Record 往返绑成一次验证。
 
 Remote 负责把 tensor operation 送到 compute peer；WASM client 的连接
 需要异步事件循环；no_std 只缩小标准库依赖，不自动提供文件、网络、线程
@@ -31,7 +32,7 @@ backend 的性能。
 【挑战】题往往需要额外硬件、外部数据或自行设计，本书默认示例不覆盖。
 
 
-## 概念题
+### 概念题
 
 1. 【基础】为什么 `ModuleRecord` 不能单独恢复一个任意模型？列出 topology、
    参数路径、shape 和 dtype 各自的职责。
@@ -125,7 +126,7 @@ padding 与 shape bucket 又把无效计算加进了哪一项。
 </details>
 
 
-## Rust 与 API 题
+### Rust 与 API 题
 
 1. 【基础】把实验的 Linear 改成两个 Linear 组成的 `Module`，断言 record tensor
    数量和输出误差。
@@ -210,13 +211,13 @@ model、handler 拿到的是共享引用还是消息通道，再填实现。
 [「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)。
 示例的 `inspect_burnpack_layout` 测试演示了截断与坏 magic 两类字节
 层错误，比较时区分路径/IO 错误、格式错误与校验错误各在哪一层报出。
-生成代码的 `from_file` 只需对照固定 `burn-onnx` 源码阅读，不要接入
-本书 workspace。
+生成代码的 `from_file` 只需对照本书所用的 `burn-onnx` 源码阅读，不要接到
+本书默认示例上。
 
 </details>
 
 
-## 源码题
+### 源码题
 
 1. 【进阶】阅读 `burn/crates/burn-core/src/store/mod.rs`，追踪
    `into_record → into_bytes → from_bytes → try_load_record` 的数据路径，
@@ -248,8 +249,8 @@ model、handler 拿到的是共享引用还是消息通道，再填实现。
 
 </details>
 
-3. 【进阶】阅读 `burn-onnx/crates/burn-onnx/src/model_gen.rs` 和
-   `burn-onnx/crates/burn-onnx/src/burn/graph.rs`，画出 ONNX parser、
+3. 【进阶】阅读 `burn-onnx/crates/burn-onnx/src/import/model_gen.rs` 和
+   `burn-onnx/crates/burn-onnx/src/import/burn/graph.rs`，画出 ONNX parser、
    graph simplification、codegen 和 Burnpack loader 的调用链。
 
 <details>
@@ -259,12 +260,12 @@ model、handler 拿到的是共享引用还是消息通道，再填实现。
 「`ModelGen` 的转换路线」已给出四阶段骨架，把它当待验证的
 假设：在源码里定位 `OnnxGraphBuilder`、`ParsedOnnxGraph::into_burn`、
 `BurnGraph::codegen` 与 `register_burnpack_loaders`，补全箭头之间
-省略的中间结构。该仓库与主线 Burn 版本字符串已对齐，仍只读源码即可，
-不要把它接入本书 workspace。
+省略的中间结构。该仓库与主线 Burn 版本号相同，仍只读源码即可，
+不要把它接到本书默认示例上。
 
 </details>
 
-4. 【进阶】阅读 `burn-onnx/crates/burn-onnx/src/burn/graph.rs` 的
+4. 【进阶】阅读 `burn-onnx/crates/burn-onnx/src/import/burn/graph.rs` 的
    `LoadStrategy` 测试，确认四种策略生成了哪些 constructor。
 
 <details>
@@ -278,8 +279,8 @@ model、handler 拿到的是共享引用还是消息通道，再填实现。
 
 </details>
 
-5. 【进阶】阅读 `burn/crates/burn-store/src/traits.rs`、`adapter.rs` 和
-   `tensor_snapshot.rs`，说明 lazy snapshot、filter、remap 和 adapter
+5. 【进阶】阅读 `burn/crates/burn-store/src/traits.rs`、`collector.rs`、
+   `applier.rs` 和 `adapter.rs`，说明 lazy snapshot、filter、remap 和 adapter
    的边界。
 
 <details>
@@ -309,17 +310,16 @@ API 形状（同步返回，对比 async）上。
 
 </details>
 
-7. 【进阶】对照 `pins.toml`、`burn-onnx/Cargo.toml` 和根 `Cargo.toml`，解释
-   本版版本字符串已经对齐，为什么默认示例仍不把 `burn-onnx` 编进同一
-   依赖图。
+7. 【进阶】说明 burn-onnx 与主线 Burn 版本号已经相同时，为什么默认示例仍不把
+   importer 编进同一依赖图。
 
 <details>
 <summary>提示</summary>
 
 [「ONNX、图转换与 Burn Rust 代码生成」](02-onnx-and-codegen.md)的
-「为什么本书默认示例不直接依赖 burn-onnx」把独立产品、CI 与 fixture
-验证分开了。你的任务是在两份 manifest 里核对 `0.22.0-pre.3`，再说明
-「版本对齐」只解除了类型世界冲突，并不自动等于「已经跑通一份 ONNX
+「为什么本书默认示例不直接依赖 burn-onnx」把独立产品、发布节奏与导入
+样例验证分开了。你的任务是在两份 manifest 里核对版本号相同，再说明
+「版本号相同」只解除了类型世界冲突，并不自动等于「已经跑通一份 ONNX
 模型」。这也是本书默认实验继续走 `ModuleRecord` 的原因。
 
 </details>
@@ -369,7 +369,7 @@ queue delay 上限又会出现在哪个分位数里。
 不可。加载侧入口可用
 [「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
 的 dtype policy。固定输入 schema、batch、backend 与测量方式再比较；
-CPU 上的结论不要外推到其他 backend。
+CPU 上的结论不要直接搬到其他 backend。
 
 </details>
 
@@ -461,7 +461,7 @@ scale/zero-point、metadata 随之怎么涨。实验是协议层演算，不依�
 [「ModuleRecord、Burnpack 与权重格式」](03-record-and-artifacts.md)
 威胁模型段的展开。逐层清点手头已有的证据：示例的
 `ArtifactManifest` checksum、Burnpack 头部读取器对截断/坏 magic 的
-拒绝、固定源码内置的 metadata 与 tensor 数上限，各覆盖哪一层的哪个
+拒绝、实现里内置的 metadata 与 tensor 数上限，各覆盖哪一层的哪个
 子问题；剩下没有任何机制覆盖的空白，就是 `ModuleRecord` 单独解决
 不了的部分。
 
@@ -497,7 +497,7 @@ chunk 越小，长 prompt 拆成越多步，α 项累加越多；chunk 太大则
 </details>
 
 
-## 延伸阅读与固定源码入口
+## 延伸阅读
 
 量化、蒸馏、推理服务与大模型服务的论文见附录
 [参考文献](../references.md#第-7-章-模型服务)。
@@ -511,7 +511,8 @@ chunk 越小，长 prompt 拆成越多步，α 项累加越多；chunk 太大则
 - `burn/crates/burn-store/src/burnpack/`
 - `burn/crates/burn-store/src/safetensors/`
 - `burn/crates/burn-store/src/adapter.rs`
-- `burn/crates/burn-store/src/tensor_snapshot.rs`
+- `burn/crates/burn-store/src/collector.rs`
+- `burn/crates/burn-store/src/applier.rs`
 - `burn/crates/burn/Cargo.toml`
 - `burn/crates/burn-tensor/Cargo.toml`
 - `burn/crates/burn-tensor/src/device.rs`
@@ -519,25 +520,14 @@ chunk 越小，长 prompt 拆成越多步，α 项累加越多；chunk 太大则
 - `burn/crates/burn-remote/src/lib.rs`
 - `burn/crates/burn-remote/src/server/builder.rs`
 - `burn/examples/remote-inference-web/README.md`
-
-固定 `burn-onnx`：
-
 - `burn-onnx/Cargo.toml`
 - `burn-onnx/README.md`
-- `burn-onnx/crates/burn-onnx/src/model_gen.rs`
-- `burn-onnx/crates/burn-onnx/src/burn/graph.rs`
+- `burn-onnx/crates/burn-onnx/src/import/model_gen.rs`
+- `burn-onnx/crates/burn-onnx/src/import/burn/graph.rs`
 - `burn-onnx/crates/burn-onnx/src/bin/onnx2burn.rs`
 - `burn-onnx/examples/onnx-inference/README.md`
 
-OpenMLSys v1：
-
-- `openmlsys/v1/zh_chapters/chapter_model_deployment/index.md`
-- `openmlsys/v1/zh_chapters/chapter_model_deployment/model_deployment_introduction.md`
-- `openmlsys/v1/zh_chapters/chapter_model_deployment/model_converter_and_optimizer.md`
-- `openmlsys/v1/zh_chapters/chapter_model_deployment/model_compression.md`
-- `openmlsys/v1/zh_chapters/chapter_model_deployment/model_inference.md`
-- `openmlsys/v1/zh_chapters/chapter_model_deployment/model_security.md`
-- `openmlsys/v1/zh_chapters/chapter_model_deployment/summary.md`
+对照 OpenMLSys 原作的文件级改编见[来源与改编总录](../appendix-sources.md#第-7-章)。
 
 ## 本章系统结论
 

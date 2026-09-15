@@ -1,6 +1,15 @@
 # Reproducible remote source snapshot for the second writing cycle.
-# GitHub revisions are authoritative; local_path entries are optional,
-# Git-ignored mirrors for agent source reading only.
+# GitHub revisions are authoritative. Capability claims in the book must
+# match these SHAs (or the crates.io version string of the same tag).
+#
+# Verification order:
+# 1. The `rev` (and `version`) below.
+# 2. Cargo's git checkout under ~/.cargo/git/checkouts/, or the crates.io
+#    source matching `version` (CubeK is often only on crates.io).
+# 3. A local_path mirror, and only if `HEAD` equals `rev` and
+#    `git cat-file -t <rev>` succeeds. A stale mirror is not evidence.
+#
+# local_path entries are optional, Git-ignored mirrors for fast reading.
 # Updating a revision requires a decision entry and a full project check.
 #
 # Tagged Burn / burn-onnx manifests pin CubeCL, CubeK and Burn via crates.io

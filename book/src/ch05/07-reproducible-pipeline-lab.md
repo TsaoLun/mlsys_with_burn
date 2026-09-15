@@ -40,10 +40,10 @@ cargo test -p ch05-data-pipeline --locked
 单 worker、batch size 为 3、未 shuffle 时，你应看到：
 
 ```text
-batch_sizes = [3, 3, 3, 3]
-ids         = [0, 1, 2, ..., 11]
-values      = [1, 3, 5, ..., 23]
-progress    = 12 / 12 items
+单线程批大小：[3, 3, 3, 3]
+单线程输入顺序：[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+单线程预处理值：[1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23]
+单线程进度：12 / 12 items
 ```
 
 ## 4. 固定 seed 与 epoch

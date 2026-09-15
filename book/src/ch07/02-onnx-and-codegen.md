@@ -95,11 +95,11 @@ node_conversion 阶段会识别特例：`Gemm(alpha=1, beta=1, transB=1)`
 来源下布局不同**，这正是转换器必须携带元数据的原因。
 
 **第 4 站：代码生成。** 没被特例吸收的一般 Gemm 走
-`burn-onnx/src/burn/node/gemm.rs` 的 `NodeCodegen::forward`，把
+`burn-onnx/crates/burn-onnx/src/import/burn/node/gemm.rs` 的 `NodeCodegen::forward`，把
 配置拼成 Burn 张量 API 的 Rust token：
 
 ```rust,ignore
-// burn-onnx/src/burn/node/gemm.rs（节选）
+// burn-onnx/crates/burn-onnx/src/import/burn/node/gemm.rs（节选）
 let product = quote! { #a.matmul(#b) };            // 必要时先 .transpose()
 // alpha != 1 时： quote! { #product * #alpha }
 // 有 C 时：      quote! { … + (#c) * #beta }
@@ -111,12 +111,12 @@ let product = quote! { #a.matmul(#b) };            // 必要时先 .transpose()
 `.bpk`（下一节的装载入口）。
 
 **第 5 站：语义测试。** `onnx-tests/tests/gemm/` 里有一组
-`gemm*.py` 脚本生成的 `.onnx` fixture（含 `gemm_no_c`、
+`gemm*.py` 脚本生成的 `.onnx` 测试文件（含 `gemm_no_c`、
 `gemm_non_unit_alpha_beta` 等变体），Rust 测试把生成模型的输出与
-参考值比对——属性组合的每个分支都有 fixture 盯着。
+参考值比对——属性组合的每个分支都有测试盯着。
 
 把 `Gemm` 换成任何算子，五站不变：注册、属性与形状推断、可选的
-模式识别、代码生成、fixture 测试。`SUPPORTED-ONNX-OPS.md` 列出的
+模式识别、代码生成、对照测试。`SUPPORTED-ONNX-OPS.md` 列出的
 每个「已支持」算子背后都是这样一条链；表里的空档则意味着五站中
 至少缺一站。
 
@@ -140,10 +140,10 @@ loader 应用 snapshot 时，还可能触发 dtype 转换、设备分配和 back
 
 ## 为什么本书默认示例不直接依赖 `burn-onnx`
 
-本版 `burn-onnx` 与主线 Burn 都发布为 `0.22.0-pre.3`，crates.io 版本
-字符串已经对齐。即便如此，ONNX importer 仍是独立产品：它有自己的
-CI、算子覆盖和生成代码生命周期。把 importer 编进根 workspace 会把
-“读懂转换路径”和“跑通一份 ONNX fixture”混成一个不可隔离的验证。
+本版 `burn-onnx` 与主线 Burn 的版本号相同。即便如此，ONNX importer
+仍是独立产品：它有自己的发布节奏、算子覆盖和生成代码生命周期。把
+importer 编进本书默认示例，会把“读懂转换路径”和“跑通一份 ONNX
+导入样例”混成一件事。
 
 所以本章分两条阅读线：
 
@@ -152,7 +152,7 @@ CI、算子覆盖和生成代码生命周期。把 importer 编进根 workspace 
 2. 用本书示例里的 Burn `ModuleRecord` 做 CPU 往返保存与恢复，观察当前
    参数状态 API。
 
-将来增加小型 ONNX fixture 时，应同时比较 ONNX Runtime reference、生成
+将来增加小型 ONNX 导入样例时，应同时比较 ONNX Runtime reference、生成
 model 的输出和不同 backend 的输出，而不是只把 crate 塞进同一依赖图。
 
 ## 验证转换时建议记下什么

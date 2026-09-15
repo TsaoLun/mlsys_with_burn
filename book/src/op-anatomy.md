@@ -20,7 +20,7 @@
 | 9 | 契约测试 | `burn-backend-tests/tests/` | 同一断言跑所有后端 |
 | 10 | 你的验证 | `examples/ch02-ch04-op-anatomy` | 数值断言（本页末） |
 
-下面逐层走读。每层只贴关键行；行号以固定版本为准。
+下面逐层走读。每层只贴关键行；行号以本书所用版本为准。
 
 ## 1. 用户 API：一行转发
 
@@ -100,9 +100,14 @@ fn float_tanh(tensor: FloatTensor<Self>) -> FloatTensor<Self> {
   标量循环表达，所以反向传播本身也能在 GPU 上跑；
 - **反向需要前向值**：第 2 章说 tape 必须保存中间结果，这里的
   `State` 与 `checkpointer.retrieve_node_output` 就是那句话的实现；
-- **checkpoint 策略按算子声明**：`memory_bound()` + `retro_forward`
-  表示「不保存输出，反向时用 `RetroTanh` 重算」——第 6 章讲的激活
-  重计算不是全局开关，而是每个算子自己声明的属性；
+- **算子只提出重算提示，默认并不重算**：`memory_bound()` 加上
+  `retro_forward` 是算子告诉自动微分「这个输出可以扔掉、反向时用
+  `RetroTanh` 再算一遍」。默认的 `Device::autodiff()` 走
+  `NoCheckpointing`：它把 memory-bound 当成 compute-bound，前向输出
+  照常保存，`RetroTanh` 不会执行。要真正重算，需要
+  `Device::autodiff().gradient_checkpointing()`，此时策略换成
+  `BalancedCheckpointing`，才会按算子提示丢掉输出。第 6 章讲的激活
+  重计算，在 Burn 里是这条编译期策略，而不是每个算子自己说了算；
 - **装饰器模式**：autodiff 不是编译器 pass，而是一层实现了同一契约
   的后端包装——这就是第 2 章「tape 与 Fusion IR 是两套机制」的
   结构原因。

@@ -109,4 +109,4 @@ backend、dtype、校准集摘要和 schema version 写入发布元数据。
 这些能力要按 feature 启用并单独验证。
 
 下一节转向更大的转换边界：ONNX 图如何变成 Burn 的 Rust source，以及
-为什么 `burn-onnx` 的依赖 revision 必须先对齐。
+为什么要先确认 `burn-onnx` 与主线 Burn 用的是同一套类型。
